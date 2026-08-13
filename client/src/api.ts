@@ -19,7 +19,7 @@ export async function checkSystem(): Promise<SystemStatus> {
   // TODO(Issue 2 & 4): implement the two fetch calls described above.
   const healthRes = await fetch(`${API_URL}/api/health`);
   if (!healthRes.ok) {
-    throw new Error(`Health check failed: ${healthRes.statusText}`);
+    throw new Error("Unable to connect to TokTickIT API");
   }
 
   return { online: true, categories: [] };
