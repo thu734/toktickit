@@ -8,7 +8,6 @@ export default function App() {
   const [state, setState] = useState<UiState>("idle");
   const [categories, setCategories] = useState<Category[]>([]);
   const [errorMsg, setErrorMsg] = useState<string>("");
-  void categories;
 
   async function handleCheck() {
     // TODO(Issue 4): set loading, call checkSystem(), then either
@@ -17,7 +16,8 @@ export default function App() {
     setState("loading");
     setErrorMsg("");
     try {
-      await checkSystem();
+      const res = await checkSystem();
+      setCategories(res.categories);
       setState("success");
     } catch (err: any) {
       setErrorMsg(err?.message ?? "Unable to connect to TokTickIT API");
@@ -38,9 +38,15 @@ export default function App() {
       {/* TODO(Issue 4): render loading / success (Online + categories) / error (Offline) states. */}
       {state === "success" && (
         <div className="mt-4">
-          <p className="fs-5 fw-bold text-success mb-0">
+          <p className="fs-5 fw-bold text-success mb-3">
             System Status: Online
           </p>
+          <h2 className="h5 fw-bold mb-2">Supported Request Categories</h2>
+          <ol className="ps-3">
+            {categories.map((cat) => (
+              <li key={cat.id}>{cat.name}</li>
+            ))}
+          </ol>
         </div>
       )}
 
