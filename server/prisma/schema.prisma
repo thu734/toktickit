@@ -40,7 +40,8 @@ model DevelopmentRequester {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  tickets Ticket[]
+  tickets            Ticket[]
+  removedAttachments Attachment[] @relation("RemovedByRequester")
 
   @@map("development_requesters")
 }
@@ -86,9 +87,36 @@ model Ticket {
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
 
+  attachments     Attachment[]
+
   @@index([requesterId])
   @@index([currentStatus])
   @@index([categoryId])
   @@index([createdAt])
   @@map("tickets")
+}
+
+model Attachment {
+  id                   Int                   @id @default(autoincrement())
+  filename             String                // Original uploaded filename
+  storedFilename       String                @unique // Generated safe UUID filename
+  mimeType             String
+  fileSize             Int
+  filePath             String
+
+  isRemoved            Boolean               @default(false)
+  removedAt            DateTime?
+  removalReason        String?
+
+  ticketId             Int
+  ticket               Ticket                @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  removedByRequesterId Int?
+  removedByRequester   DevelopmentRequester? @relation("RemovedByRequester", fields: [removedByRequesterId], references: [id])
+
+  createdAt            DateTime              @default(now())
+
+  @@index([ticketId])
+  @@index([ticketId, isRemoved])
+  @@map("attachments")
 }
