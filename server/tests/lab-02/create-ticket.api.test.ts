@@ -4,6 +4,14 @@ import app from "../../src/app.js";
 import { getPrisma } from "../../src/prisma.js";
 
 afterAll(async () => {
+  // Clean up tickets created during test
+  await getPrisma().ticket.deleteMany({
+    where: {
+      summary: {
+        in: ["Cannot access email account", "Valid summary text"],
+      },
+    },
+  });
   await getPrisma().$disconnect();
 });
 

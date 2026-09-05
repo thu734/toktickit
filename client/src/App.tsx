@@ -5,6 +5,7 @@ import {
 } from "./context/RequesterContext.js";
 import { DevelopmentRequesterSelectionModal } from "./components/DevelopmentRequesterSelectionModal.js";
 import { CreateTicketForm } from "./components/CreateTicketForm.js";
+import { MyTicketsList } from "./components/MyTicketsList.js";
 
 type TabView = "create-ticket" | "my-tickets";
 
@@ -67,31 +68,13 @@ function MainContent() {
       </header>
 
       {/* Main Container */}
-      <div className="container py-5" style={{ maxWidth: 840 }}>
+      <div className="container-fluid px-3 px-md-4 px-xl-5 py-4" style={{ maxWidth: 1440 }}>
         <DevelopmentRequesterSelectionModal />
 
         {activeTab === "create-ticket" && <CreateTicketForm />}
 
         {activeTab === "my-tickets" && (
-          <div className="card shadow-sm border-0 p-5 text-center" style={{ borderRadius: 12 }}>
-            <div className="fs-1 text-muted mb-2">📄</div>
-            <h2 className="h4 fw-bold mb-2" style={{ color: "#1E2923" }}>
-              My Tickets
-            </h2>
-            <p className="text-muted small mb-4">
-              My Tickets listing, search, filter, and pagination will be implemented in Issue #7.
-            </p>
-            <div>
-              <button
-                type="button"
-                className="btn text-white fw-semibold px-4"
-                style={{ backgroundColor: "#006B3C" }}
-                onClick={() => setActiveTab("create-ticket")}
-              >
-                + Create Ticket
-              </button>
-            </div>
-          </div>
+          <MyTicketsList onNavigateCreate={() => setActiveTab("create-ticket")} />
         )}
       </div>
     </div>

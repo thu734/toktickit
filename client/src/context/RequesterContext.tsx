@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { DevelopmentRequester } from "../api.js";
 
 interface RequesterContextType {
@@ -24,6 +24,13 @@ export const RequesterProvider: React.FC<{
   const [showSelectorModal, setShowSelectorModal] = useState<boolean>(
     !initialRequester
   );
+
+  useEffect(() => {
+    if (initialRequester !== undefined) {
+      setActiveRequester(initialRequester);
+      setShowSelectorModal(!initialRequester);
+    }
+  }, [initialRequester]);
 
   return (
     <RequesterContext.Provider
