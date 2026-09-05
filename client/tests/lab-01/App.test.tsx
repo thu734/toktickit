@@ -8,7 +8,7 @@ describe("App", () => {
   // WORKED EXAMPLE — provided for you.
   it("renders the TokTickIT heading", () => {
     render(<App />);
-    expect(screen.getByText(/TokTickIT/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/TokTickIT/i)[0]).toBeInTheDocument();
   });
 
   // Issue 4 — write these yourself. Hint: mock the api module with
