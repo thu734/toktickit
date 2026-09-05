@@ -5,15 +5,11 @@ import App from "../../src/App.js";
 import * as api from "../../src/api.js";
 
 describe("App", () => {
-  // WORKED EXAMPLE — provided for you.
   it("renders the TokTickIT heading", () => {
     render(<App />);
     expect(screen.getAllByText(/TokTickIT/i)[0]).toBeInTheDocument();
   });
 
-  // Issue 4 — write these yourself. Hint: mock the api module with
-  // vi.spyOn(api, "checkSystem").mockResolvedValue(...) / .mockRejectedValue(...)
-  // then click the button and assert the Online list / Offline message.
   it("shows Online and the seeded categories on success", async () => {
     vi.spyOn(api, "checkSystem").mockResolvedValue({
       online: true,
@@ -26,6 +22,9 @@ describe("App", () => {
     });
 
     render(<App />);
+    const tabButton = screen.getByRole("button", { name: /System Status/i });
+    await userEvent.click(tabButton);
+
     const button = screen.getByRole("button", { name: /Check System/i });
     await userEvent.click(button);
 
@@ -43,6 +42,9 @@ describe("App", () => {
     );
 
     render(<App />);
+    const tabButton = screen.getByRole("button", { name: /System Status/i });
+    await userEvent.click(tabButton);
+
     const button = screen.getByRole("button", { name: /Check System/i });
     await userEvent.click(button);
 
