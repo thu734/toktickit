@@ -132,6 +132,20 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
     };
 
     switch (priority) {
+      case "UNASSIGNED":
+        return (
+          <span
+            className="badge rounded-pill"
+            style={{
+              ...commonStyle,
+              backgroundColor: "#F1F5F9",
+              color: "#475569",
+              border: "1px solid #CBD5E1",
+            }}
+          >
+            UNASSIGNED
+          </span>
+        );
       case "URGENT":
         return (
           <span
