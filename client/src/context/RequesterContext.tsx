@@ -15,13 +15,14 @@ const RequesterContext = createContext<RequesterContextType>({
   setShowSelectorModal: () => {},
 });
 
-export const RequesterProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const RequesterProvider: React.FC<{
+  children: React.ReactNode;
+  initialRequester?: DevelopmentRequester | null;
+}> = ({ children, initialRequester = null }) => {
   const [activeRequester, setActiveRequester] =
-    useState<DevelopmentRequester | null>(null);
+    useState<DevelopmentRequester | null>(initialRequester);
   const [showSelectorModal, setShowSelectorModal] = useState<boolean>(
-    !activeRequester
+    !initialRequester
   );
 
   return (

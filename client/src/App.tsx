@@ -1,109 +1,98 @@
 import { useState } from "react";
-import { checkSystem, Category } from "./api.js";
 import {
   RequesterProvider,
   useRequester,
 } from "./context/RequesterContext.js";
 import { DevelopmentRequesterSelectionModal } from "./components/DevelopmentRequesterSelectionModal.js";
+import { CreateTicketForm } from "./components/CreateTicketForm.js";
 
-type UiState = "idle" | "loading" | "success" | "error";
+type TabView = "create-ticket" | "my-tickets";
 
 function MainContent() {
-  const { activeRequester, setShowSelectorModal } = useRequester();
-  const [state, setState] = useState<UiState>("idle");
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [errorMsg, setErrorMsg] = useState<string>("");
-
-  async function handleCheck() {
-    setState("loading");
-    setErrorMsg("");
-    try {
-      const res = await checkSystem();
-      setCategories(res.categories);
-      setState("success");
-    } catch (_err: any) {
-      setErrorMsg("Unable to connect to TokTickIT API");
-      setState("error");
-    }
-  }
+  const { setShowSelectorModal } = useRequester();
+  const [activeTab, setActiveTab] = useState<TabView>("create-ticket");
 
   return (
     <div className="min-vh-100" style={{ backgroundColor: "#F5F7F6" }}>
-      {/* Zen Green Application Header */}
+      {/* Zen Green Application Header matching Reference Illustration strictly */}
       <header className="navbar navbar-expand-lg px-4" style={{ backgroundColor: "#006B3C", color: "#FFFFFF" }}>
         <div className="container-fluid d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center">
-            <span className="fs-4 me-2">🕒</span>
-            <span className="fw-bold fs-5 text-white">TokTickIT</span>
+          <div className="d-flex align-items-center gap-4">
+            {/* Brand Title & Logo */}
+            <div className="d-flex align-items-center cursor-pointer" onClick={() => setActiveTab("create-ticket")}>
+              <span className="fs-4 me-2">🕒</span>
+              <span className="fw-bold fs-5 text-white">TokTickIT</span>
+            </div>
+
+            {/* Navigation Items: My Tickets | Create Ticket */}
+            <nav className="d-flex align-items-center gap-3 ms-2">
+              <button
+                type="button"
+                className={`btn btn-link text-white text-decoration-none d-flex align-items-center gap-1 px-2 py-1 small ${
+                  activeTab === "my-tickets" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"
+                }`}
+                onClick={() => setActiveTab("my-tickets")}
+              >
+                <span>📄</span>
+                <span>My Tickets</span>
+              </button>
+
+              <button
+                type="button"
+                className={`btn btn-link text-white text-decoration-none d-flex align-items-center gap-1 px-2 py-1 small ${
+                  activeTab === "create-ticket" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"
+                }`}
+                onClick={() => setActiveTab("create-ticket")}
+              >
+                <span>➕</span>
+                <span>Create Ticket</span>
+              </button>
+            </nav>
           </div>
 
+          {/* Right Profile Element: strictly 'Profile v' opening Requester Selection modal */}
           <div className="d-flex align-items-center">
-            {activeRequester ? (
-              <button
-                className="btn btn-sm btn-light d-flex align-items-center gap-1 rounded-pill px-3"
-                onClick={() => setShowSelectorModal(true)}
-              >
-                <span>👤</span>
-                <span className="fw-semibold">{activeRequester.name}</span>
-                <span className="small text-muted ms-1">▼</span>
-              </button>
-            ) : (
-              <button
-                className="btn btn-sm btn-light rounded-pill px-3"
-                onClick={() => setShowSelectorModal(true)}
-              >
-                Select Requester Context
-              </button>
-            )}
+            <button
+              type="button"
+              className="btn text-white d-flex align-items-center gap-1 px-2 py-1 opacity-90 border-0 bg-transparent"
+              onClick={() => setShowSelectorModal(true)}
+              style={{ fontSize: 14 }}
+            >
+              <span className="fs-6">👤</span>
+              <span className="fw-semibold ms-1">Profile</span>
+              <span className="small ms-1">∨</span>
+            </button>
           </div>
         </div>
       </header>
 
       {/* Main Container */}
-      <div className="container py-5" style={{ maxWidth: 800 }}>
+      <div className="container py-5" style={{ maxWidth: 840 }}>
         <DevelopmentRequesterSelectionModal />
 
-        <div className="card shadow-sm border-0 p-4" style={{ borderRadius: 10 }}>
-          <h1 className="h4 mb-3" style={{ color: "#1E2923" }}>
-            TokTickIT <span style={{ color: "#006B3C" }}>IT Service Desk</span>
-          </h1>
+        {activeTab === "create-ticket" && <CreateTicketForm />}
 
-          <button
-            className="btn text-white fw-semibold mb-3"
-            style={{ backgroundColor: "#006B3C", maxWidth: 200 }}
-            onClick={handleCheck}
-            disabled={state === "loading"}
-          >
-            {state === "loading" ? "Loading…" : "Check System"}
-          </button>
-
-          {state === "success" && (
-            <div className="mt-3 p-3 rounded" style={{ backgroundColor: "#EAF6EF" }}>
-              <p className="fs-5 fw-bold mb-2" style={{ color: "#006B3C" }}>
-                System Status: Online
-              </p>
-              <h2 className="h6 fw-bold mb-2" style={{ color: "#1E2923" }}>
-                Supported Request Categories
-              </h2>
-              <ul className="ps-3 mb-0" style={{ color: "#1E2923" }}>
-                {categories.map((cat) => (
-                  <li key={cat.id}>{cat.name}</li>
-                ))}
-              </ul>
+        {activeTab === "my-tickets" && (
+          <div className="card shadow-sm border-0 p-5 text-center" style={{ borderRadius: 12 }}>
+            <div className="fs-1 text-muted mb-2">📄</div>
+            <h2 className="h4 fw-bold mb-2" style={{ color: "#1E2923" }}>
+              My Tickets
+            </h2>
+            <p className="text-muted small mb-4">
+              My Tickets listing, search, filter, and pagination will be implemented in Issue #7.
+            </p>
+            <div>
+              <button
+                type="button"
+                className="btn text-white fw-semibold px-4"
+                style={{ backgroundColor: "#006B3C" }}
+                onClick={() => setActiveTab("create-ticket")}
+              >
+                + Create Ticket
+              </button>
             </div>
-          )}
-
-          {state === "error" && (
-            <div className="mt-3 p-3 rounded" style={{ backgroundColor: "#FEE2E2" }}>
-              <p className="fs-5 fw-bold mb-1" style={{ color: "#D92D20" }}>
-                System Status: Offline
-              </p>
-              <p className="small mb-0" style={{ color: "#D92D20" }}>
-                {errorMsg || "Unable to connect to TokTickIT API"}
-              </p>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

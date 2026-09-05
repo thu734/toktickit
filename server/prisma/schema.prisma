@@ -7,6 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum RequestedPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ITPriority {
+  UNASSIGNED
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  NEW
+  OPEN
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
 model DevelopmentRequester {
   id         Int      @id @default(autoincrement())
   name       String
@@ -16,6 +40,8 @@ model DevelopmentRequester {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  tickets Ticket[]
+
   @@map("development_requesters")
 }
 
@@ -24,6 +50,8 @@ model Category {
   name      String   @unique
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
+
+  tickets Ticket[]
 }
 
 model RelatedSystem {
@@ -32,5 +60,35 @@ model RelatedSystem {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
+  tickets Ticket[]
+
   @@map("related_systems")
+}
+
+model Ticket {
+  id                Int                  @id @default(autoincrement())
+  ticketNumber      String               @unique
+  summary           String
+  description       String
+  requestedPriority RequestedPriority    @default(MEDIUM)
+  itPriority        ITPriority           @default(UNASSIGNED)
+  currentStatus     TicketStatus         @default(NEW)
+
+  requesterId     Int
+  requester       DevelopmentRequester @relation(fields: [requesterId], references: [id])
+
+  categoryId      Int
+  category        Category             @relation(fields: [categoryId], references: [id])
+
+  relatedSystemId Int
+  relatedSystem   RelatedSystem        @relation(fields: [relatedSystemId], references: [id])
+
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([requesterId])
+  @@index([currentStatus])
+  @@index([categoryId])
+  @@index([createdAt])
+  @@map("tickets")
 }
