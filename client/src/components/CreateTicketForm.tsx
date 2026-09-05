@@ -179,7 +179,7 @@ export const CreateTicketForm: React.FC = () => {
   });
 
   return (
-    <div className="card border-0 shadow-sm p-4" style={{ borderRadius: 12 }}>
+    <div className="card border-0 shadow-sm p-4" style={{ borderRadius: 12, maxWidth: 800, margin: "0 auto" }}>
       <h2 className="h4 fw-bold mb-1" style={{ color: "#1E2923" }}>
         Create IT Support Ticket
       </h2>

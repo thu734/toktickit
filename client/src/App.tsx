@@ -68,7 +68,7 @@ function MainContent() {
       </header>
 
       {/* Main Container */}
-      <div className="container py-5" style={{ maxWidth: 960 }}>
+      <div className="container-fluid px-3 px-md-4 px-xl-5 py-4" style={{ maxWidth: 1440 }}>
         <DevelopmentRequesterSelectionModal />
 
         {activeTab === "create-ticket" && <CreateTicketForm />}
