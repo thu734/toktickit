@@ -729,14 +729,14 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
               }}
             >
               <colgroup>
-                <col style={{ width: "14%" }} />
-                <col style={{ width: "14%" }} />
-                <col style={{ width: "18%" }} />
-                <col style={{ width: "11%" }} />
-                <col style={{ width: "11%" }} />
                 <col style={{ width: "12%" }} />
+                <col style={{ width: "14%" }} />
+                <col style={{ width: "17%" }} />
                 <col style={{ width: "10%" }} />
                 <col style={{ width: "10%" }} />
+                <col style={{ width: "11%" }} />
+                <col style={{ width: "11%" }} />
+                <col style={{ width: "15%" }} />
               </colgroup>
 
               <thead
@@ -808,7 +808,7 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
                     Current Status
                   </th>
 
-                  <th scope="col" className="ps-2 pe-3 pe-md-4 py-2.5">
+                  <th scope="col" className="ps-2 pe-3 py-2.5">
                     <button
                       type="button"
                       className="btn btn-link p-0 border-0 text-decoration-none fw-semibold d-inline-flex align-items-center gap-1"
@@ -918,7 +918,7 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
 
                     {/* Last update */}
                     <td
-                      className="ps-2 pe-3 pe-md-4 py-2 text-muted text-nowrap"
+                      className="ps-2 pe-3 py-2 text-muted text-nowrap"
                       style={{
                         fontSize: "0.74rem",
                       }}
