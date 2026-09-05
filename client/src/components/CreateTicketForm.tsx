@@ -9,7 +9,13 @@ import {
 } from "../api.js";
 import { useRequester } from "../context/RequesterContext.js";
 
-export const CreateTicketForm: React.FC = () => {
+interface CreateTicketFormProps {
+  onViewTicketDetail?: (ticketId: number) => void;
+}
+
+export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
+  onViewTicketDetail,
+}) => {
   const { activeRequester } = useRequester();
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -158,7 +164,33 @@ export const CreateTicketForm: React.FC = () => {
           </div>
         </div>
 
-        <div>
+        <div className="d-flex flex-column flex-sm-row justify-content-center gap-2">
+          {onViewTicketDetail && (
+            <button
+              type="button"
+              className="btn btn-sm text-nowrap fw-semibold px-4"
+              style={{
+                backgroundColor: "#FFFFFF",
+                color: "#006B3C",
+                border: "1px solid #006B3C",
+                transition: "all 0.2s ease-in-out",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#EAF6EF";
+                e.currentTarget.style.color = "#006B3C";
+                e.currentTarget.style.borderColor = "#006B3C";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#FFFFFF";
+                e.currentTarget.style.color = "#006B3C";
+                e.currentTarget.style.borderColor = "#006B3C";
+              }}
+              onClick={() => onViewTicketDetail(createdTicket.id)}
+            >
+              View Ticket Detail
+            </button>
+          )}
+
           <button
             type="button"
             className="btn text-white fw-semibold px-4"

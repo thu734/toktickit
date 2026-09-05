@@ -127,4 +127,35 @@ describe("Lab 2 Attachment Section UI Tests (UI-06, AC-04, AC-07)", () => {
       /Only JPG, PNG, WEBP, and PDF files under 5 MB are allowed/i
     );
   });
+
+  it("disables upload controls and displays limit warning when 5 active attachments exist (UI-06, AC-06)", () => {
+    const fiveActiveAttachments: api.Attachment[] = Array.from({ length: 5 }, (_, i) => ({
+      id: i + 1,
+      filename: `file_${i + 1}.pdf`,
+      mimeType: "application/pdf",
+      fileSize: 1024,
+      isRemoved: false,
+      createdAt: "2026-01-01T10:00:00Z",
+    }));
+
+    render(
+      <RequesterProvider initialRequester={mockRequester}>
+        <AttachmentSection
+          ticketId={101}
+          attachments={fiveActiveAttachments}
+          onAttachmentChange={vi.fn()}
+        />
+      </RequesterProvider>
+    );
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      /Maximum limit of 5 active attachments reached/i
+    );
+
+    const input = screen.getByLabelText(/Upload New Attachment/i) as HTMLInputElement;
+    expect(input).toBeDisabled();
+
+    const uploadButton = screen.getByRole("button", { name: /Upload File/i });
+    expect(uploadButton).toBeDisabled();
+  });
 });

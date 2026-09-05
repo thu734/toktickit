@@ -249,9 +249,9 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
         </ol>
       </nav>
 
-      {/* Main Ticket Card Surface */}
+      {/* Surface Card 1: Read-Only Ticket Information */}
       <section
-        className="card border-0 shadow-sm p-4"
+        className="card border-0 shadow-sm p-4 mb-4"
         style={{
           borderRadius: 12,
           backgroundColor: "#FFFFFF",
@@ -259,96 +259,127 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
         aria-labelledby="ticket-detail-number"
       >
         {/* Header Bar */}
-        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-start gap-3 pb-3 border-bottom mb-4">
-          <div>
-            <div className="d-flex align-items-center gap-2 mb-1">
-              <h1
-                id="ticket-detail-number"
-                className="h4 font-monospace fw-bold mb-0"
-                style={{ color: "#006B3C" }}
-              >
-                {ticket.ticketNumber}
-              </h1>
+        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center pb-3 border-bottom mb-4 gap-2">
+          <div className="d-flex align-items-center gap-2 flex-wrap">
+            <h1
+              id="ticket-detail-number"
+              className="h4 font-monospace fw-bold mb-0"
+              style={{ color: "#006B3C" }}
+            >
+              {ticket.ticketNumber}
+            </h1>
 
-              {renderStatusBadge(ticket.currentStatus)}
-            </div>
-
-            <h2 className="h5 fw-semibold mb-0 mt-2" style={{ color: "#1E2923" }}>
-              {ticket.summary}
-            </h2>
+            {renderStatusBadge(ticket.currentStatus)}
           </div>
 
           <button
             type="button"
-            className="btn btn-outline-secondary btn-sm align-self-start"
+            className="btn btn-outline-secondary btn-sm align-self-start align-self-sm-center"
             onClick={onBack}
           >
             &larr; Back to My Tickets
           </button>
         </div>
 
-        {/* Read-Only Metadata Details Grid */}
+        {/* Read-Only Ticket Information Card (4-Row Grid Matching Reference) */}
         <div
-          className="p-3 rounded mb-4"
+          className="p-3 p-md-4 rounded mb-4"
           style={{
             backgroundColor: "#F1F5F3",
             border: "1px solid #E2E8F0",
           }}
         >
-          <dl className="row mb-0 small">
-            <dt className="col-12 col-sm-3 text-muted fw-semibold mb-1">Category</dt>
-            <dd className="col-12 col-sm-3 mb-2 mb-sm-0">{ticket.category?.name || "—"}</dd>
+          {/* Row 1: Ticket Number | Ticket Date | Category | Related System */}
+          <div className="row g-3 mb-3">
+            <div className="col-12 col-sm-6 col-md-3">
+              <div className="small text-muted fw-semibold mb-1">Ticket Number</div>
+              <div
+                className="font-monospace fw-bold"
+                style={{ color: "#006B3C", fontSize: "0.95rem" }}
+              >
+                {ticket.ticketNumber}
+              </div>
+            </div>
 
-            <dt className="col-12 col-sm-3 text-muted fw-semibold mb-1">Related System</dt>
-            <dd className="col-12 col-sm-3 mb-2 mb-sm-0">{ticket.relatedSystem?.name || "—"}</dd>
+            <div className="col-12 col-sm-6 col-md-3">
+              <div className="small text-muted fw-semibold mb-1">Ticket Date</div>
+              <div className="small text-dark">{formatDate(ticket.createdAt)}</div>
+            </div>
 
-            <dt className="col-12 col-sm-3 text-muted fw-semibold mb-1 mt-sm-2">
-              Requested Priority
-            </dt>
-            <dd className="col-12 col-sm-3 mb-2 mb-sm-0 mt-sm-2">
-              {renderPriorityBadge(ticket.requestedPriority)}
-            </dd>
+            <div className="col-12 col-sm-6 col-md-3">
+              <div className="small text-muted fw-semibold mb-1">Category</div>
+              <div className="small text-dark">{ticket.category?.name || "—"}</div>
+            </div>
 
-            <dt className="col-12 col-sm-3 text-muted fw-semibold mb-1 mt-sm-2">
-              IT Priority (Read-Only)
-            </dt>
-            <dd className="col-12 col-sm-3 mb-2 mb-sm-0 mt-sm-2">
-              {renderPriorityBadge(ticket.itPriority)}
-            </dd>
+            <div className="col-12 col-sm-6 col-md-3">
+              <div className="small text-muted fw-semibold mb-1">Related System</div>
+              <div className="small text-dark">{ticket.relatedSystem?.name || "—"}</div>
+            </div>
+          </div>
 
-            <dt className="col-12 col-sm-3 text-muted fw-semibold mb-1 mt-sm-2">Created Date</dt>
-            <dd className="col-12 col-sm-3 text-muted mb-2 mb-sm-0 mt-sm-2">
-              {formatDate(ticket.createdAt)}
-            </dd>
+          {/* Row 2: Requester | Requested Priority | IT Priority | Current Status */}
+          <div className="row g-3">
+            <div className="col-12 col-sm-6 col-md-3">
+              <div className="small text-muted fw-semibold mb-1">Requester</div>
+              <div className="small text-dark">{ticket.requester?.name || "—"}</div>
+            </div>
 
-            <dt className="col-12 col-sm-3 text-muted fw-semibold mb-1 mt-sm-2">Last Updated</dt>
-            <dd className="col-12 col-sm-3 text-muted mb-0 mt-sm-2">
-              {formatDate(ticket.updatedAt)}
-            </dd>
-          </dl>
-        </div>
+            <div className="col-12 col-sm-6 col-md-3">
+              <div className="small text-muted fw-semibold mb-1">Requested Priority</div>
+              <div>{renderPriorityBadge(ticket.requestedPriority)}</div>
+            </div>
 
-        {/* Full Ticket Description */}
-        <div className="mb-4">
-          <h3 className="h6 fw-semibold mb-2" style={{ color: "#1E2923" }}>
-            Description
-          </h3>
+            <div className="col-12 col-sm-6 col-md-3">
+              <div className="small text-muted fw-semibold mb-1">IT Priority (Read-Only)</div>
+              <div>{renderPriorityBadge(ticket.itPriority)}</div>
+            </div>
 
-          <div
-            className="p-3 rounded small"
-            style={{
-              backgroundColor: "#F8FAFC",
-              border: "1px solid #CBD5E1",
-              whiteSpace: "pre-wrap",
-              color: "#1E2923",
-              lineHeight: 1.6,
-            }}
-          >
-            {ticket.description}
+            <div className="col-12 col-sm-6 col-md-3">
+              <div className="small text-muted fw-semibold mb-1">Current Status</div>
+              <div>{renderStatusBadge(ticket.currentStatus)}</div>
+            </div>
           </div>
         </div>
 
-        {/* Attachment Section Component */}
+        {/* Summary & Description Blocks */}
+        <div className="d-flex flex-column gap-3">
+          <div>
+            <div className="small text-muted fw-semibold mb-1">Summary</div>
+            <div
+              className="fw-semibold text-dark p-3 rounded small"
+              style={{ backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0" }}
+            >
+              {ticket.summary}
+            </div>
+          </div>
+
+          <div>
+            <div className="small text-muted fw-semibold mb-1">Description</div>
+            <div
+              className="p-3 rounded small"
+              style={{
+                backgroundColor: "#FFFFFF",
+                border: "1px solid #CBD5E1",
+                whiteSpace: "pre-wrap",
+                color: "#1E2923",
+                lineHeight: 1.6,
+              }}
+            >
+              {ticket.description}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Surface Card 2: Ticket Attachments Section */}
+      <section
+        className="card border-0 shadow-sm p-4"
+        style={{
+          borderRadius: 12,
+          backgroundColor: "#FFFFFF",
+        }}
+        aria-label="Ticket attachments section"
+      >
         <AttachmentSection
           ticketId={ticket.id}
           attachments={ticket.attachments || []}

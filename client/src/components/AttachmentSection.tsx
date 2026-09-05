@@ -162,10 +162,16 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
   };
 
   return (
-    <section className="mt-4 pt-4 border-top" aria-label="Ticket attachments section">
-      <h3 className="h6 fw-semibold mb-3" style={{ color: "#1E2923" }}>
-        Attachments ({activeAttachments.length} / 5 active)
-      </h3>
+    <div aria-label="Ticket attachments section">
+      <h2 className="h5 fw-semibold mb-3 d-flex align-items-center gap-2" style={{ color: "#1E2923" }}>
+        <span>Attachments</span>
+        <span
+          className="badge bg-light text-dark border font-monospace fw-normal"
+          style={{ fontSize: "0.78rem" }}
+        >
+          {activeAttachments.length} / 5 active
+        </span>
+      </h2>
 
       {toastMessage && (
         <div
@@ -206,7 +212,19 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
                   <button
                     type="button"
                     className="btn btn-sm btn-outline-success"
-                    style={{ borderColor: "#006B3C", color: "#006B3C" }}
+                    style={{
+                      borderColor: "#006B3C",
+                      color: "#006B3C",
+                      transition: "all 0.2s ease-in-out",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#EAF6EF";
+                      e.currentTarget.style.color = "#006B3C";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "#006B3C";
+                    }}
                     onClick={() => handleDownload(att)}
                   >
                     Download
@@ -227,58 +245,74 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
       </div>
 
       {/* Upload Dropzone Form */}
-      {activeAttachments.length < 5 && (
-        <div
-          className="p-3 rounded mb-4"
-          style={{
-            backgroundColor: "#F5F7F6",
-            border: "1px dashed #CBD5E1",
-          }}
-        >
-          <form onSubmit={handleUploadSubmit}>
-            <label htmlFor="attachment-upload-input" className="form-label small fw-semibold mb-2">
-              Upload New Attachment (JPG, PNG, WEBP, PDF up to 5 MB)
-            </label>
+      {(() => {
+        const isLimitReached = activeAttachments.length >= 5;
+        return (
+          <div
+            className="p-3 rounded mb-4"
+            style={{
+              backgroundColor: isLimitReached ? "#F8FAFC" : "#F5F7F6",
+              border: "1px dashed #CBD5E1",
+              opacity: isLimitReached ? 0.9 : 1,
+            }}
+          >
+            <form onSubmit={handleUploadSubmit}>
+              <label htmlFor="attachment-upload-input" className="form-label small fw-semibold mb-2">
+                Upload New Attachment (JPG, PNG, WEBP, PDF up to 5 MB)
+              </label>
 
-            <div className="d-flex flex-column flex-sm-row gap-2">
-              <input
-                id="attachment-upload-input"
-                type="file"
-                className="form-control form-control-sm"
-                accept=".jpg,.jpeg,.png,.webp,.pdf"
-                onChange={handleFileSelect}
-                disabled={uploading}
-              />
+              {isLimitReached && (
+                <div
+                  className="alert alert-warning py-2 px-3 small mb-3 border-warning-subtle text-warning-emphasis"
+                  role="alert"
+                >
+                  ⚠️ Maximum limit of 5 active attachments reached for this ticket. Soft-remove an active attachment to upload new files.
+                </div>
+              )}
 
-              <button
-                type="submit"
-                className="btn btn-sm text-white fw-semibold px-3 text-nowrap"
-                style={{ backgroundColor: "#006B3C" }}
-                disabled={!selectedFile || uploading}
-              >
-                {uploading ? (
-                  <>
-                    <span
-                      className="spinner-border spinner-border-sm me-1"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
-                    Uploading...
-                  </>
-                ) : (
-                  "Upload File"
-                )}
-              </button>
-            </div>
+              <div className="d-flex flex-column flex-sm-row gap-2">
+                <input
+                  id="attachment-upload-input"
+                  type="file"
+                  className="form-control form-control-sm"
+                  accept=".jpg,.jpeg,.png,.webp,.pdf"
+                  onChange={handleFileSelect}
+                  disabled={uploading || isLimitReached}
+                />
 
-            {uploadError && (
-              <p className="small text-danger mt-2 mb-0" role="alert">
-                {uploadError}
-              </p>
-            )}
-          </form>
-        </div>
-      )}
+                <button
+                  type="submit"
+                  className="btn btn-sm text-white fw-semibold px-3 text-nowrap"
+                  style={{
+                    backgroundColor: "#006B3C",
+                    opacity: isLimitReached || !selectedFile || uploading ? 0.65 : 1,
+                  }}
+                  disabled={!selectedFile || uploading || isLimitReached}
+                >
+                  {uploading ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm me-1"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Uploading...
+                    </>
+                  ) : (
+                    "Upload File"
+                  )}
+                </button>
+              </div>
+
+              {uploadError && (
+                <p className="small text-danger mt-2 mb-0" role="alert">
+                  {uploadError}
+                </p>
+              )}
+            </form>
+          </div>
+        );
+      })()}
 
       {/* Soft-Removed Attachments Audit History */}
       {removedAttachments.length > 0 && (
@@ -423,6 +457,6 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 };
