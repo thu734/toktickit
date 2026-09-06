@@ -3,6 +3,7 @@ import {
   fetchCategories,
   fetchRelatedSystems,
   createTicket,
+  uploadAttachment,
   Category,
   RelatedSystem,
   Ticket,
@@ -29,11 +30,63 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
   const [summary, setSummary] = useState<string>("");
   const [description, setDescription] = useState<string>("");
 
+  // Initial Attachments State & Validation (BR-15, BR-16, BR-17, BR-22)
+  const [selectedInitialFiles, setSelectedInitialFiles] = useState<File[]>([]);
+  const [attachmentError, setAttachmentError] = useState<string>("");
+  const [uploadWarning, setUploadWarning] = useState<string>("");
+
   // Submission & Validation States
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState<string>("");
   const [createdTicket, setCreatedTicket] = useState<Ticket | null>(null);
+
+  const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+  const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".pdf"];
+
+  const handleInitialFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAttachmentError("");
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const currentFiles = [...selectedInitialFiles];
+    let errorMsg = "";
+
+    for (const file of files) {
+      const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+      if (!ALLOWED_TYPES.includes(file.type.toLowerCase()) && !ALLOWED_EXTENSIONS.includes(ext)) {
+        errorMsg = "File type not permitted. Only JPG, PNG, WEBP, and PDF files under 5 MB are allowed.";
+        break;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        errorMsg = "File size exceeds 5 MB limit.";
+        break;
+      }
+      if (currentFiles.length >= 5) {
+        errorMsg = "Maximum limit of 5 active attachments reached for this ticket.";
+        break;
+      }
+      currentFiles.push(file);
+    }
+
+    if (errorMsg) {
+      setAttachmentError(errorMsg);
+    } else {
+      setSelectedInitialFiles(currentFiles);
+    }
+    e.target.value = "";
+  };
+
+  const handleRemoveInitialFile = (index: number) => {
+    setAttachmentError("");
+    setSelectedInitialFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
 
   useEffect(() => {
     async function loadReferenceData() {
@@ -95,6 +148,7 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
     }
 
     setSubmitting(true);
+    setUploadWarning("");
 
     try {
       const ticket = await createTicket(
@@ -107,6 +161,24 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
         },
         activeRequester.id
       );
+
+      // BR-22: Sequential upload of initial attachments after ticket creation
+      if (selectedInitialFiles.length > 0) {
+        const failedFiles: string[] = [];
+        for (const file of selectedInitialFiles) {
+          try {
+            await uploadAttachment(ticket.id, file, activeRequester.id);
+          } catch (_err) {
+            failedFiles.push(file.name);
+          }
+        }
+
+        if (failedFiles.length > 0) {
+          setUploadWarning(
+            `Ticket created successfully (${ticket.ticketNumber}), but failed to upload initial attachment(s): ${failedFiles.join(", ")}. You may retry uploading from Ticket Detail.`
+          );
+        }
+      }
 
       setCreatedTicket(ticket);
     } catch (err: any) {
@@ -125,6 +197,9 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
     setSummary("");
     setDescription("");
     setRequestedPriority("MEDIUM");
+    setSelectedInitialFiles([]);
+    setAttachmentError("");
+    setUploadWarning("");
     setFormErrors({});
     setApiError("");
   };
@@ -163,6 +238,12 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
             <span className="fw-semibold small text-truncate" style={{ maxWidth: 300 }}>{createdTicket.summary}</span>
           </div>
         </div>
+
+        {uploadWarning && (
+          <div className="alert alert-warning py-2 small mb-4 text-start mx-auto" style={{ maxWidth: 500 }} role="alert">
+            ⚠️ {uploadWarning}
+          </div>
+        )}
 
         <div className="d-flex flex-column flex-sm-row justify-content-center gap-2">
           {onViewTicketDetail && (
@@ -391,6 +472,56 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
             <div className="invalid-feedback d-block small" style={{ color: "#D92D20" }} role="alert">
               {formErrors.description}
             </div>
+          )}
+        </div>
+
+        {/* Attachments (Optional) Section */}
+        <div className="mb-4 pt-3 border-top">
+          <label htmlFor="initial-attachments-input" className="form-label small fw-semibold">
+            Attachments <span className="text-muted fw-normal">(Optional, max 5 files, 5 MB each)</span>
+          </label>
+          <input
+            id="initial-attachments-input"
+            type="file"
+            className="form-control form-control-sm mb-2"
+            accept=".jpg,.jpeg,.png,.webp,.pdf"
+            multiple
+            onChange={handleInitialFileSelect}
+            disabled={submitting}
+          />
+          <span className="text-muted small d-block mb-2">
+            Allowed types: JPG, JPEG, PNG, WEBP, PDF (max 5 MB per file)
+          </span>
+
+          {attachmentError && (
+            <div className="alert alert-danger py-2 small mb-2" role="alert">
+              {attachmentError}
+            </div>
+          )}
+
+          {selectedInitialFiles.length > 0 && (
+            <ul className="list-group mb-2">
+              {selectedInitialFiles.map((file, idx) => (
+                <li
+                  key={idx}
+                  className="list-group-item d-flex justify-content-between align-items-center py-2 small"
+                >
+                  <div>
+                    <span className="me-2">📄</span>
+                    <span className="fw-semibold me-2">{file.name}</span>
+                    <span className="text-muted">({formatFileSize(file.size)})</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-danger py-0 px-2"
+                    onClick={() => handleRemoveInitialFile(idx)}
+                    disabled={submitting}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
 
