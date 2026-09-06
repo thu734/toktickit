@@ -18,13 +18,15 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadTicket = useCallback(async () => {
+  const loadTicket = useCallback(async (isInitial = false) => {
     if (!activeRequester) {
       setLoading(false);
       return;
     }
 
-    setLoading(true);
+    if (isInitial) {
+      setLoading(true);
+    }
     setError("");
 
     try {
@@ -33,12 +35,14 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
     } catch (err: any) {
       setError(err.message || "Failed to load ticket detail.");
     } finally {
-      setLoading(false);
+      if (isInitial) {
+        setLoading(false);
+      }
     }
   }, [ticketId, activeRequester]);
 
   useEffect(() => {
-    loadTicket();
+    loadTicket(true);
   }, [loadTicket]);
 
   const formatDate = (dateStr?: string) => {
@@ -383,7 +387,7 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
         <AttachmentSection
           ticketId={ticket.id}
           attachments={ticket.attachments || []}
-          onAttachmentChange={loadTicket}
+          onAttachmentChange={() => loadTicket(false)}
         />
       </section>
     </div>
