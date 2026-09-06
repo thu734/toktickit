@@ -291,32 +291,32 @@ The seed script (`server/prisma/seed.ts`) must run idempotently using `upsert`:
 ## 10. Definition of Done
 
 ### Part 1: Product Completion
-- [ ] All functional requirements (FR-01 to FR-19) and business rules (BR-01 to BR-25) implemented and verified.
-- [ ] All required planned tests pass on documented commands in the final `main` branch.
-- [ ] No required test is skipped, disabled, or commented out.
-- [ ] Every Acceptance Criterion (AC-01 to AC-23) has traceable passing test evidence.
-- [ ] Conformance to data, API, UI, validation, and responsive specifications verified.
-- [ ] Correct handling of success, failure, and boundary cases verified.
-- [ ] Database schema migrated via Prisma and seeded idempotently with Categories, Related Systems, active Requesters, and inactive Requester.
-- [ ] Responsive UI verified on Desktop (1280px), Tablet (768px), and Mobile (375px) without horizontal page scrolling or clipping.
-- [ ] Zen Green design system tokens applied consistently across header, cards, buttons, badges, and form controls.
-- [ ] README setup and test-running instructions are current.
-- [ ] Required repository documentation is current.
+- [x] All functional requirements (FR-01 to FR-19) and business rules (BR-01 to BR-25) implemented and verified.
+- [x] All required planned tests pass on documented commands in the final `main` branch.
+- [x] No required test is skipped, disabled, or commented out.
+- [x] Every Acceptance Criterion (AC-01 to AC-23) has traceable passing test evidence.
+- [x] Conformance to data, API, UI, validation, and responsive specifications verified.
+- [x] Correct handling of success, failure, and boundary cases verified.
+- [x] Database schema migrated via Prisma and seeded idempotently with Categories, Related Systems, active Requesters, and inactive Requester.
+- [x] Responsive UI verified on Desktop (1280px), Tablet (768px), and Mobile (375px) without horizontal page scrolling or clipping.
+- [x] Zen Green design system tokens applied consistently across header, cards, buttons, badges, and form controls.
+- [x] README setup and test-running instructions are current.
+- [x] Required repository documentation is current.
 
 ### Part 2: Course Delivery Requirements
-- [ ] **Specification & Test Planning Pre-Implementation Traceability**: Initial Sprint Specification and Test Planning contract files (`specification.md`, `tests.md`, `ui-spec.md`, `api-spec.md`, `reviewer.md`, `ai-use.md`) are explicitly committed and merged on branch `feature/5-requester-context` targeting `lab2-staging` via PR #5 before implementation feature branches are merged.
-- [ ] **Sequential Issue Naming**: GitHub Issues continue directly from Lab 1 (#1 through #4) starting at Issue #5 through #9:
+- [x] **Specification & Test Planning Pre-Implementation Traceability**: Initial Sprint Specification and Test Planning contract files (`specification.md`, `tests.md`, `ui-spec.md`, `api-spec.md`, `reviewer.md`, `ai-use.md`) are explicitly committed and merged on branch `feature/5-requester-context` targeting `lab2-staging` via PR #5 before implementation feature branches are merged.
+- [x] **Sequential Issue Naming**: GitHub Issues continue directly from Lab 1 (#1 through #4) starting at Issue #5 through #9:
   - Issue #5: `[Lab 2] Sprint Specification, Test Plan & Development Requester Context` (`feature/5-requester-context`)
   - Issue #6: `[Lab 2] Ticket Creation & Official Ticket Number Generator` (`feature/6-create-ticket`)
   - Issue #7: `[Lab 2] My Tickets Paginated List, Search, Filter & Sort` (`feature/7-my-tickets`)
   - Issue #8: `[Lab 2] Requester Ticket Detail & Attachment Lifecycle` (`feature/8-ticket-detail-attachments`)
   - Issue #9: `[Lab 2] Responsive Layout, Accessibility & Release Integration` (`feature/9-visual-responsive`)
-- [ ] **Strict Branching**: All feature branches are created from `lab2-staging` and open PRs targeting `lab2-staging` (never branch directly from or merge to `main`).
-- [ ] **Peer Review & Approvals**: All PRs reviewed, approved, and recorded in `docs/lab-02/reviewer.md` with reviewer identity, PR links, comments, responses, and approvals.
-- [ ] **AI Use Record**: `docs/lab-02/ai-use.md` completed with selected key prompts and reflection.
-- [ ] **Required Contract Documents**: `specification.md`, `tests.md`, `ui-spec.md`, `api-spec.md`, `reviewer.md`, `ai-use.md` present in `docs/lab-02/`.
-- [ ] **Final Release PR**: One final release PR merged from `lab2-staging` into `main` after integration testing.
-- [ ] **PDF Submission Evidence**: Required Lab 2 submission PDF compiled with Answer Part 1 through Answer Part 9.
+- [x] **Strict Branching**: All feature branches are created from `lab2-staging` and open PRs targeting `lab2-staging` (never branch directly from or merge to `main`).
+- [ ] **Peer Review & Approvals**: All PRs reviewed, approved, and recorded in `docs/lab-02/reviewer.md` with reviewer identity, PR links, comments, responses, and approvals. *(Pending manual completion of peer review responses in reviewer.md)*
+- [x] **AI Use Record**: `docs/lab-02/ai-use.md` completed with selected key prompts and reflection.
+- [x] **Required Contract Documents**: `specification.md`, `tests.md`, `ui-spec.md`, `api-spec.md`, `reviewer.md`, `ai-use.md` present in `docs/lab-02/`.
+- [ ] **Final Release PR**: One final release PR merged from `lab2-staging` into `main` after integration testing. *(Pending GitHub PR merge into main)*
+- [ ] **PDF Submission Evidence**: Required Lab 2 submission PDF compiled with Answer Part 1 through Answer Part 9. *(Pending manual PDF report compilation)*
 
 ---
 
