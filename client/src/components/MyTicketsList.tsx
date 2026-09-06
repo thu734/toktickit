@@ -729,14 +729,14 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
               }}
             >
               <colgroup>
-                <col style={{ width: "12%" }} />
-                <col style={{ width: "14%" }} />
-                <col style={{ width: "17%" }} />
-                <col style={{ width: "10%" }} />
-                <col style={{ width: "10%" }} />
-                <col style={{ width: "11%" }} />
-                <col style={{ width: "11%" }} />
+                <col style={{ width: "16%" }} />
                 <col style={{ width: "15%" }} />
+                <col style={{ width: "15%" }} />
+                <col style={{ width: "14%" }} />
+                <col style={{ width: "11%" }} />
+                <col style={{ width: "8%" }} />
+                <col style={{ width: "7%" }} />
+                <col style={{ width: "14%" }} />
               </colgroup>
 
               <thead
@@ -747,7 +747,7 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
                 }}
               >
                 <tr className="fw-semibold border-bottom" style={{ borderColor: "#C6E7D2" }}>
-                  <th scope="col" className="ps-3 ps-md-4 pe-2 py-2.5">
+                  <th scope="col" className="ps-3 pe-2 py-2.5">
                     <button
                       type="button"
                       className="btn btn-link p-0 border-0 text-decoration-none fw-semibold d-inline-flex align-items-center gap-1"
@@ -839,7 +839,7 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
                     }}
                   >
                     {/* Ticket Number / open */}
-                    <td className="ps-3 ps-md-4 pe-2 py-2 text-nowrap">
+                    <td className="ps-3 pe-2 py-2 text-nowrap">
                       {onOpenTicket ? (
                         <button
                           type="button"
@@ -888,20 +888,14 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
 
                     {/* Category */}
                     <td className="px-2 py-2 text-muted">
-                      <div
-                        className="text-truncate"
-                        title={ticket.category?.name || "—"}
-                      >
+                      <div>
                         {ticket.category?.name || "—"}
                       </div>
                     </td>
 
                     {/* System */}
                     <td className="px-2 py-2 text-muted">
-                      <div
-                        className="text-truncate"
-                        title={ticket.relatedSystem?.name || "—"}
-                      >
+                      <div>
                         {ticket.relatedSystem?.name || "—"}
                       </div>
                     </td>

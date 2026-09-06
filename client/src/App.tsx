@@ -6,12 +6,19 @@ import {
 import { DevelopmentRequesterSelectionModal } from "./components/DevelopmentRequesterSelectionModal.js";
 import { CreateTicketForm } from "./components/CreateTicketForm.js";
 import { MyTicketsList } from "./components/MyTicketsList.js";
+import { RequesterTicketDetail } from "./components/RequesterTicketDetail.js";
 
-type TabView = "create-ticket" | "my-tickets";
+type TabView = "create-ticket" | "my-tickets" | "ticket-detail";
 
 function MainContent() {
   const { setShowSelectorModal } = useRequester();
   const [activeTab, setActiveTab] = useState<TabView>("create-ticket");
+  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+
+  const handleOpenTicket = (ticketId: number) => {
+    setSelectedTicketId(ticketId);
+    setActiveTab("ticket-detail");
+  };
 
   return (
     <div className="min-vh-100" style={{ backgroundColor: "#F5F7F6" }}>
@@ -30,7 +37,7 @@ function MainContent() {
               <button
                 type="button"
                 className={`btn btn-link text-white text-decoration-none d-flex align-items-center gap-1 px-2 py-1 small ${
-                  activeTab === "my-tickets" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"
+                  activeTab === "my-tickets" || activeTab === "ticket-detail" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"
                 }`}
                 onClick={() => setActiveTab("my-tickets")}
               >
@@ -71,10 +78,22 @@ function MainContent() {
       <div className="container-fluid px-3 px-md-4 px-xl-5 py-4" style={{ maxWidth: 1440 }}>
         <DevelopmentRequesterSelectionModal />
 
-        {activeTab === "create-ticket" && <CreateTicketForm />}
+        {activeTab === "create-ticket" && (
+          <CreateTicketForm onViewTicketDetail={handleOpenTicket} />
+        )}
 
         {activeTab === "my-tickets" && (
-          <MyTicketsList onNavigateCreate={() => setActiveTab("create-ticket")} />
+          <MyTicketsList
+            onNavigateCreate={() => setActiveTab("create-ticket")}
+            onOpenTicket={handleOpenTicket}
+          />
+        )}
+
+        {activeTab === "ticket-detail" && selectedTicketId !== null && (
+          <RequesterTicketDetail
+            ticketId={selectedTicketId}
+            onBack={() => setActiveTab("my-tickets")}
+          />
         )}
       </div>
     </div>
