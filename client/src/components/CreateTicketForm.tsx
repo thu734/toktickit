@@ -220,7 +220,7 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
       </p>
 
       {apiError && (
-        <div className="alert alert-danger py-2 small mb-4">
+        <div className="alert alert-danger py-2 small mb-4" role="alert" aria-live="polite">
           🚨 {apiError}
         </div>
       )}
@@ -268,6 +268,8 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
               disabled={loadingRef}
+              aria-required="true"
+              aria-invalid={Boolean(formErrors.categoryId)}
             >
               {loadingRef ? (
                 <option>Loading categories...</option>
@@ -280,7 +282,7 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
               )}
             </select>
             {formErrors.categoryId && (
-              <div className="invalid-feedback d-block small" style={{ color: "#D92D20" }}>
+              <div className="invalid-feedback d-block small" style={{ color: "#D92D20" }} role="alert">
                 {formErrors.categoryId}
               </div>
             )}
@@ -296,6 +298,8 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
               value={relatedSystemId}
               onChange={(e) => setRelatedSystemId(e.target.value)}
               disabled={loadingRef}
+              aria-required="true"
+              aria-invalid={Boolean(formErrors.relatedSystemId)}
             >
               {loadingRef ? (
                 <option>Loading systems...</option>
@@ -308,7 +312,7 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
               )}
             </select>
             {formErrors.relatedSystemId && (
-              <div className="invalid-feedback d-block small" style={{ color: "#D92D20" }}>
+              <div className="invalid-feedback d-block small" style={{ color: "#D92D20" }} role="alert">
                 {formErrors.relatedSystemId}
               </div>
             )}
@@ -324,6 +328,8 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
             id="requestedPriority"
             className={`form-select ${formErrors.requestedPriority ? "is-invalid" : ""}`}
             value={requestedPriority}
+            aria-required="true"
+            aria-invalid={Boolean(formErrors.requestedPriority)}
             onChange={(e) =>
               setRequestedPriority(
                 e.target.value as "LOW" | "MEDIUM" | "HIGH" | "URGENT"
@@ -336,7 +342,7 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
             <option value="URGENT">Urgent - Work stoppage / system down</option>
           </select>
           {formErrors.requestedPriority && (
-            <div className="invalid-feedback d-block small" style={{ color: "#D92D20" }}>
+            <div className="invalid-feedback d-block small" style={{ color: "#D92D20" }} role="alert">
               {formErrors.requestedPriority}
             </div>
           )}
@@ -355,9 +361,11 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             maxLength={150}
+            aria-required="true"
+            aria-invalid={Boolean(formErrors.summary)}
           />
           {formErrors.summary && (
-            <div className="invalid-feedback d-block small" style={{ color: "#D92D20" }}>
+            <div className="invalid-feedback d-block small" style={{ color: "#D92D20" }} role="alert">
               {formErrors.summary}
             </div>
           )}
@@ -376,9 +384,11 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             maxLength={3000}
+            aria-required="true"
+            aria-invalid={Boolean(formErrors.description)}
           />
           {formErrors.description && (
-            <div className="invalid-feedback d-block small" style={{ color: "#D92D20" }}>
+            <div className="invalid-feedback d-block small" style={{ color: "#D92D20" }} role="alert">
               {formErrors.description}
             </div>
           )}

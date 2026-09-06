@@ -1,0 +1,25 @@
+/* TokTickIT Zen Green Design System Custom Styles */
+
+/* WCAG 2.1 AA Visible Keyboard Focus Rings */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #0B7A46 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(11, 122, 70, 0.25) !important;
+}
+
+/* Ensure touch targets meet minimum 44px height on mobile */
+@media (max-width: 767.98px) {
+  .btn,
+  .form-control,
+  .form-select {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
