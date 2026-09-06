@@ -11,7 +11,7 @@ import { RequesterTicketDetail } from "./components/RequesterTicketDetail.js";
 type TabView = "create-ticket" | "my-tickets" | "ticket-detail";
 
 function MainContent() {
-  const { setShowSelectorModal } = useRequester();
+  const { activeRequester, setShowSelectorModal } = useRequester();
   const [activeTab, setActiveTab] = useState<TabView>("create-ticket");
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
 
@@ -78,18 +78,18 @@ function MainContent() {
       <div className="container-fluid px-3 px-md-4 px-xl-5 py-4" style={{ maxWidth: 1440 }}>
         <DevelopmentRequesterSelectionModal />
 
-        {activeTab === "create-ticket" && (
+        {activeRequester && activeTab === "create-ticket" && (
           <CreateTicketForm onViewTicketDetail={handleOpenTicket} />
         )}
 
-        {activeTab === "my-tickets" && (
+        {activeRequester && activeTab === "my-tickets" && (
           <MyTicketsList
             onNavigateCreate={() => setActiveTab("create-ticket")}
             onOpenTicket={handleOpenTicket}
           />
         )}
 
-        {activeTab === "ticket-detail" && selectedTicketId !== null && (
+        {activeRequester && activeTab === "ticket-detail" && selectedTicketId !== null && (
           <RequesterTicketDetail
             ticketId={selectedTicketId}
             onBack={() => setActiveTab("my-tickets")}
