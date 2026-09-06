@@ -1,10 +1,19 @@
 # TokTickIT
 
+An end-user facing IT support ticketing system built with a unified Zen Green design system.
+
 ## Tech Stack
 
 - **Frontend**: React 18, TypeScript, Vite, Bootstrap 5
 - **Backend**: Node.js, Express, TypeScript, Prisma ORM, PostgreSQL
-- **Testing**: Vitest, Supertest, React Testing Library
+- **Testing**: Vitest, Supertest, React Testing Library, Playwright E2E
+
+## Key Features (Lab 2 Increment)
+
+- **Requester Selection**: Testing selector context for multi-user identity switching and ownership isolation (`BR-03`, `BR-06`).
+- **Create IT Ticket**: Ticket submission with auto-generated `TKT-YYYY-XXXXXX` numbers (`BR-01`) and optional initial attachments (`FR-12`).
+- **My Tickets Workspace**: Real-time search, multi-criteria filtering, sorting, pagination, and clean empty/no-results states (`FR-07`–`FR-10`).
+- **Attachment Lifecycle**: File validation (PDF, PNG, JPG, WEBP ≤ 5 MB), upload, download, and soft-removal with mandatory removal reasons (`BR-15`–`BR-21`).
 
 ## Workspace Structure
 
@@ -15,6 +24,7 @@ toktickit/
 │   ├── prisma/      # Database schema, migrations, and seed scripts
 │   ├── src/         # Express server source code
 │   └── tests/       # Supertest & Vitest tests
+├── e2e/             # Playwright End-to-End test suites
 ├── docs/            # Lab documentation and peer review records
 ├── .gitignore
 └── README.md
@@ -86,4 +96,9 @@ npm run prisma:seed
   ```bash
   cd client
   npm test
+  ```
+
+- **Run End-to-End Tests (Playwright)**:
+  ```bash
+  npx playwright test e2e/lab-02/
   ```
