@@ -12,3 +12,10 @@ server/prisma/*.db
 # logs & OS
 *.log
 .DS_Store
+# test output
+test-results/
+playwright-report/
+*.timestamp-*.mjs
+server/uploads/*
+!server/uploads/.gitkeep
+server/scratch_test/

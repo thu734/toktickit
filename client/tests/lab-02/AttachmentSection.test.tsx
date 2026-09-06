@@ -158,4 +158,79 @@ describe("Lab 2 Attachment Section UI Tests (UI-06, AC-04, AC-07)", () => {
     const uploadButton = screen.getByRole("button", { name: /Upload File/i });
     expect(uploadButton).toBeDisabled();
   });
+
+  it("clears selectedFile and resets file input element upon successful upload", async () => {
+    vi.spyOn(api, "uploadAttachment").mockResolvedValue({
+      id: 99,
+      ticketId: 101,
+      filename: "sample.pdf",
+      storedFilename: "99-sample.pdf",
+      mimeType: "application/pdf",
+      fileSizeBytes: 1024,
+      isRemoved: false,
+      uploadedAt: "2026-01-01T10:00:00Z",
+      uploadedByRequesterId: 1,
+    });
+
+    const onAttachmentChangeMock = vi.fn();
+
+    render(
+      <RequesterProvider initialRequester={mockRequester}>
+        <AttachmentSection
+          ticketId={101}
+          attachments={[]}
+          onAttachmentChange={onAttachmentChangeMock}
+        />
+      </RequesterProvider>
+    );
+
+    const input = screen.getByLabelText(/Upload New Attachment/i) as HTMLInputElement;
+    const validFile = new File(["sample content"], "sample.pdf", { type: "application/pdf" });
+
+    fireEvent.change(input, { target: { files: [validFile] } });
+
+    const uploadButton = screen.getByRole("button", { name: /Upload File/i });
+    expect(uploadButton).not.toBeDisabled();
+
+    fireEvent.click(uploadButton);
+
+    await waitFor(() => {
+      expect(api.uploadAttachment).toHaveBeenCalledWith(101, validFile, 1);
+      expect(onAttachmentChangeMock).toHaveBeenCalled();
+      expect(uploadButton).toBeDisabled();
+      expect(input.value).toBe("");
+    });
+  });
+
+  it("retains selectedFile and input selection when upload API returns failure", async () => {
+    vi.spyOn(api, "uploadAttachment").mockRejectedValue(new Error("Network error during file upload"));
+
+    const onAttachmentChangeMock = vi.fn();
+
+    render(
+      <RequesterProvider initialRequester={mockRequester}>
+        <AttachmentSection
+          ticketId={101}
+          attachments={[]}
+          onAttachmentChange={onAttachmentChangeMock}
+        />
+      </RequesterProvider>
+    );
+
+    const input = screen.getByLabelText(/Upload New Attachment/i) as HTMLInputElement;
+    const validFile = new File(["sample content"], "retry_me.pdf", { type: "application/pdf" });
+
+    fireEvent.change(input, { target: { files: [validFile] } });
+
+    const uploadButton = screen.getByRole("button", { name: /Upload File/i });
+    expect(uploadButton).not.toBeDisabled();
+
+    fireEvent.click(uploadButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent("Network error during file upload");
+      expect(uploadButton).not.toBeDisabled();
+      expect(onAttachmentChangeMock).not.toHaveBeenCalled();
+    });
+  });
 });

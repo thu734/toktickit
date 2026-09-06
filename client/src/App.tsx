@@ -11,7 +11,7 @@ import { RequesterTicketDetail } from "./components/RequesterTicketDetail.js";
 type TabView = "create-ticket" | "my-tickets" | "ticket-detail";
 
 function MainContent() {
-  const { setShowSelectorModal } = useRequester();
+  const { activeRequester, setShowSelectorModal } = useRequester();
   const [activeTab, setActiveTab] = useState<TabView>("create-ticket");
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
 
@@ -23,9 +23,9 @@ function MainContent() {
   return (
     <div className="min-vh-100" style={{ backgroundColor: "#F5F7F6" }}>
       {/* Zen Green Application Header matching Reference Illustration strictly */}
-      <header className="navbar navbar-expand-lg px-4" style={{ backgroundColor: "#006B3C", color: "#FFFFFF" }}>
-        <div className="container-fluid d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center gap-4">
+      <header className="navbar navbar-expand-lg px-2 px-md-4 py-2" style={{ backgroundColor: "#006B3C", color: "#FFFFFF" }}>
+        <div className="container-fluid d-flex flex-wrap flex-md-nowrap justify-content-between align-items-center gap-2 gap-md-0">
+          <div className="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
             {/* Brand Title & Logo */}
             <div className="d-flex align-items-center cursor-pointer" onClick={() => setActiveTab("create-ticket")}>
               <span className="fs-4 me-2">🕒</span>
@@ -78,18 +78,18 @@ function MainContent() {
       <div className="container-fluid px-3 px-md-4 px-xl-5 py-4" style={{ maxWidth: 1440 }}>
         <DevelopmentRequesterSelectionModal />
 
-        {activeTab === "create-ticket" && (
+        {activeRequester && activeTab === "create-ticket" && (
           <CreateTicketForm onViewTicketDetail={handleOpenTicket} />
         )}
 
-        {activeTab === "my-tickets" && (
+        {activeRequester && activeTab === "my-tickets" && (
           <MyTicketsList
             onNavigateCreate={() => setActiveTab("create-ticket")}
             onOpenTicket={handleOpenTicket}
           />
         )}
 
-        {activeTab === "ticket-detail" && selectedTicketId !== null && (
+        {activeRequester && activeTab === "ticket-detail" && selectedTicketId !== null && (
           <RequesterTicketDetail
             ticketId={selectedTicketId}
             onBack={() => setActiveTab("my-tickets")}

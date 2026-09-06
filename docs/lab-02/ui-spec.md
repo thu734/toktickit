@@ -144,13 +144,13 @@ The TokTickIT Lab 2 user interface follows the **Zen Green Design System**, prov
 
 ## 8. Visual Inspection Checklist & Screenshot Paths
 
-- [ ] Header renders Primary Green (`#006B3C`) with active identity pill.
-- [ ] Read-only fields use distinct soft shading (`#F1F5F3`).
-- [ ] Required field labels include red asterisk (`*`).
-- [ ] Validation errors appear directly below field controls.
-- [ ] Submit button displays busy spinner during request processing.
-- [ ] My Tickets displays as table on desktop and card list on mobile.
-- [ ] Soft-removed attachments display removal reason and disabled download.
+- [x] Header renders Primary Green (`#006B3C`) with active identity pill.
+- [x] Read-only fields use distinct soft shading (`#F1F5F3`).
+- [x] Required field labels include red asterisk (`*`).
+- [x] Validation errors appear directly below field controls.
+- [x] Submit button displays busy spinner during request processing.
+- [x] My Tickets displays as table on desktop and card list on mobile.
+- [x] Soft-removed attachments display removal reason and disabled download.
 
 ### Required Screenshot Artifact Paths (Desktop, Tablet, Mobile)
 - **Create Ticket**: `artifacts/lab-02/screenshots/create-ticket/{desktop,tablet,mobile}.png`

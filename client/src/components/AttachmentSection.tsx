@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Attachment, uploadAttachment, downloadAttachment, softRemoveAttachment } from "../api.js";
 import { useRequester } from "../context/RequesterContext.js";
 
@@ -19,6 +19,7 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
   const [uploadError, setUploadError] = useState("");
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Soft removal modal state
   const [removalModalOpen, setRemovalModalOpen] = useState(false);
@@ -97,6 +98,9 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
     try {
       await uploadAttachment(ticketId, selectedFile, activeRequester.id);
       setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       onAttachmentChange();
     } catch (err: any) {
       setUploadError(err.message || "Failed to upload file.");
@@ -272,6 +276,7 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
 
               <div className="d-flex flex-column flex-sm-row gap-2">
                 <input
+                  ref={fileInputRef}
                   id="attachment-upload-input"
                   type="file"
                   className="form-control form-control-sm"
