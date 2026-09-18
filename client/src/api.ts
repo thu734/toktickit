@@ -288,3 +288,32 @@ export async function softRemoveAttachment(
 
   return data;
 }
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export async function changePassword(payload: ChangePasswordPayload): Promise<{ message: string; mustChangePassword: boolean }> {
+  const res = await fetch(`${API_URL}/api/auth/change-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.error || "Failed to change password");
+    (errorObj as any).code = data.code;
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  return data;
+}
+

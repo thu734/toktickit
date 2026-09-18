@@ -2,23 +2,56 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import path from "path";
 import fs from "fs";
+import session from "express-session";
 import { getPrisma } from "./prisma.js";
 import { generateNextTicketNumber } from "./utils/ticketNumber.js";
 import { RequestedPriority, TicketStatus, Prisma } from "@prisma/client";
 import { upload } from "./middleware/upload.js";
+import { csrfProtection } from "./middleware/csrf.js";
+import { mustChangePasswordLock } from "./middleware/mustChangePasswordLock.js";
+import { authRouter } from "./routes/auth.js";
 
 export const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// Helper function to extract and validate Development Requester identity header (BR-05, BR-06)
+app.use(
+  session({
+    name: "toktickit_session",
+    secret: process.env.SESSION_SECRET || "toktickit-dev-session-secret-2026",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: "strict",
+      path: "/",
+      maxAge: 8 * 60 * 60 * 1000, // 8 hours
+    },
+  })
+);
+
+app.use(csrfProtection);
+app.use("/api/auth", authRouter);
+app.use(mustChangePasswordLock);
+
+
+// Helper function to extract and validate Requester identity from session or header
 async function getValidatedRequester(req: Request, res: Response): Promise<number | null> {
+  // Session-authenticated user (Lab 3)
+  if (req.session?.userId) {
+    const user = await getPrisma().user.findUnique({ where: { id: req.session.userId } });
+    if (user && user.isActive) {
+      return user.id;
+    }
+  }
+
+  // Fallback header identity for testing / backward compatibility
   const requesterHeader = req.headers["x-development-requester-id"];
   if (!requesterHeader || typeof requesterHeader !== "string") {
     res.status(400).json({
       error: "Bad Request",
-      message: "X-Development-Requester-Id header is required.",
+      message: "X-Development-Requester-Id header or active session is required.",
     });
     return null;
   }
@@ -32,7 +65,7 @@ async function getValidatedRequester(req: Request, res: Response): Promise<numbe
     return null;
   }
 
-  const requester = await getPrisma().developmentRequester.findUnique({
+  const requester = await getPrisma().user.findUnique({
     where: { id: requesterId },
   });
 
@@ -76,14 +109,13 @@ app.get("/api/categories", async (_req: Request, res: Response) => {
 // GET /api/requesters (Active Development Requesters - BR-04, AC-13)
 app.get("/api/requesters", async (_req: Request, res: Response) => {
   try {
-    const requesters = await getPrisma().developmentRequester.findMany({
-      where: { isActive: true },
+    const requesters = await getPrisma().user.findMany({
+      where: { isActive: true, role: "REQUESTER" },
       orderBy: { id: "asc" },
       select: {
         id: true,
         name: true,
         email: true,
-        department: true,
       },
     });
     res.status(200).json(requesters);
@@ -171,7 +203,7 @@ app.post("/api/tickets", async (req: Request, res: Response) => {
         summary,
         description,
         requestedPriority: requestedPriority as RequestedPriority,
-        itPriority: "UNASSIGNED",
+        itPriority: (requestedPriority as any) || "MEDIUM",
         currentStatus: "NEW",
         requesterId,
         categoryId: catIdNum,
@@ -310,7 +342,7 @@ app.get("/api/tickets/:id", async (req: Request, res: Response) => {
       include: {
         category: { select: { id: true, name: true } },
         relatedSystem: { select: { id: true, name: true } },
-        requester: { select: { id: true, name: true, email: true, department: true } },
+        requester: { select: { id: true, name: true, email: true } },
         attachments: {
           orderBy: { createdAt: "asc" },
           select: {
