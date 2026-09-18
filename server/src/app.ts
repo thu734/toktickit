@@ -8,6 +8,7 @@ import { generateNextTicketNumber } from "./utils/ticketNumber.js";
 import { RequestedPriority, TicketStatus, Prisma } from "@prisma/client";
 import { upload } from "./middleware/upload.js";
 import { csrfProtection } from "./middleware/csrf.js";
+import { mustChangePasswordLock } from "./middleware/mustChangePasswordLock.js";
 import { authRouter } from "./routes/auth.js";
 
 export const app = express();
@@ -32,6 +33,8 @@ app.use(
 
 app.use(csrfProtection);
 app.use("/api/auth", authRouter);
+app.use(mustChangePasswordLock);
+
 
 // Helper function to extract and validate Requester identity from session or header
 async function getValidatedRequester(req: Request, res: Response): Promise<number | null> {
