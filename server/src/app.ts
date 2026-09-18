@@ -9,7 +9,9 @@ import { RequestedPriority, TicketStatus, Prisma } from "@prisma/client";
 import { upload } from "./middleware/upload.js";
 import { csrfProtection } from "./middleware/csrf.js";
 import { mustChangePasswordLock } from "./middleware/mustChangePasswordLock.js";
+import { requireAuth, requireRole } from "./middleware/authorization.js";
 import { authRouter } from "./routes/auth.js";
+
 
 export const app = express();
 
@@ -106,7 +108,7 @@ app.get("/api/categories", async (_req: Request, res: Response) => {
   }
 });
 
-// GET /api/requesters (Active Development Requesters - BR-04, AC-13)
+// GET /api/requesters (Active Requesters)
 app.get("/api/requesters", async (_req: Request, res: Response) => {
   try {
     const requesters = await getPrisma().user.findMany({
@@ -141,8 +143,10 @@ app.get("/api/related-systems", async (_req: Request, res: Response) => {
   }
 });
 
-// POST /api/tickets (Create Ticket - FR-04, FR-05, FR-06, BR-01, BR-02, BR-07..BR-12, AC-01, AC-23)
-app.post("/api/tickets", async (req: Request, res: Response) => {
+
+// POST /api/tickets (Create Ticket - requireRole("REQUESTER"))
+app.post("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Response) => {
+
   try {
     const requesterId = await getValidatedRequester(req, res);
     if (requesterId === null) return;
@@ -226,11 +230,12 @@ app.post("/api/tickets", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/tickets (Paginated Ticket Listing, Search, Filter, Sort & Ownership - FR-07..FR-10, BR-06, BR-23..BR-25, AC-09, AC-10, AC-19, AC-20)
-app.get("/api/tickets", async (req: Request, res: Response) => {
+// GET /api/tickets (Paginated Ticket Listing - requireRole("REQUESTER"))
+app.get("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Response) => {
   try {
     const requesterId = await getValidatedRequester(req, res);
     if (requesterId === null) return;
+
 
     const {
       search,
@@ -323,11 +328,12 @@ app.get("/api/tickets", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/tickets/:id (Get Owned Ticket Detail - FR-11, BR-06, AC-03, AC-22)
-app.get("/api/tickets/:id", async (req: Request, res: Response) => {
+// GET /api/tickets/:id (Get Owned Ticket Detail - requireRole("REQUESTER"))
+app.get("/api/tickets/:id", requireRole("REQUESTER"), async (req: Request, res: Response) => {
   try {
     const requesterId = await getValidatedRequester(req, res);
     if (requesterId === null) return;
+
 
     const ticketId = parseInt(req.params.id, 10);
     if (isNaN(ticketId)) {
@@ -383,9 +389,10 @@ app.get("/api/tickets/:id", async (req: Request, res: Response) => {
   }
 });
 
-// POST /api/tickets/:id/attachments (Upload Attachment - FR-12, FR-13, FR-14, BR-06, BR-15..BR-18, BR-22, AC-04..AC-06)
-app.post("/api/tickets/:id/attachments", (req: Request, res: Response) => {
+// POST /api/tickets/:id/attachments (Upload Attachment - requireRole("REQUESTER"))
+app.post("/api/tickets/:id/attachments", requireRole("REQUESTER"), (req: Request, res: Response) => {
   upload.single("file")(req, res, async (err: any) => {
+
     const cleanupFile = async () => {
       if (req.file && req.file.path) {
         await fs.promises.unlink(req.file.path).catch(() => {});
@@ -478,11 +485,12 @@ app.post("/api/tickets/:id/attachments", (req: Request, res: Response) => {
   });
 });
 
-// GET /api/tickets/:id/attachments (List Ticket Attachments Metadata - BR-06)
-app.get("/api/tickets/:id/attachments", async (req: Request, res: Response) => {
+// GET /api/tickets/:id/attachments (List Ticket Attachments Metadata - requireAuth)
+app.get("/api/tickets/:id/attachments", requireAuth, async (req: Request, res: Response) => {
   try {
     const requesterId = await getValidatedRequester(req, res);
     if (requesterId === null) return;
+
 
     const ticketId = parseInt(req.params.id, 10);
     if (isNaN(ticketId)) {
@@ -535,11 +543,12 @@ app.get("/api/tickets/:id/attachments", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/attachments/:id/download (Download Active Attachment Stream - FR-15, BR-06, BR-21, AC-08)
-app.get("/api/attachments/:id/download", async (req: Request, res: Response) => {
+// GET /api/attachments/:id/download (Download Active Attachment Stream - requireAuth)
+app.get("/api/attachments/:id/download", requireAuth, async (req: Request, res: Response) => {
   try {
     const requesterId = await getValidatedRequester(req, res);
     if (requesterId === null) return;
+
 
     const attachmentId = parseInt(req.params.id, 10);
     if (isNaN(attachmentId)) {
@@ -598,11 +607,12 @@ app.get("/api/attachments/:id/download", async (req: Request, res: Response) => 
   }
 });
 
-// POST /api/attachments/:id/soft-remove (Soft-Remove Attachment - FR-16, FR-17, BR-06, BR-19, BR-20, AC-07)
-app.post("/api/attachments/:id/soft-remove", async (req: Request, res: Response) => {
+// POST /api/attachments/:id/soft-remove (Soft-Remove Attachment - requireRole("REQUESTER"))
+app.post("/api/attachments/:id/soft-remove", requireRole("REQUESTER"), async (req: Request, res: Response) => {
   try {
     const requesterId = await getValidatedRequester(req, res);
     if (requesterId === null) return;
+
 
     const attachmentId = parseInt(req.params.id, 10);
     if (isNaN(attachmentId)) {
