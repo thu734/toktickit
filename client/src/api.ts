@@ -317,3 +317,64 @@ export async function changePassword(payload: ChangePasswordPayload): Promise<{ 
   return data;
 }
 
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: "REQUESTER" | "IT_STAFF" | "ADMINISTRATOR";
+  mustChangePassword: boolean;
+  isActive: boolean;
+}
+
+export async function loginApi(email: string, password: string): Promise<{ user: User }> {
+  const res = await fetch(`${API_URL}/api/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "include",
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.error || "Invalid email or password.");
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  return data;
+}
+
+export async function logoutApi(): Promise<void> {
+  const res = await fetch(`${API_URL}/api/auth/logout`, {
+    method: "POST",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to logout.");
+  }
+}
+
+export async function fetchCurrentUser(): Promise<User | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/auth/me`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.user || null;
+  } catch {
+    return null;
+  }
+}
+
+
