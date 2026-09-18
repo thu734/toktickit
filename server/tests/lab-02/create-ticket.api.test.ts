@@ -1,9 +1,16 @@
-import { describe, it, expect, afterAll } from "vitest";
+import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import request from "supertest";
 import { app } from "../../src/app.js";
 import { getPrisma } from "../../src/prisma.js";
 
 const CSRF_HEADER = { "X-Requested-With": "XMLHttpRequest" };
+
+beforeEach(async () => {
+  await getPrisma().user.updateMany({
+    where: { email: "jennifer.a@toktickit.local" },
+    data: { mustChangePassword: false },
+  });
+});
 
 afterAll(async () => {
   // Clean up tickets created during test
@@ -49,11 +56,25 @@ describe("Lab 2 Reference Data APIs & Requester Exclusion (API-11)", () => {
 });
 
 describe("POST /api/tickets Creation & Validation (API-01, API-02)", () => {
+  let requester1Id: number;
+
+  beforeEach(async () => {
+    const requesters = await getPrisma().user.findMany({
+      where: { isActive: true, role: "REQUESTER" },
+      orderBy: { id: "asc" },
+    });
+    requester1Id = requesters[0].id;
+    await getPrisma().user.updateMany({
+      where: { id: requester1Id },
+      data: { mustChangePassword: false },
+    });
+  });
+
   it("POST /api/tickets creates a valid ticket with official Ticket Number (API-01, AC-01)", async () => {
     const res = await request(app)
       .post("/api/tickets")
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", "1")
+      .set("X-Development-Requester-Id", String(requester1Id))
       .send({
         categoryId: 1,
         relatedSystemId: 1,
@@ -66,7 +87,7 @@ describe("POST /api/tickets Creation & Validation (API-01, API-02)", () => {
     expect(res.body.id).toBeDefined();
     expect(res.body.ticketNumber).toMatch(/^TKT-\d{4}-\d{6}$/);
     expect(res.body.currentStatus).toBe("NEW");
-    expect(res.body.requesterId).toBe(1);
+    expect(res.body.requesterId).toBe(requester1Id);
     expect(res.body.summary).toBe("Cannot access email account");
   });
 
@@ -87,7 +108,7 @@ describe("POST /api/tickets Creation & Validation (API-01, API-02)", () => {
     const resShortSummary = await request(app)
       .post("/api/tickets")
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", "1")
+      .set("X-Development-Requester-Id", String(requester1Id))
       .send({
         categoryId: 1,
         relatedSystemId: 1,
@@ -101,7 +122,7 @@ describe("POST /api/tickets Creation & Validation (API-01, API-02)", () => {
     const resShortDesc = await request(app)
       .post("/api/tickets")
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", "1")
+      .set("X-Development-Requester-Id", String(requester1Id))
       .send({
         categoryId: 1,
         relatedSystemId: 1,
@@ -115,7 +136,7 @@ describe("POST /api/tickets Creation & Validation (API-01, API-02)", () => {
     const resInvalidPriority = await request(app)
       .post("/api/tickets")
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", "1")
+      .set("X-Development-Requester-Id", String(requester1Id))
       .send({
         categoryId: 1,
         relatedSystemId: 1,

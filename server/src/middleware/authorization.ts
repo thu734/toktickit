@@ -5,7 +5,7 @@ import { getPrisma } from "../prisma.js";
 /**
  * Helper to auto-authenticate header fallback for backward compatibility with Lab 2 tests.
  */
-async function syncHeaderSession(req: Request): Promise<void> {
+export async function syncHeaderSession(req: Request): Promise<void> {
   if (!req.session?.userId && req.headers["x-development-requester-id"]) {
     const headerId = parseInt(String(req.headers["x-development-requester-id"]), 10);
     if (!isNaN(headerId)) {
@@ -16,6 +16,11 @@ async function syncHeaderSession(req: Request): Promise<void> {
       }
     }
   }
+}
+
+export async function syncHeaderSessionMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
+  await syncHeaderSession(req);
+  next();
 }
 
 /**

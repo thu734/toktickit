@@ -34,20 +34,34 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="container py-5 d-flex justify-content-center align-items-center" style={{ minHeight: "85vh" }}>
-      <div className="card shadow-sm border-0 w-100" style={{ maxWidth: "440px" }}>
-        <div className="card-header text-white p-4" style={{ backgroundColor: "#006B3C" }}>
+    <div
+      className="container py-5 d-flex justify-content-center align-items-center"
+      style={{ minHeight: "85vh" }}
+    >
+      <div
+        className="card shadow-sm border-0 w-100"
+        style={{ maxWidth: "440px" }}
+      >
+        <div
+          className="card-header text-white p-4"
+          style={{ backgroundColor: "#006B3C" }}
+        >
           <div className="d-flex align-items-center mb-2">
             <span className="fs-3 me-2">🕒</span>
             <h3 className="h4 mb-0 fw-bold">TokTickIT</h3>
           </div>
           <h4 className="card-title h5 mb-1">Sign in to your account</h4>
-          <p className="card-subtitle small opacity-75 mb-0">Enter your email and password to access support services.</p>
+          <p className="card-subtitle small opacity-75 mb-0">
+            Enter your email and password to access support services.
+          </p>
         </div>
 
         <div className="card-body p-4">
           {error && (
-            <div className="alert alert-danger d-flex align-items-center" role="alert">
+            <div
+              className="alert alert-danger d-flex align-items-center"
+              role="alert"
+            >
               <span className="me-2">⚠️</span>
               <div>{error}</div>
             </div>
@@ -91,7 +105,7 @@ export const Login: React.FC = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  {showPassword ? "🙈" : "👀"}
                 </button>
               </div>
             </div>
@@ -104,7 +118,11 @@ export const Login: React.FC = () => {
             >
               {loading ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   Signing in...
                 </>
               ) : (
