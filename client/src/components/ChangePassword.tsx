@@ -72,7 +72,7 @@ export const ChangePassword: React.FC<ChangePasswordProps> = ({ onSuccess }) => 
   return (
     <div className="container py-5 d-flex justify-content-center align-items-center" style={{ minHeight: "80vh" }}>
       <div className="card shadow-sm border-0 w-100" style={{ maxWidth: "520px" }}>
-        <div className="card-header bg-dark text-white p-4" style={{ backgroundColor: "#006B3C" }}>
+        <div className="card-header text-white p-4" style={{ backgroundColor: "#006B3C" }}>
           <h4 className="card-title mb-1 fw-bold">Mandatory Password Change</h4>
           <p className="card-subtitle small opacity-75 mb-0">
             You must change your initial password before continuing to TokTickIT.
