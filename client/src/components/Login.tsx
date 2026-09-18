@@ -36,7 +36,7 @@ export const Login: React.FC = () => {
   return (
     <div className="container py-5 d-flex justify-content-center align-items-center" style={{ minHeight: "85vh" }}>
       <div className="card shadow-sm border-0 w-100" style={{ maxWidth: "440px" }}>
-        <div className="card-header bg-dark text-white p-4" style={{ backgroundColor: "#006B3C" }}>
+        <div className="card-header text-white p-4" style={{ backgroundColor: "#006B3C" }}>
           <div className="d-flex align-items-center mb-2">
             <span className="fs-3 me-2">🕒</span>
             <h3 className="h4 mb-0 fw-bold">TokTickIT</h3>
