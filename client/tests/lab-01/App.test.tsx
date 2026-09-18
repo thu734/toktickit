@@ -18,7 +18,13 @@ describe("App Header & Brand Baseline (Lab 1 / Lab 2 Integration)", () => {
     vi.spyOn(api, "fetchTickets").mockResolvedValue({ items: [], pagination: { page: 1, limit: 10, totalPages: 0, totalItems: 0 } });
   });
 
-  it("renders the TokTickIT brand logo and heading", async () => {
+  it("renders the Login screen when user is unauthenticated", async () => {
+    vi.spyOn(api, "fetchCurrentUser").mockResolvedValue(null);
+    render(<App />);
+    expect(await screen.findByText(/Sign in to your account/i)).toBeInTheDocument();
+  });
+
+  it("renders the TokTickIT brand logo and heading when authenticated", async () => {
     render(<App />);
     expect(await screen.findByRole("link", { name: /TokTickIT/i })).toBeInTheDocument();
     const createBtns = await screen.findAllByRole("button", { name: /Create Ticket/i });

@@ -19,6 +19,14 @@ describe("Lab 3 Application Authentication & Baseline Routing UI (UI-01, UI-03)"
   });
 
   it("renders main application shell with default requester context (UI-03)", async () => {
+    vi.spyOn(api, "fetchCurrentUser").mockResolvedValue({
+      id: 1,
+      name: "Jennifer Anderson",
+      email: "jennifer.a@toktickit.local",
+      role: "REQUESTER",
+      mustChangePassword: false,
+      isActive: true,
+    });
     vi.spyOn(api, "fetchCategories").mockResolvedValue([]);
     vi.spyOn(api, "fetchTickets").mockResolvedValue({ items: [], pagination: { page: 1, limit: 10, totalPages: 0, totalItems: 0 } });
 
