@@ -13,16 +13,14 @@ const mockRequester = {
   department: "Marketing",
 };
 
-describe("Lab 2 Development Requester Selection & Exclusion UI (UI-01, UI-07)", () => {
+describe("Lab 3 Application Authentication & Baseline Routing UI (UI-01, UI-03)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("renders Development Requester Selection screen when no identity is selected (UI-01)", async () => {
-    vi.spyOn(api, "fetchRequesters").mockResolvedValue([
-      { id: 1, name: "Jennifer Anderson", email: "jennifer.a@toktickit.local", department: "Marketing" },
-      { id: 2, name: "Michael Brown", email: "michael.b@toktickit.local", department: "IT Support" },
-    ]);
+  it("renders main application shell with default requester context (UI-03)", async () => {
+    vi.spyOn(api, "fetchCategories").mockResolvedValue([]);
+    vi.spyOn(api, "fetchTickets").mockResolvedValue({ items: [], pagination: { page: 1, limit: 10, totalPages: 0, totalItems: 0 } });
 
     render(
       <RequesterProvider>
@@ -31,17 +29,21 @@ describe("Lab 2 Development Requester Selection & Exclusion UI (UI-01, UI-07)", 
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/Select Development Requester/i)).toBeInTheDocument();
-      expect(screen.getByText(/Only active development requesters are shown/i)).toBeInTheDocument();
-      expect(screen.getByText(/Authentication coming in Lab 3/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /User profile menu/i })).toBeInTheDocument();
     });
   });
 
-  it("excludes inactive requesters from the selector dropdown (UI-07)", async () => {
-    vi.spyOn(api, "fetchRequesters").mockResolvedValue([
-      { id: 1, name: "Jennifer Anderson", email: "jennifer.a@toktickit.local", department: "Marketing" },
-      { id: 2, name: "Michael Brown", email: "michael.b@toktickit.local", department: "IT Support" },
-    ]);
+  it("renders authenticated application shell when logged in (UI-03)", async () => {
+    vi.spyOn(api, "fetchCurrentUser").mockResolvedValue({
+      id: 1,
+      name: "Jennifer Anderson",
+      email: "jennifer.a@toktickit.local",
+      role: "REQUESTER",
+      mustChangePassword: false,
+      isActive: true,
+    });
+    vi.spyOn(api, "fetchCategories").mockResolvedValue([]);
+    vi.spyOn(api, "fetchTickets").mockResolvedValue({ items: [], pagination: { page: 1, limit: 10, totalPages: 0, totalItems: 0 } });
 
     render(
       <RequesterProvider>
@@ -50,11 +52,8 @@ describe("Lab 2 Development Requester Selection & Exclusion UI (UI-01, UI-07)", 
     );
 
     await waitFor(() => {
-      expect(screen.getByRole("option", { name: "Jennifer Anderson" })).toBeInTheDocument();
-      expect(screen.getByRole("option", { name: "Michael Brown" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /User profile menu/i })).toBeInTheDocument();
     });
-
-    expect(screen.queryByRole("option", { name: "Robert Smith" })).not.toBeInTheDocument();
   });
 });
 

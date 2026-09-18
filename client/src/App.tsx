@@ -1,19 +1,60 @@
-import { useState } from "react";
-import {
-  RequesterProvider,
-  useRequester,
-} from "./context/RequesterContext.js";
-import { DevelopmentRequesterSelectionModal } from "./components/DevelopmentRequesterSelectionModal.js";
+import { useState, useEffect } from "react";
+import { AuthProvider, useAuth } from "./context/AuthContext.js";
+import { RequesterProvider, useRequester } from "./context/RequesterContext.js";
+import { AppShell } from "./components/AppShell.js";
+import { Login } from "./components/Login.js";
+import { ChangePassword } from "./components/ChangePassword.js";
 import { CreateTicketForm } from "./components/CreateTicketForm.js";
 import { MyTicketsList } from "./components/MyTicketsList.js";
 import { RequesterTicketDetail } from "./components/RequesterTicketDetail.js";
 
-type TabView = "create-ticket" | "my-tickets" | "ticket-detail";
+type TabView = "create-ticket" | "my-tickets" | "ticket-detail" | "ticket-queue" | "user-management";
 
 function MainContent() {
-  const { activeRequester, setShowSelectorModal } = useRequester();
-  const [activeTab, setActiveTab] = useState<TabView>("create-ticket");
+  const { user, loading, refreshUser } = useAuth();
+  const { setActiveRequester } = useRequester();
+  const [activeTab, setActiveTab] = useState<TabView>("my-tickets");
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      setActiveRequester({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        department: "General",
+      });
+
+      if (user.role === "IT_STAFF") {
+        setActiveTab("ticket-queue");
+      } else if (user.role === "ADMINISTRATOR") {
+        setActiveTab("user-management");
+      } else {
+        setActiveTab("my-tickets");
+      }
+    }
+  }, [user, setActiveRequester]);
+
+  if (loading) {
+    return (
+      <div className="min-vh-100 d-flex justify-content-center align-items-center bg-light">
+        <div className="text-center">
+          <div className="spinner-border text-success mb-3" role="status" style={{ width: "3rem", height: "3rem" }}>
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <div className="fw-semibold text-secondary">Loading TokTickIT...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Login />;
+  }
+
+  if (user.mustChangePassword) {
+    return <ChangePassword onSuccess={() => refreshUser()} />;
+  }
 
   const handleOpenTicket = (ticketId: number) => {
     setSelectedTicketId(ticketId);
@@ -21,89 +62,64 @@ function MainContent() {
   };
 
   return (
-    <div className="min-vh-100" style={{ backgroundColor: "#F5F7F6" }}>
-      {/* Zen Green Application Header matching Reference Illustration strictly */}
-      <header className="navbar navbar-expand-lg px-2 px-md-4 py-2" style={{ backgroundColor: "#006B3C", color: "#FFFFFF" }}>
-        <div className="container-fluid d-flex flex-wrap flex-md-nowrap justify-content-between align-items-center gap-2 gap-md-0">
-          <div className="d-flex flex-wrap flex-md-nowrap align-items-center gap-2 gap-md-4">
-            {/* Brand Title & Logo */}
-            <div className="d-flex align-items-center cursor-pointer" onClick={() => setActiveTab("create-ticket")}>
-              <span className="fs-4 me-2">🕒</span>
-              <span className="fw-bold fs-5 text-white">TokTickIT</span>
-            </div>
-
-            {/* Navigation Items: My Tickets | Create Ticket */}
-            <nav className="d-flex align-items-center gap-3 ms-2">
-              <button
-                type="button"
-                className={`btn btn-link text-white text-decoration-none d-flex align-items-center gap-1 px-2 py-1 small ${
-                  activeTab === "my-tickets" || activeTab === "ticket-detail" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"
-                }`}
-                onClick={() => setActiveTab("my-tickets")}
-              >
-                <span>📄</span>
-                <span>My Tickets</span>
-              </button>
-
-              <button
-                type="button"
-                className={`btn btn-link text-white text-decoration-none d-flex align-items-center gap-1 px-2 py-1 small ${
-                  activeTab === "create-ticket" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"
-                }`}
-                onClick={() => setActiveTab("create-ticket")}
-              >
-                <span>➕</span>
-                <span>Create Ticket</span>
-              </button>
-            </nav>
-          </div>
-
-          {/* Right Profile Element: strictly 'Profile v' opening Requester Selection modal */}
-          <div className="d-flex align-items-center">
-            <button
-              type="button"
-              className="btn text-white d-flex align-items-center gap-1 px-2 py-1 opacity-90 border-0 bg-transparent"
-              onClick={() => setShowSelectorModal(true)}
-              style={{ fontSize: 14 }}
-            >
-              <span className="fs-6">👤</span>
-              <span className="fw-semibold ms-1">Profile</span>
-              <span className="small ms-1">∨</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Container */}
+    <AppShell currentTab={activeTab} onTabChange={(tab) => setActiveTab(tab as TabView)}>
       <div className="container-fluid px-3 px-md-4 px-xl-5 py-4" style={{ maxWidth: 1440 }}>
-        <DevelopmentRequesterSelectionModal />
+        {user.role === "REQUESTER" && (
+          <>
+            {activeTab === "create-ticket" && (
+              <CreateTicketForm onViewTicketDetail={handleOpenTicket} />
+            )}
 
-        {activeRequester && activeTab === "create-ticket" && (
-          <CreateTicketForm onViewTicketDetail={handleOpenTicket} />
+            {activeTab === "my-tickets" && (
+              <MyTicketsList
+                onNavigateCreate={() => setActiveTab("create-ticket")}
+                onOpenTicket={handleOpenTicket}
+              />
+            )}
+
+            {activeTab === "ticket-detail" && selectedTicketId !== null && (
+              <RequesterTicketDetail
+                ticketId={selectedTicketId}
+                onBack={() => setActiveTab("my-tickets")}
+              />
+            )}
+          </>
         )}
 
-        {activeRequester && activeTab === "my-tickets" && (
-          <MyTicketsList
-            onNavigateCreate={() => setActiveTab("create-ticket")}
-            onOpenTicket={handleOpenTicket}
-          />
+        {user.role === "IT_STAFF" && (
+          <div className="container py-5 text-center">
+            <div className="card shadow-sm border-0 p-5 mx-auto" style={{ maxWidth: 600 }}>
+              <div className="fs-1 mb-3">📥</div>
+              <h3 className="fw-bold text-dark">IT Staff Ticket Queue</h3>
+              <p className="text-muted mb-0">
+                IT Staff ticket operations, queue filtering, ticket claiming, and internal notes are scheduled for <strong>Issue #15</strong>.
+              </p>
+            </div>
+          </div>
         )}
 
-        {activeRequester && activeTab === "ticket-detail" && selectedTicketId !== null && (
-          <RequesterTicketDetail
-            ticketId={selectedTicketId}
-            onBack={() => setActiveTab("my-tickets")}
-          />
+        {user.role === "ADMINISTRATOR" && (
+          <div className="container py-5 text-center">
+            <div className="card shadow-sm border-0 p-5 mx-auto" style={{ maxWidth: 600 }}>
+              <div className="fs-1 mb-3">👥</div>
+              <h3 className="fw-bold text-dark">Administrator User Management</h3>
+              <p className="text-muted mb-0">
+                Administrator user management, account creation, and password reset operations are scheduled for <strong>Issue #16</strong>.
+              </p>
+            </div>
+          </div>
         )}
       </div>
-    </div>
+    </AppShell>
   );
 }
 
 export default function App() {
   return (
-    <RequesterProvider>
-      <MainContent />
-    </RequesterProvider>
+    <AuthProvider>
+      <RequesterProvider>
+        <MainContent />
+      </RequesterProvider>
+    </AuthProvider>
   );
 }
