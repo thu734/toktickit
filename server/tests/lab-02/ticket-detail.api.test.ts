@@ -12,8 +12,8 @@ describe("Lab 2 Ticket Detail API - Owned Retrieval & Cross-Requester Security (
     const prisma = getPrisma();
 
     // Get seeded active requesters
-    const requesters = await prisma.developmentRequester.findMany({
-      where: { isActive: true },
+    const requesters = await prisma.user.findMany({
+      where: { isActive: true, role: "REQUESTER" },
       orderBy: { id: "asc" },
     });
     requester1Id = requesters[0].id;
@@ -35,7 +35,7 @@ describe("Lab 2 Ticket Detail API - Owned Retrieval & Cross-Requester Security (
         description: "External monitor goes black randomly.",
         requestedPriority: "MEDIUM",
         currentStatus: "NEW",
-        itPriority: "UNASSIGNED",
+        itPriority: "MEDIUM",
         requesterId: requester1Id,
         categoryId: cat!.id,
         relatedSystemId: sys!.id,
@@ -57,7 +57,7 @@ describe("Lab 2 Ticket Detail API - Owned Retrieval & Cross-Requester Security (
     expect(res.body.id).toBe(ticket1Id);
     expect(res.body.ticketNumber).toBe("TKT-2026-000099");
     expect(res.body.summary).toBe("Monitor display issues");
-    expect(res.body.itPriority).toBe("UNASSIGNED");
+    expect(res.body.itPriority).toBe("MEDIUM");
     expect(res.body.requester.id).toBe(requester1Id);
     expect(res.body.category.name).toBeDefined();
     expect(res.body.relatedSystem.name).toBeDefined();

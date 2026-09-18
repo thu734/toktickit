@@ -1,7 +1,16 @@
 import { getPrisma } from "../src/prisma.js";
+import bcrypt from "bcryptjs";
 
+/**
+ * TokTickIT Lab 3 Idempotent Seed Data Script
+ * 
+ * DISCLAIMER:
+ * Seed credentials and initial password ("Initial123!") are strictly for
+ * local development and testing environments and must never be used in production.
+ */
 async function main() {
   const prisma = getPrisma();
+  const initialPasswordHash = await bcrypt.hash("Initial123!", 10);
 
   // 1. Seed Categories (Idempotent)
   const categories = [
@@ -38,58 +47,105 @@ async function main() {
     });
   }
 
-  // 3. Seed Development Requesters (4 Active, 1 Inactive) (Idempotent)
-  const requesters = [
+  // 3. Seed Active & Inactive Users across 3 Roles (Idempotent)
+  const users = [
+    // Requesters (4 Active, 1 Inactive)
     {
       name: "Jennifer Anderson",
       email: "jennifer.a@toktickit.local",
-      department: "Marketing",
+      role: "REQUESTER" as const,
+      mustChangePassword: true,
       isActive: true,
     },
     {
       name: "Michael Brown",
       email: "michael.b@toktickit.local",
-      department: "IT Support",
+      role: "REQUESTER" as const,
+      mustChangePassword: true,
       isActive: true,
     },
     {
       name: "Sarah Johnson",
       email: "sarah.j@toktickit.local",
-      department: "Human Resources",
+      role: "REQUESTER" as const,
+      mustChangePassword: true,
       isActive: true,
     },
     {
       name: "David Lee",
       email: "david.l@toktickit.local",
-      department: "Engineering",
+      role: "REQUESTER" as const,
+      mustChangePassword: true,
       isActive: true,
     },
     {
-      name: "Robert Smith",
-      email: "robert.s@toktickit.local",
-      department: "Finance",
-      isActive: false, // Inactive requester
+      name: "Inactive Requester",
+      email: "inactive.req@toktickit.local",
+      role: "REQUESTER" as const,
+      mustChangePassword: true,
+      isActive: false,
+    },
+
+    // IT Staff (3 Active, 1 Inactive)
+    {
+      name: "Alex Turner",
+      email: "alex.t@toktickit.local",
+      role: "IT_STAFF" as const,
+      mustChangePassword: true,
+      isActive: true,
+    },
+    {
+      name: "Kevin Patel",
+      email: "kevin.p@toktickit.local",
+      role: "IT_STAFF" as const,
+      mustChangePassword: true,
+      isActive: true,
+    },
+    {
+      name: "Emily Davis",
+      email: "emily.d@toktickit.local",
+      role: "IT_STAFF" as const,
+      mustChangePassword: true,
+      isActive: true,
+    },
+    {
+      name: "Inactive Staff",
+      email: "inactive.staff@toktickit.local",
+      role: "IT_STAFF" as const,
+      mustChangePassword: true,
+      isActive: false,
+    },
+
+    // Administrator (1 Active)
+    {
+      name: "System Administrator",
+      email: "admin@toktickit.local",
+      role: "ADMINISTRATOR" as const,
+      mustChangePassword: true,
+      isActive: true,
     },
   ];
 
-  for (const req of requesters) {
-    await prisma.developmentRequester.upsert({
-      where: { email: req.email },
+  for (const u of users) {
+    await prisma.user.upsert({
+      where: { email: u.email },
       update: {
-        name: req.name,
-        department: req.department,
-        isActive: req.isActive,
+        name: u.name,
+        role: u.role,
+        isActive: u.isActive,
       },
       create: {
-        name: req.name,
-        email: req.email,
-        department: req.department,
-        isActive: req.isActive,
+        name: u.name,
+        email: u.email,
+        passwordHash: initialPasswordHash,
+        role: u.role,
+        mustChangePassword: u.mustChangePassword,
+        isActive: u.isActive,
       },
     });
   }
 
-  console.log("Database seeded successfully with Lab 2 reference data.");
+  console.log("Database seeded successfully with Lab 3 users and reference data.");
 }
 
 main()
@@ -98,5 +154,6 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await getPrisma().$disconnect();
+    const prisma = getPrisma();
+    await prisma.$disconnect();
   });

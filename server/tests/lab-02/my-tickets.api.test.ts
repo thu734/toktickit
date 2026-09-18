@@ -14,8 +14,8 @@ describe("Lab 2 My Tickets API - Paginated Listing, Search, Filter, Sort & Owner
     const prisma = getPrisma();
 
     // Get seeded active requesters
-    const requesters = await prisma.developmentRequester.findMany({
-      where: { isActive: true },
+    const requesters = await prisma.user.findMany({
+      where: { isActive: true, role: "REQUESTER" },
       orderBy: { id: "asc" },
     });
     requester1Id = requesters[0].id; // Jennifer Anderson
@@ -41,7 +41,7 @@ describe("Lab 2 My Tickets API - Paginated Listing, Search, Filter, Sort & Owner
           description: "Connecting to campus VPN fails every 10 minutes.",
           requestedPriority: "HIGH",
           currentStatus: "NEW",
-          itPriority: "UNASSIGNED",
+          itPriority: "MEDIUM",
           requesterId: requester1Id,
           categoryId: cat1Id,
           relatedSystemId: sys1Id,
@@ -53,7 +53,7 @@ describe("Lab 2 My Tickets API - Paginated Listing, Search, Filter, Sort & Owner
           description: "Cannot reset email password on self-service portal.",
           requestedPriority: "MEDIUM",
           currentStatus: "NEW",
-          itPriority: "UNASSIGNED",
+          itPriority: "MEDIUM",
           requesterId: requester1Id,
           categoryId: cat1Id,
           relatedSystemId: sys1Id,
@@ -83,7 +83,7 @@ describe("Lab 2 My Tickets API - Paginated Listing, Search, Filter, Sort & Owner
           description: "Department printer needs new black toner cartridge.",
           requestedPriority: "LOW",
           currentStatus: "NEW",
-          itPriority: "UNASSIGNED",
+          itPriority: "MEDIUM",
           requesterId: requester2Id,
           categoryId: cat2Id,
           relatedSystemId: sys1Id,

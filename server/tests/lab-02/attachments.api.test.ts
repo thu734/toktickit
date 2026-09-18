@@ -2,8 +2,10 @@ import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import request from "supertest";
 import path from "path";
 import fs from "fs";
-import app from "../../src/app.js";
+import { app } from "../../src/app.js";
 import { getPrisma } from "../../src/prisma.js";
+
+const CSRF_HEADER = { "X-Requested-With": "XMLHttpRequest" };
 
 describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Ownership Security (API-06, API-07, API-08, API-09, API-10, API-12)", () => {
   let requester1Id: number;
@@ -16,8 +18,8 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
     const prisma = getPrisma();
 
     // Get seeded active requesters
-    const requesters = await prisma.developmentRequester.findMany({
-      where: { isActive: true },
+    const requesters = await prisma.user.findMany({
+      where: { isActive: true, role: "REQUESTER" },
       orderBy: { id: "asc" },
     });
     requester1Id = requesters[0].id;
@@ -38,7 +40,7 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
         description: "Cannot install IDE software package.",
         requestedPriority: "MEDIUM",
         currentStatus: "NEW",
-        itPriority: "UNASSIGNED",
+        itPriority: "MEDIUM",
         requesterId: requester1Id,
         categoryId: cat!.id,
         relatedSystemId: sys!.id,
@@ -64,6 +66,7 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
   it("POST /api/tickets/:id/attachments uploads valid PDF file (API-06, AC-04, BR-15, BR-18)", async () => {
     const res = await request(app)
       .post(`/api/tickets/${ticket1Id}/attachments`)
+      .set(CSRF_HEADER)
       .set("X-Development-Requester-Id", String(requester1Id))
       .attach("file", samplePdfPath);
 
@@ -77,6 +80,7 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
   it("POST /api/tickets/:id/attachments rejects invalid MIME type .exe (API-07, AC-05, BR-15)", async () => {
     const res = await request(app)
       .post(`/api/tickets/${ticket1Id}/attachments`)
+      .set(CSRF_HEADER)
       .set("X-Development-Requester-Id", String(requester1Id))
       .attach("file", sampleTxtPath);
 
@@ -104,6 +108,7 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
     // Try uploading a 6th attachment
     const res = await request(app)
       .post(`/api/tickets/${ticket1Id}/attachments`)
+      .set(CSRF_HEADER)
       .set("X-Development-Requester-Id", String(requester1Id))
       .attach("file", samplePdfPath);
 
@@ -126,6 +131,7 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
 
     const res = await request(app)
       .post(`/api/attachments/${att.id}/soft-remove`)
+      .set(CSRF_HEADER)
       .set("X-Development-Requester-Id", String(requester1Id))
       .send({ removalReason: "Uploaded wrong screenshot file" });
 
@@ -175,6 +181,7 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
     // Upload attempt by Requester 2 -> 403
     const uploadRes = await request(app)
       .post(`/api/tickets/${ticket1Id}/attachments`)
+      .set(CSRF_HEADER)
       .set("X-Development-Requester-Id", String(requester2Id))
       .attach("file", samplePdfPath);
     expect(uploadRes.status).toBe(403);
@@ -188,6 +195,7 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
     // Soft-remove attempt by Requester 2 -> 403
     const removeRes = await request(app)
       .post(`/api/attachments/${att.id}/soft-remove`)
+      .set(CSRF_HEADER)
       .set("X-Development-Requester-Id", String(requester2Id))
       .send({ removalReason: "Unauthorized removal attempt" });
     expect(removeRes.status).toBe(403);
