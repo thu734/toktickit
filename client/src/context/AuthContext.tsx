@@ -31,11 +31,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(u);
         return u;
       }
-      setUser(defaultDevRequester);
-      return defaultDevRequester;
+      setUser(null);
+      return null;
     } catch {
-      setUser(defaultDevRequester);
-      return defaultDevRequester;
+      setUser(null);
+      return null;
     } finally {
       setLoading(false);
     }
