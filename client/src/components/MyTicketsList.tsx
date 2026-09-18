@@ -127,7 +127,7 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
       setLoading(false);
     }
   }, [
-    activeRequester,
+    activeRequester?.id,
     appliedSearch,
     categoryId,
     requestedPriority,

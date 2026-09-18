@@ -12,18 +12,20 @@ type TabView = "create-ticket" | "my-tickets" | "ticket-detail" | "ticket-queue"
 
 function MainContent() {
   const { user, loading, refreshUser } = useAuth();
-  const { setActiveRequester } = useRequester();
+  const { activeRequester, setActiveRequester } = useRequester();
   const [activeTab, setActiveTab] = useState<TabView>("my-tickets");
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
 
   useEffect(() => {
     if (user) {
-      setActiveRequester({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        department: "General",
-      });
+      if (activeRequester?.id !== user.id) {
+        setActiveRequester({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          department: "General",
+        });
+      }
 
       if (user.role === "IT_STAFF") {
         setActiveTab("ticket-queue");
@@ -33,7 +35,7 @@ function MainContent() {
         setActiveTab("my-tickets");
       }
     }
-  }, [user, setActiveRequester]);
+  }, [user, activeRequester?.id, setActiveRequester]);
 
   if (loading) {
     return (
