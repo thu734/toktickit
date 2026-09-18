@@ -1,10 +1,36 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
 import { app } from "../../src/app.js";
+import { getPrisma } from "../../src/prisma.js";
+import bcrypt from "bcryptjs";
 
 const CSRF_HEADER = { "X-Requested-With": "XMLHttpRequest" };
 
 describe("Lab 3 Authentication & Session API Tests (AUTH-API-01 to AUTH-API-08)", () => {
+  beforeEach(async () => {
+    const prisma = getPrisma();
+    const initialPasswordHash = await bcrypt.hash("Initial123!", 10);
+    await prisma.user.updateMany({
+      where: {
+        email: {
+          in: [
+            "jennifer.a@toktickit.local",
+            "michael.b@toktickit.local",
+            "sarah.j@toktickit.local",
+            "david.l@toktickit.local",
+            "alex.t@toktickit.local",
+            "admin@toktickit.local",
+          ],
+        },
+      },
+      data: {
+        passwordHash: initialPasswordHash,
+        mustChangePassword: true,
+        isActive: true,
+      },
+    });
+  });
+
   it("AUTH-API-01: Valid login sets session cookie and returns user profile", async () => {
     const res = await request(app)
       .post("/api/auth/login")
