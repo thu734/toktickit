@@ -377,4 +377,75 @@ export async function fetchCurrentUser(): Promise<User | null> {
   }
 }
 
+export interface Comment {
+  id: number;
+  content: string;
+  ticketId: number;
+  createdAt: string;
+  author: {
+    id: number;
+    name: string;
+    email: string;
+    role: "REQUESTER" | "IT_STAFF" | "ADMINISTRATOR";
+  };
+}
+
+export async function fetchTicketComments(ticketId: number): Promise<Comment[]> {
+  const res = await fetch(`${API_URL}/api/tickets/${ticketId}/comments`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to fetch ticket comments");
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  return data;
+}
+
+export async function postTicketComment(ticketId: number, content: string): Promise<Comment> {
+  const res = await fetch(`${API_URL}/api/tickets/${ticketId}/comments`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "include",
+    body: JSON.stringify({ content }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to post public comment");
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  return data;
+}
+
+export async function indicateTicketResolved(ticketId: number, comment: string): Promise<{ message: string; comment: Comment }> {
+  const res = await fetch(`${API_URL}/api/tickets/${ticketId}/indicate-resolved`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "include",
+    body: JSON.stringify({ comment }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to submit resolution indication");
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  return data;
+}
+
 
