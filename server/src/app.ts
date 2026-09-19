@@ -555,10 +555,10 @@ app.get("/api/attachments/:id/download", requireAuth, async (req: Request, res: 
       });
     }
 
-    if (attachment.ticket.requesterId !== requesterId) {
-      return res.status(403).json({
-        error: "Forbidden",
-        message: "You do not have permission to download this attachment.",
+    if (req.session?.role === "REQUESTER" && attachment.ticket.requesterId !== requesterId) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Attachment not found.",
       });
     }
 
