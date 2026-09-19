@@ -757,7 +757,7 @@ app.post("/api/tickets/:id/comments", requireAuth, async (req: Request, res: Res
       data: {
         ticketId,
         content,
-        authorId: req.session!.userId,
+        authorId: req.session!.userId as number,
       },
       include: {
         author: {
@@ -1310,7 +1310,7 @@ app.post("/api/staff/tickets/:id/notes", requireRole("IT_STAFF", "ADMINISTRATOR"
       data: {
         ticketId,
         content,
-        authorId: req.session!.userId,
+        authorId: req.session!.userId as number,
       },
       include: {
         author: {
