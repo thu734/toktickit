@@ -127,7 +127,7 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
       setLoading(false);
     }
   }, [
-    activeRequester,
+    activeRequester?.id,
     appliedSearch,
     categoryId,
     requestedPriority,
@@ -184,9 +184,9 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
     requestedPriority !== "ALL" ||
     currentStatus !== "ALL";
 
-  const totalItems = ticketsData?.pagination.totalItems ?? 0;
+  const totalItems = ticketsData?.pagination?.totalItems ?? 0;
 
-  const totalPages = ticketsData?.pagination.totalPages ?? 0;
+  const totalPages = ticketsData?.pagination?.totalPages ?? 0;
 
   const items = ticketsData?.items ?? [];
 

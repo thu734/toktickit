@@ -1,8 +1,9 @@
 import { Router, Request, Response } from "express";
 import { getPrisma } from "../prisma.js";
-import { comparePassword } from "../utils/password.js";
+import { comparePassword, hashPassword, validatePasswordComplexity } from "../utils/password.js";
 
 export const authRouter = Router();
+
 
 /**
  * POST /api/auth/login
@@ -119,3 +120,71 @@ authRouter.get("/me", async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: "Internal server error." });
   }
 });
+
+/**
+ * POST /api/auth/change-password
+ * Change current user's password (used for initial password change BR-02 or voluntary change).
+ */
+authRouter.post("/change-password", async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.session?.userId;
+    if (!userId) {
+      res.status(401).json({ error: "Unauthenticated" });
+      return;
+    }
+
+    const { currentPassword, newPassword, confirmPassword } = req.body || {};
+
+    if (!currentPassword || typeof currentPassword !== "string") {
+      res.status(400).json({ error: "Current password is required.", code: "INVALID_CURRENT_PASSWORD" });
+      return;
+    }
+
+    if (!newPassword || typeof newPassword !== "string") {
+      res.status(400).json({ error: "New password is required.", code: "INVALID_NEW_PASSWORD" });
+      return;
+    }
+
+    if (confirmPassword !== newPassword) {
+      res.status(400).json({ error: "New password and confirm password do not match.", code: "PASSWORD_MISMATCH" });
+      return;
+    }
+
+    const complexity = validatePasswordComplexity(newPassword);
+    if (!complexity.isValid) {
+      res.status(400).json({ error: complexity.message, code: "WEAK_PASSWORD" });
+      return;
+    }
+
+    const prisma = getPrisma();
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.isActive) {
+      res.status(401).json({ error: "Unauthenticated" });
+      return;
+    }
+
+    const isCurrentValid = await comparePassword(currentPassword, user.passwordHash);
+    if (!isCurrentValid) {
+      res.status(400).json({ error: "Current password is incorrect.", code: "INVALID_CURRENT_PASSWORD" });
+      return;
+    }
+
+    const newHash = await hashPassword(newPassword);
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash: newHash,
+        mustChangePassword: false,
+      },
+    });
+
+    res.status(200).json({ message: "Password changed successfully", mustChangePassword: false });
+  } catch (error) {
+    console.error("Change password error:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
