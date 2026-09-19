@@ -407,10 +407,10 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
           </div>
 
           {/* Pagination Controls */}
-          {ticketsData.pagination.totalPages > 1 && (
-            <div className="d-flex justify-content-between align-items-center mt-3">
+          {ticketsData.pagination.totalItems > 0 && (
+            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
               <span className="small text-muted">
-                Showing page {ticketsData.pagination.page} of {ticketsData.pagination.totalPages} ({ticketsData.pagination.totalItems} total tickets)
+                Showing page <strong>{ticketsData.pagination.page}</strong> of <strong>{ticketsData.pagination.totalPages}</strong> ({ticketsData.pagination.totalItems} total tickets)
               </span>
               <div className="btn-group">
                 <button
