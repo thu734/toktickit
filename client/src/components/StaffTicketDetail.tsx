@@ -468,9 +468,6 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                       ))}
                     </ul>
                   )}
-                  <p className="text-muted extra-small mt-3 mb-0">
-                    * IT Staff attachment permissions permit downloading active files and viewing soft-removed history. Upload and removal are restricted to ticket owners.
-                  </p>
                 </div>
               )}
             </div>
@@ -576,7 +573,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                       <option value={ticket.currentStatus}>{ticket.currentStatus.replace(/_/g, " ")} (Current)</option>
                       {allowedNextStatuses.map((st) => (
                         <option key={st} value={st}>
-                          ➔ Transition to {st.replace(/_/g, " ")}
+                          {st.replace(/_/g, " ")}
                         </option>
                       ))}
                     </select>
@@ -595,16 +592,14 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                       </div>
                     )}
 
-                    {isStaff && (
+                    {isStaff && (selectedStatus !== ticket.currentStatus || statusUpdating) && (
                       <button
                         type="submit"
                         className="btn btn-sm btn-zen-primary w-100 mt-2"
-                        disabled={statusUpdating || selectedStatus === ticket.currentStatus}
+                        disabled={statusUpdating}
                       >
                         {statusUpdating
                           ? "Updating Status..."
-                          : selectedStatus === ticket.currentStatus
-                          ? "Select a Target Status Above"
                           : `Save Transition to ${selectedStatus.replace(/_/g, " ")}`}
                       </button>
                     )}
