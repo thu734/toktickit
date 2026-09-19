@@ -50,56 +50,29 @@ app.use("/api/auth", authRouter);
 app.use(mustChangePasswordLock);
 
 
-// Helper function to extract and validate Requester identity from session or header
+// Helper function to extract and validate Requester identity strictly from authenticated session (BR-03, FR-08)
 async function getValidatedRequester(req: Request, res: Response): Promise<number | null> {
-  // Session-authenticated user (Lab 3)
-  if (req.session?.userId) {
-    const user = await getPrisma().user.findUnique({ where: { id: req.session.userId } });
-    if (user && user.isActive) {
-      return user.id;
-    }
-  }
-
-  // Fallback header identity for testing / backward compatibility
-  const requesterHeader = req.headers["x-development-requester-id"];
-  if (!requesterHeader || typeof requesterHeader !== "string") {
-    res.status(400).json({
-      error: "Bad Request",
-      message: "X-Development-Requester-Id header or active session is required.",
+  if (!req.session?.userId) {
+    res.status(401).json({
+      error: "Authentication required. Please log in.",
+      code: "UNAUTHENTICATED",
     });
     return null;
   }
 
-  const requesterId = parseInt(requesterHeader, 10);
-  if (isNaN(requesterId)) {
-    res.status(400).json({
-      error: "Bad Request",
-      message: "Invalid X-Development-Requester-Id header format.",
-    });
-    return null;
-  }
-
-  const requester = await getPrisma().user.findUnique({
-    where: { id: requesterId },
+  const user = await getPrisma().user.findUnique({
+    where: { id: req.session.userId },
   });
 
-  if (!requester) {
-    res.status(404).json({
-      error: "Not Found",
-      message: "Development Requester does not exist.",
+  if (!user || !user.isActive) {
+    res.status(401).json({
+      error: "User session is invalid or inactive.",
+      code: "UNAUTHENTICATED",
     });
     return null;
   }
 
-  if (!requester.isActive) {
-    res.status(403).json({
-      error: "Forbidden",
-      message: "Inactive Development Requesters cannot access tickets.",
-    });
-    return null;
-  }
-
-  return requesterId;
+  return user.id;
 }
 
 // GET /api/health
@@ -582,10 +555,10 @@ app.get("/api/attachments/:id/download", requireAuth, async (req: Request, res: 
       });
     }
 
-    if (attachment.ticket.requesterId !== requesterId) {
-      return res.status(403).json({
-        error: "Forbidden",
-        message: "You do not have permission to download this attachment.",
+    if (req.session?.role === "REQUESTER" && attachment.ticket.requesterId !== requesterId) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Attachment not found.",
       });
     }
 
@@ -679,6 +652,195 @@ app.post("/api/attachments/:id/soft-remove", requireRole("REQUESTER"), async (re
     return res.status(500).json({
       error: "Internal Server Error",
       message: "An error occurred while removing the attachment.",
+    });
+  }
+});
+
+// GET /api/tickets/:id/comments (Public Comments Feed - requireAuth)
+app.get("/api/tickets/:id/comments", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid ticket ID format.",
+      });
+    }
+
+    const ticket = await getPrisma().ticket.findUnique({
+      where: { id: ticketId },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    // Requester must own ticket; return 404 to prevent resource existence probing (BR-16)
+    if (req.session?.role === "REQUESTER" && ticket.requesterId !== req.session.userId) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    const comments = await getPrisma().comment.findMany({
+      where: { ticketId },
+      orderBy: { createdAt: "asc" },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    return res.status(200).json(comments);
+  } catch (error) {
+    console.error("Error fetching ticket comments:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while fetching ticket comments.",
+    });
+  }
+});
+
+// POST /api/tickets/:id/comments (Post Public Comment - requireAuth)
+app.post("/api/tickets/:id/comments", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid ticket ID format.",
+      });
+    }
+
+    let { content } = req.body || {};
+    content = typeof content === "string" ? content.trim() : "";
+
+    if (!content || content.length < 3 || content.length > 1000) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Public comment content is required and must be between 3 and 1000 characters.",
+      });
+    }
+
+    const ticket = await getPrisma().ticket.findUnique({
+      where: { id: ticketId },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    // Requester must own ticket; return 404 to prevent existence probing (BR-16)
+    if (req.session?.role === "REQUESTER" && ticket.requesterId !== req.session.userId) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    // Backend-generated authorship and timestamp (BR-21)
+    const newComment = await getPrisma().comment.create({
+      data: {
+        ticketId,
+        content,
+        authorId: req.session!.userId,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    return res.status(201).json(newComment);
+  } catch (error) {
+    console.error("Error posting public comment:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while posting public comment.",
+    });
+  }
+});
+
+// POST /api/tickets/:id/indicate-resolved (Indicate Problem Appears Resolved - requireRole("REQUESTER"))
+app.post("/api/tickets/:id/indicate-resolved", requireRole("REQUESTER"), async (req: Request, res: Response) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid ticket ID format.",
+      });
+    }
+
+    let { comment } = req.body || {};
+    comment = typeof comment === "string" ? comment.trim() : "";
+
+    if (!comment || comment.length < 3 || comment.length > 1000) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Resolution comment is required and must be between 3 and 1000 characters.",
+      });
+    }
+
+    const ticket = await getPrisma().ticket.findUnique({
+      where: { id: ticketId },
+    });
+
+    if (!ticket || ticket.requesterId !== req.session!.userId) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    // Appends public resolution comment without directly changing status (BR-05)
+    const newComment = await getPrisma().comment.create({
+      data: {
+        ticketId,
+        content: comment,
+        authorId: req.session!.userId,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    // Exact HTTP 200 OK status code per api-spec.md Section 5.3
+    return res.status(200).json({
+      message: "Resolution indication recorded successfully",
+      comment: newComment,
+    });
+  } catch (error) {
+    console.error("Error submitting resolution indication:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while submitting resolution indication.",
     });
   }
 });

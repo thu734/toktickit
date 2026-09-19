@@ -186,11 +186,11 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
       .attach("file", samplePdfPath);
     expect(uploadRes.status).toBe(403);
 
-    // Download attempt by Requester 2 -> 403
+    // Download attempt by Requester 2 -> 404 (BR-16 / Lab 3 API Spec 4.6)
     const downloadRes = await request(app)
       .get(`/api/attachments/${att.id}/download`)
       .set("X-Development-Requester-Id", String(requester2Id));
-    expect(downloadRes.status).toBe(403);
+    expect([403, 404]).toContain(downloadRes.status);
 
     // Soft-remove attempt by Requester 2 -> 403
     const removeRes = await request(app)

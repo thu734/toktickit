@@ -104,7 +104,9 @@ export async function checkSystem(): Promise<SystemStatus> {
 }
 
 export async function fetchCategories(): Promise<Category[]> {
-  const res = await fetch(`${API_URL}/api/categories`);
+  const res = await fetch(`${API_URL}/api/categories`, {
+    credentials: "include",
+  });
   if (!res.ok) {
     throw new Error("Failed to fetch categories");
   }
@@ -112,7 +114,9 @@ export async function fetchCategories(): Promise<Category[]> {
 }
 
 export async function fetchRequesters(): Promise<DevelopmentRequester[]> {
-  const res = await fetch(`${API_URL}/api/requesters`);
+  const res = await fetch(`${API_URL}/api/requesters`, {
+    credentials: "include",
+  });
   if (!res.ok) {
     throw new Error("Failed to fetch development requesters");
   }
@@ -120,7 +124,9 @@ export async function fetchRequesters(): Promise<DevelopmentRequester[]> {
 }
 
 export async function fetchRelatedSystems(): Promise<RelatedSystem[]> {
-  const res = await fetch(`${API_URL}/api/related-systems`);
+  const res = await fetch(`${API_URL}/api/related-systems`, {
+    credentials: "include",
+  });
   if (!res.ok) {
     throw new Error("Failed to fetch related systems");
   }
@@ -129,14 +135,15 @@ export async function fetchRelatedSystems(): Promise<RelatedSystem[]> {
 
 export async function createTicket(
   payload: CreateTicketPayload,
-  requesterId: number
+  _requesterId?: number
 ): Promise<Ticket> {
   const res = await fetch(`${API_URL}/api/tickets`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Development-Requester-Id": String(requesterId),
+      "X-Requested-With": "XMLHttpRequest",
     },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
 
@@ -154,7 +161,7 @@ export async function createTicket(
 
 export async function fetchTickets(
   params: FetchTicketsParams,
-  requesterId: number
+  _requesterId?: number
 ): Promise<PaginatedTicketsResponse> {
   const query = new URLSearchParams();
 
@@ -169,9 +176,7 @@ export async function fetchTickets(
 
   const res = await fetch(`${API_URL}/api/tickets?${query.toString()}`, {
     method: "GET",
-    headers: {
-      "X-Development-Requester-Id": String(requesterId),
-    },
+    credentials: "include",
   });
 
   if (!res.ok) {
@@ -186,13 +191,11 @@ export async function fetchTickets(
 
 export async function fetchTicketDetail(
   ticketId: number,
-  requesterId: number
+  _requesterId?: number
 ): Promise<TicketDetail> {
   const res = await fetch(`${API_URL}/api/tickets/${ticketId}`, {
     method: "GET",
-    headers: {
-      "X-Development-Requester-Id": String(requesterId),
-    },
+    credentials: "include",
   });
 
   const data = await res.json();
@@ -208,7 +211,7 @@ export async function fetchTicketDetail(
 export async function uploadAttachment(
   ticketId: number,
   file: File,
-  requesterId: number
+  _requesterId?: number
 ): Promise<Attachment> {
   const formData = new FormData();
   formData.append("file", file);
@@ -216,8 +219,9 @@ export async function uploadAttachment(
   const res = await fetch(`${API_URL}/api/tickets/${ticketId}/attachments`, {
     method: "POST",
     headers: {
-      "X-Development-Requester-Id": String(requesterId),
+      "X-Requested-With": "XMLHttpRequest",
     },
+    credentials: "include",
     body: formData,
   });
 
@@ -234,13 +238,11 @@ export async function uploadAttachment(
 export async function downloadAttachment(
   attachmentId: number,
   filename: string,
-  requesterId: number
+  _requesterId?: number
 ): Promise<void> {
   const res = await fetch(`${API_URL}/api/attachments/${attachmentId}/download`, {
     method: "GET",
-    headers: {
-      "X-Development-Requester-Id": String(requesterId),
-    },
+    credentials: "include",
   });
 
   if (!res.ok) {
@@ -268,14 +270,15 @@ export async function downloadAttachment(
 export async function softRemoveAttachment(
   attachmentId: number,
   removalReason: string,
-  requesterId: number
+  _requesterId?: number
 ): Promise<Attachment> {
   const res = await fetch(`${API_URL}/api/attachments/${attachmentId}/soft-remove`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Development-Requester-Id": String(requesterId),
+      "X-Requested-With": "XMLHttpRequest",
     },
+    credentials: "include",
     body: JSON.stringify({ removalReason }),
   });
 
@@ -375,6 +378,77 @@ export async function fetchCurrentUser(): Promise<User | null> {
   } catch {
     return null;
   }
+}
+
+export interface Comment {
+  id: number;
+  content: string;
+  ticketId: number;
+  createdAt: string;
+  author: {
+    id: number;
+    name: string;
+    email: string;
+    role: "REQUESTER" | "IT_STAFF" | "ADMINISTRATOR";
+  };
+}
+
+export async function fetchTicketComments(ticketId: number): Promise<Comment[]> {
+  const res = await fetch(`${API_URL}/api/tickets/${ticketId}/comments`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to fetch ticket comments");
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  return data;
+}
+
+export async function postTicketComment(ticketId: number, content: string): Promise<Comment> {
+  const res = await fetch(`${API_URL}/api/tickets/${ticketId}/comments`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "include",
+    body: JSON.stringify({ content }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to post public comment");
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  return data;
+}
+
+export async function indicateTicketResolved(ticketId: number, comment: string): Promise<{ message: string; comment: Comment }> {
+  const res = await fetch(`${API_URL}/api/tickets/${ticketId}/indicate-resolved`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "include",
+    body: JSON.stringify({ comment }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to submit resolution indication");
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  return data;
 }
 
 
