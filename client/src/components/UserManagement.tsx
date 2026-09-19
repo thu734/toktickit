@@ -302,7 +302,6 @@ export const UserManagement: React.FC = () => {
               <table className="table table-hover align-middle mb-0">
                 <thead style={{ backgroundColor: "#F8FAFC" }}>
                   <tr>
-                    <th className="small fw-bold text-muted">ID</th>
                     <th className="small fw-bold text-muted">Name</th>
                     <th className="small fw-bold text-muted">Email</th>
                     <th className="small fw-bold text-muted">Role</th>
@@ -313,7 +312,6 @@ export const UserManagement: React.FC = () => {
                 <tbody>
                   {users.map((u) => (
                     <tr key={u.id}>
-                      <td className="small text-muted font-monospace">{u.id}</td>
                       <td className="fw-bold small text-dark">{u.name}</td>
                       <td className="small text-muted">{u.email}</td>
                       <td>{renderRoleBadge(u.role)}</td>
