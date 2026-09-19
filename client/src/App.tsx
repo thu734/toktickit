@@ -9,6 +9,7 @@ import { MyTicketsList } from "./components/MyTicketsList.js";
 import { RequesterTicketDetail } from "./components/RequesterTicketDetail.js";
 import { StaffTicketQueue } from "./components/StaffTicketQueue.js";
 import { StaffTicketDetail } from "./components/StaffTicketDetail.js";
+import { UserManagement } from "./components/UserManagement.js";
 
 type TabView = "create-ticket" | "my-tickets" | "ticket-detail" | "ticket-queue" | "staff-ticket-detail" | "user-management";
 
@@ -113,15 +114,7 @@ function MainContent() {
         )}
 
         {user.role === "ADMINISTRATOR" && activeTab === "user-management" && (
-          <div className="container py-5 text-center">
-            <div className="card shadow-sm border-0 p-5 mx-auto" style={{ maxWidth: 600 }}>
-              <div className="fs-1 mb-3">👥</div>
-              <h3 className="fw-bold text-dark">Administrator User Management</h3>
-              <p className="text-muted mb-0">
-                Administrator user management, account creation, and password reset operations are scheduled for <strong>Issue #16</strong>.
-              </p>
-            </div>
-          </div>
+          <UserManagement />
         )}
       </div>
     </AppShell>
