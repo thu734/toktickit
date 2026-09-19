@@ -1356,4 +1356,333 @@ app.post("/api/staff/tickets/:id/notes", requireRole("IT_STAFF", "ADMINISTRATOR"
   }
 });
 
+// ==========================================
+// 7. ADMINISTRATOR USER MANAGEMENT ENDPOINTS
+// ==========================================
+
+// 7.1 GET /api/admin/users (List users with search & role filter)
+app.get("/api/admin/users", requireRole("ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    const { search, role } = req.query;
+
+    const whereClause: Prisma.UserWhereInput = {};
+
+    if (role && typeof role === "string" && ["REQUESTER", "IT_STAFF", "ADMINISTRATOR"].includes(role.toUpperCase())) {
+      whereClause.role = role.toUpperCase() as any;
+    }
+
+    if (search && typeof search === "string" && search.trim() !== "") {
+      const trimmedSearch = search.trim();
+      whereClause.OR = [
+        { name: { contains: trimmedSearch, mode: "insensitive" } },
+        { email: { contains: trimmedSearch, mode: "insensitive" } },
+      ];
+    }
+
+    const users = await getPrisma().user.findMany({
+      where: whereClause,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        mustChangePassword: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { id: "asc" },
+    });
+
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching admin users:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while fetching user accounts.",
+    });
+  }
+});
+
+// 7.2 POST /api/admin/users (Create new user account)
+app.post("/api/admin/users", requireRole("ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    let { name, email, role, isActive, initialPassword } = req.body || {};
+
+    name = typeof name === "string" ? name.trim() : "";
+    email = typeof email === "string" ? email.trim() : "";
+    role = typeof role === "string" ? role.toUpperCase() : "";
+    initialPassword = typeof initialPassword === "string" ? initialPassword : "";
+    const active = typeof isActive === "boolean" ? isActive : true;
+
+    if (!name || !email || !role || !initialPassword) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Name, email, role, and initialPassword are required.",
+      });
+    }
+
+    if (!["REQUESTER", "IT_STAFF", "ADMINISTRATOR"].includes(role)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid role specified. Must be REQUESTER, IT_STAFF, or ADMINISTRATOR.",
+      });
+    }
+
+    // Password complexity check
+    const pwdValidation = (await import("./utils/password.js")).validatePasswordComplexity(initialPassword);
+    if (!pwdValidation.isValid) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: pwdValidation.message || "Initial password fails complexity requirements.",
+      });
+    }
+
+    // Unique case-insensitive email check (BR-07)
+    const existingUser = await getPrisma().user.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        error: "Conflict",
+        code: "EMAIL_ALREADY_EXISTS",
+        message: "A user account with this email address already exists.",
+      });
+    }
+
+    const { hashPassword } = await import("./utils/password.js");
+    const passwordHash = await hashPassword(initialPassword);
+
+    const newUser = await getPrisma().user.create({
+      data: {
+        name,
+        email,
+        role: role as any,
+        passwordHash,
+        mustChangePassword: true,
+        isActive: active,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        mustChangePassword: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return res.status(201).json(newUser);
+  } catch (error) {
+    console.error("Error creating user account:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while creating user account.",
+    });
+  }
+});
+
+// 7.3 PATCH /api/admin/users/:id (Edit user account)
+app.patch("/api/admin/users/:id", requireRole("ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid user ID format.",
+      });
+    }
+
+    const targetUser = await getPrisma().user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "User account not found.",
+      });
+    }
+
+    let { name, email, role, isActive } = req.body || {};
+
+    const updateData: Prisma.UserUpdateInput = {};
+
+    if (name !== undefined) {
+      if (typeof name !== "string" || name.trim() === "") {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Name cannot be empty.",
+        });
+      }
+      updateData.name = name.trim();
+    }
+
+    if (email !== undefined) {
+      if (typeof email !== "string" || email.trim() === "") {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Email cannot be empty.",
+        });
+      }
+      const trimmedEmail = email.trim();
+      if (trimmedEmail.toLowerCase() !== targetUser.email.toLowerCase()) {
+        const existingEmailUser = await getPrisma().user.findFirst({
+          where: {
+            email: { equals: trimmedEmail, mode: "insensitive" },
+            id: { not: userId },
+          },
+        });
+        if (existingEmailUser) {
+          return res.status(409).json({
+            error: "Conflict",
+            code: "EMAIL_ALREADY_EXISTS",
+            message: "A user account with this email address already exists.",
+          });
+        }
+      }
+      updateData.email = trimmedEmail;
+    }
+
+    if (role !== undefined) {
+      if (typeof role !== "string" || !["REQUESTER", "IT_STAFF", "ADMINISTRATOR"].includes(role.toUpperCase())) {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Invalid role specified.",
+        });
+      }
+      updateData.role = role.toUpperCase() as any;
+    }
+
+    if (isActive !== undefined) {
+      if (typeof isActive !== "boolean") {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "isActive must be a boolean.",
+        });
+      }
+      updateData.isActive = isActive;
+    }
+
+    // Safety Rule 1: Self-deactivation prevention (BR-09)
+    if (req.session?.userId === userId && isActive === false) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You cannot deactivate your own account.",
+      });
+    }
+
+    // Safety Rule 2: Last Active Administrator protection (BR-10)
+    const targetIsActiveAdmin = targetUser.role === "ADMINISTRATOR" && targetUser.isActive === true;
+    const updateRemovesActiveAdmin =
+      isActive === false || (role !== undefined && role.toUpperCase() !== "ADMINISTRATOR");
+
+    if (targetIsActiveAdmin && updateRemovesActiveAdmin) {
+      const activeAdminCount = await getPrisma().user.count({
+        where: {
+          role: "ADMINISTRATOR",
+          isActive: true,
+        },
+      });
+
+      if (activeAdminCount <= 1) {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Cannot deactivate the only active Administrator account.",
+        });
+      }
+    }
+
+    const updatedUser = await getPrisma().user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        mustChangePassword: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user account:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while updating user account.",
+    });
+  }
+});
+
+// 7.4 POST /api/admin/users/:id/reset-password (Reset initial password)
+app.post("/api/admin/users/:id/reset-password", requireRole("ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid user ID format.",
+      });
+    }
+
+    const targetUser = await getPrisma().user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "User account not found.",
+      });
+    }
+
+    let { initialPassword } = req.body || {};
+    initialPassword = typeof initialPassword === "string" ? initialPassword : "";
+
+    const pwdValidation = (await import("./utils/password.js")).validatePasswordComplexity(initialPassword);
+    if (!pwdValidation.isValid) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: pwdValidation.message || "Initial password fails complexity requirements.",
+      });
+    }
+
+    const { hashPassword } = await import("./utils/password.js");
+    const passwordHash = await hashPassword(initialPassword);
+
+    const updatedUser = await getPrisma().user.update({
+      where: { id: userId },
+      data: {
+        passwordHash,
+        mustChangePassword: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        mustChangePassword: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error resetting user password:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while resetting user password.",
+    });
+  }
+});
+
 export default app;
