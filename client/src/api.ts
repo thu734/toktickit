@@ -451,4 +451,203 @@ export async function indicateTicketResolved(ticketId: number, comment: string):
   return data;
 }
 
+export interface StaffUser {
+  id: number;
+  name: string;
+  email: string;
+  role: "IT_STAFF" | "ADMINISTRATOR";
+}
+
+export async function fetchStaffUsers(): Promise<StaffUser[]> {
+  const res = await fetch(`${API_URL}/api/staff/users`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    return [];
+  }
+
+  return data;
+}
+
+export interface InternalNote {
+  id: number;
+  content: string;
+  ticketId: number;
+  createdAt: string;
+  author: {
+    id: number;
+    name: string;
+    email: string;
+    role: "REQUESTER" | "IT_STAFF" | "ADMINISTRATOR";
+  };
+}
+
+export interface FetchStaffTicketsParams {
+  search?: string;
+  categoryId?: string;
+  itPriority?: string;
+  currentStatus?: string;
+  assignedStaffId?: string;
+  sortBy?: string;
+  sortOrder?: string;
+  page?: number;
+  limit?: number;
+}
+
+export async function fetchStaffTickets(params: FetchStaffTicketsParams = {}): Promise<PaginatedTicketsResponse> {
+  const query = new URLSearchParams();
+  if (params.search) query.append("search", params.search);
+  if (params.categoryId) query.append("categoryId", params.categoryId);
+  if (params.itPriority) query.append("itPriority", params.itPriority);
+  if (params.currentStatus) query.append("currentStatus", params.currentStatus);
+  if (params.assignedStaffId) query.append("assignedStaffId", params.assignedStaffId);
+  if (params.sortBy) query.append("sortBy", params.sortBy);
+  if (params.sortOrder) query.append("sortOrder", params.sortOrder);
+  if (params.page) query.append("page", String(params.page));
+  if (params.limit) query.append("limit", String(params.limit));
+
+  const res = await fetch(`${API_URL}/api/staff/tickets?${query.toString()}`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to fetch staff ticket queue");
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  // Normalize structure for client table
+  return {
+    items: data.data || [],
+    pagination: data.pagination || { page: 1, limit: 10, totalItems: 0, totalPages: 1 },
+  };
+}
+
+export async function fetchStaffTicketDetail(ticketId: number): Promise<any> {
+  const res = await fetch(`${API_URL}/api/staff/tickets/${ticketId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to fetch staff ticket detail");
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  return data;
+}
+
+export async function assignStaffTicket(ticketId: number, assignedStaffId: number | null): Promise<any> {
+  const res = await fetch(`${API_URL}/api/staff/tickets/${ticketId}/assign`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "include",
+    body: JSON.stringify({ assignedStaffId }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to assign ticket");
+    (errorObj as any).status = res.status;
+    (errorObj as any).code = data.code;
+    throw errorObj;
+  }
+
+  return data;
+}
+
+export async function updateStaffTicketPriority(ticketId: number, itPriority: string): Promise<any> {
+  const res = await fetch(`${API_URL}/api/staff/tickets/${ticketId}/priority`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "include",
+    body: JSON.stringify({ itPriority }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to update IT priority");
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  return data;
+}
+
+export async function updateStaffTicketStatus(
+  ticketId: number,
+  status: string,
+  resolutionSummary?: string
+): Promise<any> {
+  const res = await fetch(`${API_URL}/api/staff/tickets/${ticketId}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "include",
+    body: JSON.stringify({ status, resolutionSummary }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to update ticket status");
+    (errorObj as any).status = res.status;
+    (errorObj as any).code = data.code;
+    throw errorObj;
+  }
+
+  return data;
+}
+
+export async function fetchInternalNotes(ticketId: number): Promise<InternalNote[]> {
+  const res = await fetch(`${API_URL}/api/staff/tickets/${ticketId}/notes`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to fetch internal notes");
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  return data;
+}
+
+export async function postInternalNote(ticketId: number, content: string): Promise<InternalNote> {
+  const res = await fetch(`${API_URL}/api/staff/tickets/${ticketId}/notes`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "include",
+    body: JSON.stringify({ content }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorObj = new Error(data.message || "Failed to post internal note");
+    (errorObj as any).status = res.status;
+    throw errorObj;
+  }
+
+  return data;
+}
+
 

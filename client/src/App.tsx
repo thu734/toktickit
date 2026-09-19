@@ -7,8 +7,10 @@ import { ChangePassword } from "./components/ChangePassword.js";
 import { CreateTicketForm } from "./components/CreateTicketForm.js";
 import { MyTicketsList } from "./components/MyTicketsList.js";
 import { RequesterTicketDetail } from "./components/RequesterTicketDetail.js";
+import { StaffTicketQueue } from "./components/StaffTicketQueue.js";
+import { StaffTicketDetail } from "./components/StaffTicketDetail.js";
 
-type TabView = "create-ticket" | "my-tickets" | "ticket-detail" | "ticket-queue" | "user-management";
+type TabView = "create-ticket" | "my-tickets" | "ticket-detail" | "ticket-queue" | "staff-ticket-detail" | "user-management";
 
 function MainContent() {
   const { user, loading, refreshUser } = useAuth();
@@ -58,9 +60,14 @@ function MainContent() {
     return <ChangePassword onSuccess={() => refreshUser()} />;
   }
 
-  const handleOpenTicket = (ticketId: number) => {
+  const handleOpenRequesterTicket = (ticketId: number) => {
     setSelectedTicketId(ticketId);
     setActiveTab("ticket-detail");
+  };
+
+  const handleOpenStaffTicket = (ticketId: number) => {
+    setSelectedTicketId(ticketId);
+    setActiveTab("staff-ticket-detail");
   };
 
   return (
@@ -69,13 +76,13 @@ function MainContent() {
         {user.role === "REQUESTER" && (
           <>
             {activeTab === "create-ticket" && (
-              <CreateTicketForm onViewTicketDetail={handleOpenTicket} />
+              <CreateTicketForm onViewTicketDetail={handleOpenRequesterTicket} />
             )}
 
             {activeTab === "my-tickets" && (
               <MyTicketsList
                 onNavigateCreate={() => setActiveTab("create-ticket")}
-                onOpenTicket={handleOpenTicket}
+                onOpenTicket={handleOpenRequesterTicket}
               />
             )}
 
@@ -88,19 +95,24 @@ function MainContent() {
           </>
         )}
 
-        {user.role === "IT_STAFF" && (
-          <div className="container py-5 text-center">
-            <div className="card shadow-sm border-0 p-5 mx-auto" style={{ maxWidth: 600 }}>
-              <div className="fs-1 mb-3">📥</div>
-              <h3 className="fw-bold text-dark">IT Staff Ticket Queue</h3>
-              <p className="text-muted mb-0">
-                IT Staff ticket operations, queue filtering, ticket claiming, and internal notes are scheduled for <strong>Issue #15</strong>.
-              </p>
-            </div>
-          </div>
+        {(user.role === "IT_STAFF" || user.role === "ADMINISTRATOR") && (
+          <>
+            {activeTab === "ticket-queue" && (
+              <StaffTicketQueue onOpenTicket={handleOpenStaffTicket} />
+            )}
+
+            {activeTab === "staff-ticket-detail" && selectedTicketId !== null && (
+              <StaffTicketDetail
+                ticketId={selectedTicketId}
+                currentUserRole={user.role}
+                currentUserId={user.id}
+                onBack={() => setActiveTab("ticket-queue")}
+              />
+            )}
+          </>
         )}
 
-        {user.role === "ADMINISTRATOR" && (
+        {user.role === "ADMINISTRATOR" && activeTab === "user-management" && (
           <div className="container py-5 text-center">
             <div className="card shadow-sm border-0 p-5 mx-auto" style={{ maxWidth: 600 }}>
               <div className="fs-1 mb-3">👥</div>

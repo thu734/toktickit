@@ -213,6 +213,12 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
             MEDIUM
           </span>
         );
+      case "UNASSIGNED":
+        return (
+          <span className="badge rounded-pill" style={{ ...commonStyle, backgroundColor: "#F1F5F9", color: "#475569", border: "1px solid #CBD5E1" }}>
+            UNASSIGNED
+          </span>
+        );
       default:
         return (
           <span className="badge rounded-pill" style={{ ...commonStyle, backgroundColor: "#EAF6EF", color: "#006B3C", border: "1px solid #C6E7D2" }}>
@@ -341,7 +347,7 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
             </div>
 
             <div className="col-12 col-sm-6 col-md-3">
-              <div className="small text-muted fw-semibold mb-1">IT Priority (Read-Only)</div>
+              <div className="small text-muted fw-semibold mb-1">IT Priority</div>
               <div>{renderPriorityBadge(ticket.itPriority)}</div>
             </div>
 

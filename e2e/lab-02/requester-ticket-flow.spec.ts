@@ -51,7 +51,7 @@ test.describe("Lab 2 E2E Tests — Requester Ticket & Attachment Lifecycle (E2E-
 
     // Verify View Ticket Detail button click
     await page.click("button:has-text('View Ticket Detail')");
-    await expect(page.locator("text=IT Priority (Read-Only)")).toBeVisible();
+    await expect(page.locator("text=IT Priority").first()).toBeVisible();
 
     // Return to My Tickets and verify ticket appears
     await page.click("header button:has-text('My Tickets')");

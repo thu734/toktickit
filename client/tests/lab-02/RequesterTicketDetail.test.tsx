@@ -15,6 +15,7 @@ const mockRequester = {
 describe("Lab 2 Requester Ticket Detail UI Tests (UI-05, AC-03, AC-22)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.spyOn(api, "fetchTicketComments").mockResolvedValue([]);
   });
 
   it("renders ticket header, read-only itPriority, description, and hides IT Staff tabs (UI-05, AC-22)", async () => {
@@ -47,14 +48,13 @@ describe("Lab 2 Requester Ticket Detail UI Tests (UI-05, AC-03, AC-22)", () => {
       expect(screen.getAllByText("TKT-2026-000101")[0]).toBeInTheDocument();
       expect(screen.getByText("VPN Drops repeatedly")).toBeInTheDocument();
       expect(screen.getByText("Detailed description of campus VPN drop issue.")).toBeInTheDocument();
-      expect(screen.getByText("IT Priority (Read-Only)")).toBeInTheDocument();
+      expect(screen.getByText("IT Priority")).toBeInTheDocument();
       expect(screen.getAllByText("UNASSIGNED")[0]).toBeInTheDocument();
     });
 
     // Ensure IT Staff controls are NOT rendered
     expect(screen.queryByText(/Ticket Owner/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Internal Notes/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Public Comments/i)).not.toBeInTheDocument();
   });
 
   it("displays error state when ticket detail API returns failure or 403 (UI-05, AC-03)", async () => {

@@ -21,7 +21,7 @@ describe("Lab 3 Public Comments & Resolution Indication Tests (COMM-API-01 - COM
     await prisma.user.updateMany({
       where: {
         email: {
-          in: ["jennifer.a@toktickit.local", "michael.b@toktickit.local"],
+          in: ["jennifer.a@toktickit.local", "michael.b@toktickit.local", "alex.t@toktickit.local"],
         },
       },
       data: {
@@ -177,5 +177,48 @@ describe("Lab 3 Public Comments & Resolution Indication Tests (COMM-API-01 - COM
       .set(CSRF_HEADER)
       .send({ content: "Unauthorized comment attempt" });
     expect(unownedPost.status).toBe(404);
+  });
+
+  // STAFF-API-05 / SEC-API-03: Internal Notes creation and retrieval for IT Staff & Admin (Requester blocked with 403)
+  it("STAFF-API-05 & SEC-API-03: IT Staff and Admin can view/post Internal Notes; Requester is blocked with HTTP 403 Forbidden", async () => {
+    // Authenticate IT Staff
+    const staffAgent = request.agent(app);
+    await staffAgent
+      .post("/api/auth/login")
+      .set(CSRF_HEADER)
+      .send({ email: "alex.t@toktickit.local", password: "Initial123!" });
+    await staffAgent
+      .post("/api/auth/change-password")
+      .set(CSRF_HEADER)
+      .send({
+        currentPassword: "Initial123!",
+        newPassword: "NewPassword123!",
+        confirmPassword: "NewPassword123!",
+      });
+
+    // IT Staff posts internal note
+    const postNoteRes = await staffAgent
+      .post(`/api/staff/tickets/${ticketId}/notes`)
+      .set(CSRF_HEADER)
+      .send({ content: "Initial internal diagnostics performed on hardware." });
+    expect(postNoteRes.status).toBe(201);
+    expect(postNoteRes.body.content).toBe("Initial internal diagnostics performed on hardware.");
+
+    // IT Staff gets internal notes
+    const getNotesRes = await staffAgent.get(`/api/staff/tickets/${ticketId}/notes`);
+    expect(getNotesRes.status).toBe(200);
+    expect(Array.isArray(getNotesRes.body)).toBe(true);
+    expect(getNotesRes.body.length).toBe(1);
+
+    // Requester gets internal notes -> 403 Forbidden (SEC-API-03)
+    const reqGetRes = await requesterAgent.get(`/api/staff/tickets/${ticketId}/notes`);
+    expect(reqGetRes.status).toBe(403);
+
+    // Requester posts internal note -> 403 Forbidden (SEC-API-03)
+    const reqPostRes = await requesterAgent
+      .post(`/api/staff/tickets/${ticketId}/notes`)
+      .set(CSRF_HEADER)
+      .send({ content: "Requester trying to post internal note" });
+    expect(reqPostRes.status).toBe(403);
   });
 });
