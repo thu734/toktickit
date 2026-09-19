@@ -50,56 +50,29 @@ app.use("/api/auth", authRouter);
 app.use(mustChangePasswordLock);
 
 
-// Helper function to extract and validate Requester identity from session or header
+// Helper function to extract and validate Requester identity strictly from authenticated session (BR-03, FR-08)
 async function getValidatedRequester(req: Request, res: Response): Promise<number | null> {
-  // Session-authenticated user (Lab 3)
-  if (req.session?.userId) {
-    const user = await getPrisma().user.findUnique({ where: { id: req.session.userId } });
-    if (user && user.isActive) {
-      return user.id;
-    }
-  }
-
-  // Fallback header identity for testing / backward compatibility
-  const requesterHeader = req.headers["x-development-requester-id"];
-  if (!requesterHeader || typeof requesterHeader !== "string") {
-    res.status(400).json({
-      error: "Bad Request",
-      message: "X-Development-Requester-Id header or active session is required.",
+  if (!req.session?.userId) {
+    res.status(401).json({
+      error: "Authentication required. Please log in.",
+      code: "UNAUTHENTICATED",
     });
     return null;
   }
 
-  const requesterId = parseInt(requesterHeader, 10);
-  if (isNaN(requesterId)) {
-    res.status(400).json({
-      error: "Bad Request",
-      message: "Invalid X-Development-Requester-Id header format.",
-    });
-    return null;
-  }
-
-  const requester = await getPrisma().user.findUnique({
-    where: { id: requesterId },
+  const user = await getPrisma().user.findUnique({
+    where: { id: req.session.userId },
   });
 
-  if (!requester) {
-    res.status(404).json({
-      error: "Not Found",
-      message: "Development Requester does not exist.",
+  if (!user || !user.isActive) {
+    res.status(401).json({
+      error: "User session is invalid or inactive.",
+      code: "UNAUTHENTICATED",
     });
     return null;
   }
 
-  if (!requester.isActive) {
-    res.status(403).json({
-      error: "Forbidden",
-      message: "Inactive Development Requesters cannot access tickets.",
-    });
-    return null;
-  }
-
-  return requesterId;
+  return user.id;
 }
 
 // GET /api/health
