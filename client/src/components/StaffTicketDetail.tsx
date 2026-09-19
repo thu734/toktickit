@@ -8,6 +8,8 @@ import {
   postTicketComment,
   fetchInternalNotes,
   postInternalNote,
+  fetchStaffUsers,
+  StaffUser,
   Comment,
   InternalNote,
 } from "../api.js";
@@ -99,12 +101,9 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
   // Load active staff users for assignment dropdown
   useEffect(() => {
-    fetch("http://localhost:3000/api/categories", { credentials: "include" })
-      .then(() => {
-        // Fall back helper using fetch for active staff list if admin endpoint not open
-        // We will fetch /api/staff/tickets with page=1 to discover assigned staff, or construct basic staff list
-      })
-      .catch(() => {});
+    fetchStaffUsers()
+      .then((users) => setStaffUsers(users))
+      .catch(() => setStaffUsers([]));
   }, []);
 
   const handleClaimTicket = async () => {
@@ -517,24 +516,33 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                     disabled={assigning}
                   >
                     <option value="unassigned">Unassigned</option>
-                    {currentUserId && (
-                      <option value={currentUserId}>Assign to Me</option>
-                    )}
-                    {/* Active Staff List options fallback */}
-                    {ticket.assignedStaff && ticket.assignedStaff.id !== currentUserId && (
-                      <option value={ticket.assignedStaff.id}>{ticket.assignedStaff.name}</option>
-                    )}
+                    {staffUsers.length > 0
+                      ? staffUsers.map((u) => (
+                          <option key={u.id} value={u.id}>
+                            {u.name} {u.id === currentUserId ? "(Me)" : `(${u.role === "ADMINISTRATOR" ? "Admin" : "IT Staff"})`}
+                          </option>
+                        ))
+                      : currentUserId && <option value={currentUserId}>Assign to Me</option>}
                   </select>
                 </div>
               )}
             </div>
 
+            {/* Requested Priority (Read-Only) */}
+            <div className="mb-3">
+              <label className="form-label small fw-bold text-muted">Requested Priority (Read-Only)</label>
+              <input
+                type="text"
+                className="form-control form-control-sm text-dark fw-bold"
+                value={`${ticket.requestedPriority} (Read-Only)`}
+                readOnly
+                style={{ backgroundColor: "#F1F5F3", borderColor: "#CBD5E1" }}
+              />
+            </div>
+
             {/* IT Priority Management */}
             <div className="mb-4">
               <label className="form-label small fw-bold text-muted">IT Priority</label>
-              <div className="small text-muted mb-1">
-                Requested Priority: <strong className="text-dark">{ticket.requestedPriority}</strong> (Read-Only)
-              </div>
               <select
                 className="form-select form-select-sm"
                 value={selectedPriority}
@@ -552,42 +560,54 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
             <div className="mb-3">
               <form onSubmit={handleStatusSubmit}>
                 <label className="form-label small fw-bold text-muted">Update Status</label>
-                <select
-                  className="form-select form-select-sm mb-2"
-                  value={selectedStatus}
-                  onChange={handleStatusSelectChange}
-                  disabled={!isStaff || statusUpdating || allowedNextStatuses.length === 0}
-                >
-                  <option value={ticket.currentStatus}>{ticket.currentStatus.replace(/_/g, " ")} (Current)</option>
-                  {allowedNextStatuses.map((st) => (
-                    <option key={st} value={st}>
-                      {st.replace(/_/g, " ")}
-                    </option>
-                  ))}
-                </select>
-
-                {selectedStatus === "RESOLVED" && (
-                  <div className="mb-2">
-                    <label className="form-label extra-small text-muted fw-bold">Resolution Summary (Optional, up to 1000 chars)</label>
-                    <textarea
-                      className="form-control form-control-sm"
-                      rows={3}
-                      placeholder="Describe resolution details..."
-                      value={resolutionSummaryInput}
-                      onChange={(e) => setResolutionSummaryInput(e.target.value)}
-                      maxLength={1000}
-                    />
+                {allowedNextStatuses.length === 0 ? (
+                  <div className="alert alert-secondary small p-2 mb-0">
+                    Ticket is in terminal state (<strong>{ticket.currentStatus}</strong>). No status transitions permitted.
                   </div>
-                )}
+                ) : (
+                  <>
+                    <select
+                      className="form-select form-select-sm mb-2"
+                      value={selectedStatus}
+                      onChange={handleStatusSelectChange}
+                      disabled={!isStaff || statusUpdating}
+                    >
+                      <option value={ticket.currentStatus}>{ticket.currentStatus.replace(/_/g, " ")} (Current)</option>
+                      {allowedNextStatuses.map((st) => (
+                        <option key={st} value={st}>
+                          ➔ Transition to {st.replace(/_/g, " ")}
+                        </option>
+                      ))}
+                    </select>
 
-                {isStaff && allowedNextStatuses.length > 0 && selectedStatus !== ticket.currentStatus && (
-                  <button
-                    type="submit"
-                    className="btn btn-sm btn-zen-primary w-100 mt-2"
-                    disabled={statusUpdating}
-                  >
-                    {statusUpdating ? "Updating Status..." : "Save Status Transition"}
-                  </button>
+                    {selectedStatus === "RESOLVED" && (
+                      <div className="mb-2">
+                        <label className="form-label extra-small text-muted fw-bold">Resolution Summary (Optional, up to 1000 chars)</label>
+                        <textarea
+                          className="form-control form-control-sm"
+                          rows={3}
+                          placeholder="Describe resolution details..."
+                          value={resolutionSummaryInput}
+                          onChange={(e) => setResolutionSummaryInput(e.target.value)}
+                          maxLength={1000}
+                        />
+                      </div>
+                    )}
+
+                    {isStaff && (
+                      <button
+                        type="submit"
+                        className="btn btn-sm btn-zen-primary w-100 mt-2"
+                        disabled={statusUpdating || selectedStatus === ticket.currentStatus}
+                      >
+                        {statusUpdating
+                          ? "Updating Status..."
+                          : selectedStatus === ticket.currentStatus
+                          ? "Select a Target Status Above"
+                          : `Save Transition to ${selectedStatus.replace(/_/g, " ")}`}
+                      </button>
+                    )}
+                  </>
                 )}
               </form>
             </div>

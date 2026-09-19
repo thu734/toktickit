@@ -64,12 +64,20 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
             )}
 
             {user.role === "ADMINISTRATOR" && (
-              <button
-                className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "user-management" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
-                onClick={() => onTabChange("user-management")}
-              >
-                👥 User Management
-              </button>
+              <>
+                <button
+                  className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "ticket-queue" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
+                  onClick={() => onTabChange("ticket-queue")}
+                >
+                  📥 Ticket Queue
+                </button>
+                <button
+                  className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "user-management" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
+                  onClick={() => onTabChange("user-management")}
+                >
+                  👥 User Management
+                </button>
+              </>
             )}
           </div>
 

@@ -88,37 +88,54 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
     currentStatus !== "ALL" ||
     assignedStaffFilter !== "ALL";
 
-  const getPriorityBadgeClass = (priority: string) => {
+  const renderPriorityBadge = (priority: string) => {
+    const style: React.CSSProperties = {
+      fontSize: "0.75rem",
+      fontWeight: 600,
+      borderRadius: "16px",
+      padding: "3px 10px",
+      display: "inline-block",
+    };
     switch (priority) {
       case "URGENT":
+        return <span className="badge text-white" style={{ ...style, backgroundColor: "#7F1D1D" }}>URGENT</span>;
       case "HIGH":
-        return "badge-danger";
+        return <span className="badge" style={{ ...style, backgroundColor: "#FEE2E2", color: "#DC2626", border: "1px solid #FCA5A5" }}>HIGH</span>;
       case "MEDIUM":
-        return "badge-warning";
+        return <span className="badge" style={{ ...style, backgroundColor: "#FEF3C7", color: "#D97706", border: "1px solid #FDE68A" }}>MEDIUM</span>;
       case "LOW":
-        return "badge-pale";
+        return <span className="badge" style={{ ...style, backgroundColor: "#EAF6EF", color: "#006B3C", border: "1px solid #C6E7D2" }}>LOW</span>;
       default:
-        return "badge-secondary";
+        return <span className="badge" style={{ ...style, backgroundColor: "#F1F5F9", color: "#475569", border: "1px solid #CBD5E1" }}>{priority}</span>;
     }
   };
 
-  const getStatusBadgeClass = (status: string) => {
+  const renderStatusBadge = (status: string) => {
+    const style: React.CSSProperties = {
+      fontSize: "0.75rem",
+      fontWeight: 600,
+      borderRadius: "16px",
+      padding: "3px 10px",
+      display: "inline-block",
+    };
     switch (status) {
       case "NEW":
-      case "IN_PROGRESS":
-      case "RESOLVED":
-        return "badge-pale";
+        return <span className="badge" style={{ ...style, backgroundColor: "#EAF6EF", color: "#006B3C", border: "1px solid #C6E7D2" }}>NEW</span>;
       case "OPEN":
-        return "badge-info";
+        return <span className="badge" style={{ ...style, backgroundColor: "#EFF6FF", color: "#2563EB", border: "1px solid #BFDBFE" }}>OPEN</span>;
+      case "IN_PROGRESS":
+        return <span className="badge" style={{ ...style, backgroundColor: "#EAF6EF", color: "#006B3C", border: "1px solid #C6E7D2" }}>IN PROGRESS</span>;
       case "WAITING_FOR_REQUESTER":
-        return "badge-warning";
+        return <span className="badge" style={{ ...style, backgroundColor: "#FEF3C7", color: "#D97706", border: "1px solid #FDE68A" }}>WAITING FOR REQUESTER</span>;
+      case "RESOLVED":
+        return <span className="badge" style={{ ...style, backgroundColor: "#EAF6EF", color: "#006B3C", border: "1px solid #C6E7D2" }}>RESOLVED</span>;
       case "CANCELLED":
       case "CLOSED":
-        return "badge-secondary";
+        return <span className="badge" style={{ ...style, backgroundColor: "#F1F5F9", color: "#475569", border: "1px solid #CBD5E1" }}>{status.replace(/_/g, " ")}</span>;
       case "REOPENED":
-        return "badge-danger";
+        return <span className="badge" style={{ ...style, backgroundColor: "#FEE2E2", color: "#DC2626", border: "1px solid #FCA5A5" }}>REOPENED</span>;
       default:
-        return "badge-secondary";
+        return <span className="badge" style={{ ...style, backgroundColor: "#F1F5F9", color: "#475569" }}>{status}</span>;
     }
   };
 
@@ -325,14 +342,10 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
                       <td className="small">{ticket.requester?.name || ticket.requester?.email || "—"}</td>
                       <td className="small">{ticket.category?.name || "—"}</td>
                       <td>
-                        <span className={`badge ${getPriorityBadgeClass(ticket.itPriority)}`}>
-                          {ticket.itPriority}
-                        </span>
+                        {renderPriorityBadge(ticket.itPriority)}
                       </td>
                       <td>
-                        <span className={`badge ${getStatusBadgeClass(ticket.currentStatus)}`}>
-                          {ticket.currentStatus.replace(/_/g, " ")}
-                        </span>
+                        {renderStatusBadge(ticket.currentStatus)}
                       </td>
                       <td className="small">
                         {ticket.assignedStaff ? (
@@ -366,13 +379,9 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
                     <span className="fw-bold" style={{ color: "#006B3C" }}>
                       {ticket.ticketNumber}
                     </span>
-                    <div>
-                      <span className={`badge ${getStatusBadgeClass(ticket.currentStatus)} me-1`}>
-                        {ticket.currentStatus.replace(/_/g, " ")}
-                      </span>
-                      <span className={`badge ${getPriorityBadgeClass(ticket.itPriority)}`}>
-                        {ticket.itPriority}
-                      </span>
+                    <div className="d-flex gap-1">
+                      {renderStatusBadge(ticket.currentStatus)}
+                      {renderPriorityBadge(ticket.itPriority)}
                     </div>
                   </div>
                   <h6 className="mb-2">{ticket.summary}</h6>

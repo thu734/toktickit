@@ -846,9 +846,31 @@ app.post("/api/tickets/:id/indicate-resolved", requireRole("REQUESTER"), async (
   }
 });
 
-// ==========================================
-// IT STAFF TICKET QUEUE & OPERATIONS API
-// ==========================================
+// GET /api/staff/users (List active IT Staff & Admin users for ticket assignment)
+app.get("/api/staff/users", requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    const users = await getPrisma().user.findMany({
+      where: {
+        isActive: true,
+        role: { in: ["IT_STAFF", "ADMINISTRATOR"] },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+      orderBy: { name: "asc" },
+    });
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching staff users:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "Failed to fetch staff users.",
+    });
+  }
+});
 
 // GET /api/staff/tickets (List Staff Ticket Queue - requireRole("IT_STAFF", "ADMINISTRATOR"))
 app.get("/api/staff/tickets", requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: Request, res: Response) => {

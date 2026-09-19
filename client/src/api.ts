@@ -451,9 +451,26 @@ export async function indicateTicketResolved(ticketId: number, comment: string):
   return data;
 }
 
-// ==========================================
-// IT STAFF API HELPER FUNCTIONS & INTERFACES
-// ==========================================
+export interface StaffUser {
+  id: number;
+  name: string;
+  email: string;
+  role: "IT_STAFF" | "ADMINISTRATOR";
+}
+
+export async function fetchStaffUsers(): Promise<StaffUser[]> {
+  const res = await fetch(`${API_URL}/api/staff/users`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    return [];
+  }
+
+  return data;
+}
 
 export interface InternalNote {
   id: number;
