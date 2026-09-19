@@ -528,15 +528,16 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
               )}
             </div>
 
-            {/* Requested Priority (Read-Only) */}
+            {/* Requested Priority */}
             <div className="mb-3">
-              <label className="form-label small fw-bold text-muted">Requested Priority (Read-Only)</label>
+              <label className="form-label small fw-bold text-muted">Requested Priority</label>
               <input
                 type="text"
                 className="form-control form-control-sm text-dark fw-bold"
-                value={`${ticket.requestedPriority} (Read-Only)`}
+                value={ticket.requestedPriority}
                 readOnly
-                style={{ backgroundColor: "#F1F5F3", borderColor: "#CBD5E1" }}
+                disabled
+                style={{ backgroundColor: "#F1F5F3", borderColor: "#CBD5E1", cursor: "not-allowed" }}
               />
             </div>
 

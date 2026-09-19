@@ -48,7 +48,7 @@ describe("Lab 2 Requester Ticket Detail UI Tests (UI-05, AC-03, AC-22)", () => {
       expect(screen.getAllByText("TKT-2026-000101")[0]).toBeInTheDocument();
       expect(screen.getByText("VPN Drops repeatedly")).toBeInTheDocument();
       expect(screen.getByText("Detailed description of campus VPN drop issue.")).toBeInTheDocument();
-      expect(screen.getByText("IT Priority (Read-Only)")).toBeInTheDocument();
+      expect(screen.getByText("IT Priority")).toBeInTheDocument();
       expect(screen.getAllByText("UNASSIGNED")[0]).toBeInTheDocument();
     });
 
