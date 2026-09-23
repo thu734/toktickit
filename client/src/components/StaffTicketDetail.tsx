@@ -540,8 +540,9 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
             {/* IT Priority Management */}
             <div className="mb-4">
-              <label className="form-label small fw-bold text-muted">IT Priority</label>
+              <label htmlFor="it-priority-select" className="form-label small fw-bold text-muted">IT Priority</label>
               <select
+                id="it-priority-select"
                 className="form-select form-select-sm"
                 value={selectedPriority}
                 onChange={(e) => handlePriorityChange(e.target.value)}
@@ -557,7 +558,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
             {/* State-Machine Status Transition */}
             <div className="mb-3">
               <form onSubmit={handleStatusSubmit}>
-                <label className="form-label small fw-bold text-muted">Update Status</label>
+                <label htmlFor="update-status-select" className="form-label small fw-bold text-muted">Update Status</label>
                 {allowedNextStatuses.length === 0 ? (
                   <div className="alert alert-secondary small p-2 mb-0">
                     Ticket is in terminal state (<strong>{ticket.currentStatus}</strong>). No status transitions permitted.
@@ -565,6 +566,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                 ) : (
                   <>
                     <select
+                      id="update-status-select"
                       className="form-select form-select-sm mb-2"
                       value={selectedStatus}
                       onChange={handleStatusSelectChange}

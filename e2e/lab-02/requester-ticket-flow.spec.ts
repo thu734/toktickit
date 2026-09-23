@@ -7,26 +7,50 @@ test.describe("Lab 2 E2E Tests — Requester Ticket & Attachment Lifecycle (E2E-
     // Navigate to local application
     await page.goto("/");
 
-    // Handle Development Requester Selection Modal if present
-    const modal = page.locator(".modal.show");
-    if (await modal.isVisible({ timeout: 3000 }).catch(() => false)) {
-      const select = page.locator("#requesterSelect");
-      await expect(select).toBeEnabled({ timeout: 15000 });
-      await select.selectOption({ index: 0 });
+    const signInBtn = page.getByRole("button", { name: /sign in/i });
+    const profileBtn = page.getByRole("button", { name: /user profile menu/i });
 
-      const continueBtn = page.locator("button:has-text('Continue')");
-      await expect(continueBtn).toBeEnabled({ timeout: 5000 });
-      await continueBtn.click();
+    await expect(signInBtn.or(profileBtn)).toBeVisible({ timeout: 15000 });
 
-      await expect(modal).not.toBeVisible({ timeout: 5000 });
+    if (await profileBtn.isVisible().catch(() => false)) {
+      const profileText = await profileBtn.innerText().catch(() => "");
+      if (!profileText.includes("Jennifer Anderson")) {
+        await profileBtn.click();
+        await page.getByRole("button", { name: /logout/i }).click();
+        await expect(signInBtn).toBeVisible({ timeout: 10000 });
+      }
     }
+
+    if (await signInBtn.isVisible().catch(() => false)) {
+      await page.getByLabel(/email address/i).fill("jennifer.a@toktickit.local");
+      await page.locator("#password").fill("Initial123!");
+      await signInBtn.click();
+      await page.waitForTimeout(1000);
+
+      const errAlert = page.locator(".alert-danger");
+      if (await errAlert.isVisible().catch(() => false)) {
+        await page.locator("#password").fill("NewRequesterPassword123!");
+        await signInBtn.click();
+        await page.waitForTimeout(1000);
+      }
+
+      const pwdChangeHeading = page.getByText(/mandatory password change/i);
+      if (await pwdChangeHeading.isVisible({ timeout: 4000 }).catch(() => false)) {
+        await page.locator("#currentPassword").fill("Initial123!");
+        await page.locator("#newPassword").fill("NewRequesterPassword123!");
+        await page.locator("#confirmPassword").fill("NewRequesterPassword123!");
+        await page.getByRole("button", { name: /save new password/i }).click();
+      }
+    }
+
+    await expect(profileBtn).toBeVisible({ timeout: 15000 });
   });
 
   test("E2E-01: Full requester ticket creation workflow and duplicate submission lock (AC-01, AC-09, AC-14)", async ({
     page,
   }) => {
     // Navigate to Create Ticket
-    await page.click("header button:has-text('Create Ticket')");
+    await page.getByRole("button", { name: /create ticket/i }).first().click();
 
     // Fill form
     await page.selectOption("#categoryId", { index: 0 });
@@ -54,7 +78,7 @@ test.describe("Lab 2 E2E Tests — Requester Ticket & Attachment Lifecycle (E2E-
     await expect(page.locator("text=IT Priority").first()).toBeVisible();
 
     // Return to My Tickets and verify ticket appears
-    await page.click("header button:has-text('My Tickets')");
+    await page.getByRole("button", { name: /my tickets/i }).first().click();
     await expect(page.locator(`text=${ticketNumText}`).locator("visible=true")).toBeVisible();
   });
 
@@ -62,12 +86,12 @@ test.describe("Lab 2 E2E Tests — Requester Ticket & Attachment Lifecycle (E2E-
     page,
   }) => {
     // Open My Tickets and click on first ticket
-    await page.click("header button:has-text('My Tickets')");
+    await page.getByRole("button", { name: /my tickets/i }).first().click();
 
     const firstTicketLink = page.locator("button.font-monospace").locator("visible=true").first();
     if (!(await firstTicketLink.isVisible().catch(() => false))) {
       // Create a ticket if none exists
-      await page.click("header button:has-text('Create Ticket')");
+      await page.getByRole("button", { name: /create ticket/i }).first().click();
       await page.fill("#summary", "E2E Attachment Test Ticket");
       await page.fill(
         "#description",
@@ -125,13 +149,13 @@ test.describe("Lab 2 E2E Tests — Requester Ticket & Attachment Lifecycle (E2E-
       await page.setViewportSize({ width: vp.width, height: vp.height });
 
       // 1. Create Ticket Screen
-      await page.click("header button:has-text('Create Ticket')");
+      await page.getByRole("button", { name: /create ticket/i }).first().click();
       const createDir = path.join(screenshotDir, "create-ticket");
       fs.mkdirSync(createDir, { recursive: true });
       await page.screenshot({ path: path.join(createDir, `${vp.name}.png`), fullPage: true });
 
       // 2. My Tickets Screen
-      await page.click("header button:has-text('My Tickets')");
+      await page.getByRole("button", { name: /my tickets/i }).first().click();
       const myTicketsDir = path.join(screenshotDir, "my-tickets");
       fs.mkdirSync(myTicketsDir, { recursive: true });
       await page.screenshot({ path: path.join(myTicketsDir, `${vp.name}.png`), fullPage: true });
