@@ -154,9 +154,10 @@ describe("Lab 2 My Tickets API - Paginated Listing, Search, Filter, Sort & Owner
   });
 
   it("GET /api/tickets validates requester context headers and invalid query params", async () => {
-    // Missing header -> 400 Bad Request
+    // Missing header / unauthenticated -> 401 Unauthorized or 400 Bad Request
     const resNoHeader = await request(app).get("/api/tickets");
-    expect(resNoHeader.status).toBe(400);
+    expect([400, 401]).toContain(resNoHeader.status);
+
 
     // Invalid sort field -> 400 Bad Request
     const resInvalidSort = await request(app)

@@ -1,21 +1,28 @@
-# dependencies
+# Dependencies
 node_modules/
-# env & secrets
+
+# Environment configuration & Secrets
 .env
 *.env
 !.env.example
-# build output
+
+# Build outputs
 dist/
 build/
-# prisma
-server/prisma/*.db
-# logs & OS
+
+# Logs & System files
 *.log
 .DS_Store
-# test output
+
+# Test execution outputs
 test-results/
 playwright-report/
 *.timestamp-*.mjs
+
+# User file uploads (preserve directory structure)
 server/uploads/*
 !server/uploads/.gitkeep
 server/scratch_test/
+
+# Local AI agent session data
+.gemini/

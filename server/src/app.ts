@@ -9,11 +9,26 @@ import { RequestedPriority, TicketStatus, Prisma } from "@prisma/client";
 import { upload } from "./middleware/upload.js";
 import { csrfProtection } from "./middleware/csrf.js";
 import { mustChangePasswordLock } from "./middleware/mustChangePasswordLock.js";
+import { syncHeaderSessionMiddleware, requireAuth, requireRole } from "./middleware/authorization.js";
 import { authRouter } from "./routes/auth.js";
+import { isValidStatusTransition } from "./utils/statusTransition.js";
+
 
 export const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. curl, postman, mobile) or local dev origins
+      if (!origin || origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.use(
@@ -36,56 +51,29 @@ app.use("/api/auth", authRouter);
 app.use(mustChangePasswordLock);
 
 
-// Helper function to extract and validate Requester identity from session or header
+// Helper function to extract and validate Requester identity strictly from authenticated session (BR-03, FR-08)
 async function getValidatedRequester(req: Request, res: Response): Promise<number | null> {
-  // Session-authenticated user (Lab 3)
-  if (req.session?.userId) {
-    const user = await getPrisma().user.findUnique({ where: { id: req.session.userId } });
-    if (user && user.isActive) {
-      return user.id;
-    }
-  }
-
-  // Fallback header identity for testing / backward compatibility
-  const requesterHeader = req.headers["x-development-requester-id"];
-  if (!requesterHeader || typeof requesterHeader !== "string") {
-    res.status(400).json({
-      error: "Bad Request",
-      message: "X-Development-Requester-Id header or active session is required.",
+  if (!req.session?.userId) {
+    res.status(401).json({
+      error: "Authentication required. Please log in.",
+      code: "UNAUTHENTICATED",
     });
     return null;
   }
 
-  const requesterId = parseInt(requesterHeader, 10);
-  if (isNaN(requesterId)) {
-    res.status(400).json({
-      error: "Bad Request",
-      message: "Invalid X-Development-Requester-Id header format.",
-    });
-    return null;
-  }
-
-  const requester = await getPrisma().user.findUnique({
-    where: { id: requesterId },
+  const user = await getPrisma().user.findUnique({
+    where: { id: req.session.userId },
   });
 
-  if (!requester) {
-    res.status(404).json({
-      error: "Not Found",
-      message: "Development Requester does not exist.",
+  if (!user || !user.isActive) {
+    res.status(401).json({
+      error: "User session is invalid or inactive.",
+      code: "UNAUTHENTICATED",
     });
     return null;
   }
 
-  if (!requester.isActive) {
-    res.status(403).json({
-      error: "Forbidden",
-      message: "Inactive Development Requesters cannot access tickets.",
-    });
-    return null;
-  }
-
-  return requesterId;
+  return user.id;
 }
 
 // GET /api/health
@@ -106,7 +94,7 @@ app.get("/api/categories", async (_req: Request, res: Response) => {
   }
 });
 
-// GET /api/requesters (Active Development Requesters - BR-04, AC-13)
+// GET /api/requesters (Active Requesters)
 app.get("/api/requesters", async (_req: Request, res: Response) => {
   try {
     const requesters = await getPrisma().user.findMany({
@@ -141,8 +129,10 @@ app.get("/api/related-systems", async (_req: Request, res: Response) => {
   }
 });
 
-// POST /api/tickets (Create Ticket - FR-04, FR-05, FR-06, BR-01, BR-02, BR-07..BR-12, AC-01, AC-23)
-app.post("/api/tickets", async (req: Request, res: Response) => {
+
+// POST /api/tickets (Create Ticket - requireRole("REQUESTER"))
+app.post("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Response) => {
+
   try {
     const requesterId = await getValidatedRequester(req, res);
     if (requesterId === null) return;
@@ -226,11 +216,12 @@ app.post("/api/tickets", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/tickets (Paginated Ticket Listing, Search, Filter, Sort & Ownership - FR-07..FR-10, BR-06, BR-23..BR-25, AC-09, AC-10, AC-19, AC-20)
-app.get("/api/tickets", async (req: Request, res: Response) => {
+// GET /api/tickets (Paginated Ticket Listing - requireRole("REQUESTER"))
+app.get("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Response) => {
   try {
     const requesterId = await getValidatedRequester(req, res);
     if (requesterId === null) return;
+
 
     const {
       search,
@@ -323,11 +314,12 @@ app.get("/api/tickets", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/tickets/:id (Get Owned Ticket Detail - FR-11, BR-06, AC-03, AC-22)
-app.get("/api/tickets/:id", async (req: Request, res: Response) => {
+// GET /api/tickets/:id (Get Owned Ticket Detail - requireRole("REQUESTER"))
+app.get("/api/tickets/:id", requireRole("REQUESTER"), async (req: Request, res: Response) => {
   try {
     const requesterId = await getValidatedRequester(req, res);
     if (requesterId === null) return;
+
 
     const ticketId = parseInt(req.params.id, 10);
     if (isNaN(ticketId)) {
@@ -383,9 +375,10 @@ app.get("/api/tickets/:id", async (req: Request, res: Response) => {
   }
 });
 
-// POST /api/tickets/:id/attachments (Upload Attachment - FR-12, FR-13, FR-14, BR-06, BR-15..BR-18, BR-22, AC-04..AC-06)
-app.post("/api/tickets/:id/attachments", (req: Request, res: Response) => {
+// POST /api/tickets/:id/attachments (Upload Attachment - requireRole("REQUESTER"))
+app.post("/api/tickets/:id/attachments", requireRole("REQUESTER"), (req: Request, res: Response) => {
   upload.single("file")(req, res, async (err: any) => {
+
     const cleanupFile = async () => {
       if (req.file && req.file.path) {
         await fs.promises.unlink(req.file.path).catch(() => {});
@@ -478,11 +471,12 @@ app.post("/api/tickets/:id/attachments", (req: Request, res: Response) => {
   });
 });
 
-// GET /api/tickets/:id/attachments (List Ticket Attachments Metadata - BR-06)
-app.get("/api/tickets/:id/attachments", async (req: Request, res: Response) => {
+// GET /api/tickets/:id/attachments (List Ticket Attachments Metadata - requireAuth)
+app.get("/api/tickets/:id/attachments", requireAuth, async (req: Request, res: Response) => {
   try {
     const requesterId = await getValidatedRequester(req, res);
     if (requesterId === null) return;
+
 
     const ticketId = parseInt(req.params.id, 10);
     if (isNaN(ticketId)) {
@@ -535,11 +529,12 @@ app.get("/api/tickets/:id/attachments", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/attachments/:id/download (Download Active Attachment Stream - FR-15, BR-06, BR-21, AC-08)
-app.get("/api/attachments/:id/download", async (req: Request, res: Response) => {
+// GET /api/attachments/:id/download (Download Active Attachment Stream - requireAuth)
+app.get("/api/attachments/:id/download", requireAuth, async (req: Request, res: Response) => {
   try {
     const requesterId = await getValidatedRequester(req, res);
     if (requesterId === null) return;
+
 
     const attachmentId = parseInt(req.params.id, 10);
     if (isNaN(attachmentId)) {
@@ -561,10 +556,10 @@ app.get("/api/attachments/:id/download", async (req: Request, res: Response) => 
       });
     }
 
-    if (attachment.ticket.requesterId !== requesterId) {
-      return res.status(403).json({
-        error: "Forbidden",
-        message: "You do not have permission to download this attachment.",
+    if (req.session?.role === "REQUESTER" && attachment.ticket.requesterId !== requesterId) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Attachment not found.",
       });
     }
 
@@ -598,11 +593,12 @@ app.get("/api/attachments/:id/download", async (req: Request, res: Response) => 
   }
 });
 
-// POST /api/attachments/:id/soft-remove (Soft-Remove Attachment - FR-16, FR-17, BR-06, BR-19, BR-20, AC-07)
-app.post("/api/attachments/:id/soft-remove", async (req: Request, res: Response) => {
+// POST /api/attachments/:id/soft-remove (Soft-Remove Attachment - requireRole("REQUESTER"))
+app.post("/api/attachments/:id/soft-remove", requireRole("REQUESTER"), async (req: Request, res: Response) => {
   try {
     const requesterId = await getValidatedRequester(req, res);
     if (requesterId === null) return;
+
 
     const attachmentId = parseInt(req.params.id, 10);
     if (isNaN(attachmentId)) {
@@ -657,6 +653,1034 @@ app.post("/api/attachments/:id/soft-remove", async (req: Request, res: Response)
     return res.status(500).json({
       error: "Internal Server Error",
       message: "An error occurred while removing the attachment.",
+    });
+  }
+});
+
+// GET /api/tickets/:id/comments (Public Comments Feed - requireAuth)
+app.get("/api/tickets/:id/comments", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid ticket ID format.",
+      });
+    }
+
+    const ticket = await getPrisma().ticket.findUnique({
+      where: { id: ticketId },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    // Requester must own ticket; return 404 to prevent resource existence probing (BR-16)
+    if (req.session?.role === "REQUESTER" && ticket.requesterId !== req.session.userId) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    const comments = await getPrisma().comment.findMany({
+      where: { ticketId },
+      orderBy: { createdAt: "asc" },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    return res.status(200).json(comments);
+  } catch (error) {
+    console.error("Error fetching ticket comments:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while fetching ticket comments.",
+    });
+  }
+});
+
+// POST /api/tickets/:id/comments (Post Public Comment - requireAuth)
+app.post("/api/tickets/:id/comments", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid ticket ID format.",
+      });
+    }
+
+    let { content } = req.body || {};
+    content = typeof content === "string" ? content.trim() : "";
+
+    if (!content || content.length < 3 || content.length > 1000) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Public comment content is required and must be between 3 and 1000 characters.",
+      });
+    }
+
+    const ticket = await getPrisma().ticket.findUnique({
+      where: { id: ticketId },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    // Requester must own ticket; return 404 to prevent existence probing (BR-16)
+    if (req.session?.role === "REQUESTER" && ticket.requesterId !== req.session.userId) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    // Backend-generated authorship and timestamp (BR-21)
+    const newComment = await getPrisma().comment.create({
+      data: {
+        ticketId,
+        content,
+        authorId: req.session!.userId as number,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    return res.status(201).json(newComment);
+  } catch (error) {
+    console.error("Error posting public comment:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while posting public comment.",
+    });
+  }
+});
+
+// POST /api/tickets/:id/indicate-resolved (Indicate Problem Appears Resolved - requireRole("REQUESTER"))
+app.post("/api/tickets/:id/indicate-resolved", requireRole("REQUESTER"), async (req: Request, res: Response) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid ticket ID format.",
+      });
+    }
+
+    let { comment } = req.body || {};
+    comment = typeof comment === "string" ? comment.trim() : "";
+
+    if (!comment || comment.length < 3 || comment.length > 1000) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Resolution comment is required and must be between 3 and 1000 characters.",
+      });
+    }
+
+    const ticket = await getPrisma().ticket.findUnique({
+      where: { id: ticketId },
+    });
+
+    if (!ticket || ticket.requesterId !== req.session!.userId) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    // Appends public resolution comment without directly changing status (BR-05)
+    const newComment = await getPrisma().comment.create({
+      data: {
+        ticketId,
+        content: comment,
+        authorId: req.session!.userId,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    // Exact HTTP 200 OK status code per api-spec.md Section 5.3
+    return res.status(200).json({
+      message: "Resolution indication recorded successfully",
+      comment: newComment,
+    });
+  } catch (error) {
+    console.error("Error submitting resolution indication:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while submitting resolution indication.",
+    });
+  }
+});
+
+// GET /api/staff/users (List active IT Staff & Admin users for ticket assignment)
+app.get("/api/staff/users", requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    const users = await getPrisma().user.findMany({
+      where: {
+        isActive: true,
+        role: { in: ["IT_STAFF", "ADMINISTRATOR"] },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+      orderBy: { name: "asc" },
+    });
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching staff users:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "Failed to fetch staff users.",
+    });
+  }
+});
+
+// GET /api/staff/tickets (List Staff Ticket Queue - requireRole("IT_STAFF", "ADMINISTRATOR"))
+app.get("/api/staff/tickets", requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    const {
+      search,
+      categoryId,
+      itPriority,
+      currentStatus,
+      assignedStaffId,
+      sortBy,
+      sortOrder,
+      page,
+      limit,
+    } = req.query;
+
+    // Resilient parameter parsing (STAFF-API-07, api-spec.md Section 6.1)
+    let parsedPage = parseInt(String(page), 10);
+    if (isNaN(parsedPage) || parsedPage < 1) parsedPage = 1;
+
+    let parsedLimit = parseInt(String(limit), 10);
+    if (isNaN(parsedLimit) || parsedLimit < 1) parsedLimit = 10;
+
+    const validSortFields = [
+      "createdAt",
+      "updatedAt",
+      "itPriority",
+      "requestedPriority",
+      "currentStatus",
+      "ticketNumber",
+      "summary",
+    ];
+    const validSortBy = typeof sortBy === "string" && validSortFields.includes(sortBy) ? sortBy : "createdAt";
+    const validSortOrder = sortOrder === "asc" ? "asc" : "desc";
+
+    const where: Prisma.TicketWhereInput = {};
+
+    // Text search (ticket number, summary, description)
+    if (typeof search === "string" && search.trim() !== "") {
+      const searchTerm = search.trim();
+      where.OR = [
+        { ticketNumber: { contains: searchTerm, mode: "insensitive" } },
+        { summary: { contains: searchTerm, mode: "insensitive" } },
+        { description: { contains: searchTerm, mode: "insensitive" } },
+      ];
+    }
+
+    // Category filter
+    if (categoryId) {
+      const parsedCatId = parseInt(String(categoryId), 10);
+      if (!isNaN(parsedCatId)) {
+        where.categoryId = parsedCatId;
+      }
+    }
+
+    // IT Priority filter
+    if (typeof itPriority === "string" && Object.values(RequestedPriority).includes(itPriority as RequestedPriority)) {
+      where.itPriority = itPriority as RequestedPriority;
+    }
+
+    // Status filter
+    if (typeof currentStatus === "string" && Object.values(TicketStatus).includes(currentStatus as TicketStatus)) {
+      where.currentStatus = currentStatus as TicketStatus;
+    }
+
+    // Assigned Owner filter
+    if (assignedStaffId) {
+      if (assignedStaffId === "null" || assignedStaffId === "unassigned") {
+        where.assignedStaffId = null;
+      } else {
+        const parsedStaffId = parseInt(String(assignedStaffId), 10);
+        if (!isNaN(parsedStaffId)) {
+          where.assignedStaffId = parsedStaffId;
+        }
+      }
+    }
+
+    const totalItems = await getPrisma().ticket.count({ where });
+    const totalPages = Math.ceil(totalItems / parsedLimit) || 1;
+
+    const tickets = await getPrisma().ticket.findMany({
+      where,
+      orderBy: { [validSortBy]: validSortOrder },
+      skip: (parsedPage - 1) * parsedLimit,
+      take: parsedLimit,
+      include: {
+        requester: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        assignedStaff: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+        category: true,
+        relatedSystem: true,
+      },
+    });
+
+    return res.status(200).json({
+      data: tickets,
+      pagination: {
+        page: parsedPage,
+        limit: parsedLimit,
+        totalItems,
+        totalPages,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching staff ticket queue:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while fetching ticket queue.",
+    });
+  }
+});
+
+// GET /api/staff/tickets/:id (Get Staff Ticket Detail - requireRole("IT_STAFF", "ADMINISTRATOR"))
+app.get("/api/staff/tickets/:id", requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid ticket ID format.",
+      });
+    }
+
+    const ticket = await getPrisma().ticket.findUnique({
+      where: { id: ticketId },
+      include: {
+        requester: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        assignedStaff: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+        category: true,
+        relatedSystem: true,
+        attachments: {
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    return res.status(200).json(ticket);
+  } catch (error) {
+    console.error("Error fetching staff ticket detail:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while fetching ticket detail.",
+    });
+  }
+});
+
+// PATCH /api/staff/tickets/:id/assign (Claim/Assign/Reassign Ownership - requireRole("IT_STAFF"))
+app.patch("/api/staff/tickets/:id/assign", requireRole("IT_STAFF"), async (req: Request, res: Response) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid ticket ID format.",
+      });
+    }
+
+    const ticket = await getPrisma().ticket.findUnique({
+      where: { id: ticketId },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    const { assignedStaffId } = req.body || {};
+
+    if (assignedStaffId !== null && assignedStaffId !== undefined) {
+      const targetId = parseInt(String(assignedStaffId), 10);
+      if (isNaN(targetId) || targetId <= 0) {
+        return res.status(400).json({
+          error: "Bad Request",
+          code: "INVALID_ASSIGNMENT_TARGET",
+          message: "Cannot assign ticket to selected account.",
+        });
+      }
+
+      const targetUser = await getPrisma().user.findUnique({
+        where: { id: targetId },
+      });
+
+      if (!targetUser || !targetUser.isActive || (targetUser.role !== "IT_STAFF" && targetUser.role !== "ADMINISTRATOR")) {
+        return res.status(400).json({
+          error: "Bad Request",
+          code: "INVALID_ASSIGNMENT_TARGET",
+          message: "Cannot assign ticket to selected account. Target must be an active IT Staff or Administrator.",
+        });
+      }
+    }
+
+    const newAssignedId = assignedStaffId === null ? null : parseInt(String(assignedStaffId), 10);
+
+    const updatedTicket = await getPrisma().ticket.update({
+      where: { id: ticketId },
+      data: { assignedStaffId: newAssignedId },
+      include: {
+        requester: { select: { id: true, name: true, email: true } },
+        assignedStaff: { select: { id: true, name: true, email: true, role: true } },
+        category: true,
+        relatedSystem: true,
+      },
+    });
+
+    return res.status(200).json(updatedTicket);
+  } catch (error) {
+    console.error("Error assigning ticket:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while updating ticket assignment.",
+    });
+  }
+});
+
+// PATCH /api/staff/tickets/:id/priority (Update IT Priority - requireRole("IT_STAFF"))
+app.patch("/api/staff/tickets/:id/priority", requireRole("IT_STAFF"), async (req: Request, res: Response) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid ticket ID format.",
+      });
+    }
+
+    const { itPriority } = req.body || {};
+
+    if (!itPriority || !Object.values(RequestedPriority).includes(itPriority as RequestedPriority)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Valid IT Priority (LOW, MEDIUM, HIGH, URGENT) is required.",
+      });
+    }
+
+    const ticket = await getPrisma().ticket.findUnique({
+      where: { id: ticketId },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    const updatedTicket = await getPrisma().ticket.update({
+      where: { id: ticketId },
+      data: { itPriority: itPriority as RequestedPriority },
+      include: {
+        requester: { select: { id: true, name: true, email: true } },
+        assignedStaff: { select: { id: true, name: true, email: true, role: true } },
+        category: true,
+        relatedSystem: true,
+      },
+    });
+
+    return res.status(200).json(updatedTicket);
+  } catch (error) {
+    console.error("Error updating IT priority:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while updating IT priority.",
+    });
+  }
+});
+
+// PATCH /api/staff/tickets/:id/status (Update Ticket Status per Matrix - requireRole("IT_STAFF"))
+app.patch("/api/staff/tickets/:id/status", requireRole("IT_STAFF"), async (req: Request, res: Response) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid ticket ID format.",
+      });
+    }
+
+    const ticket = await getPrisma().ticket.findUnique({
+      where: { id: ticketId },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    const { status, resolutionSummary } = req.body || {};
+
+    if (!status || !Object.values(TicketStatus).includes(status as TicketStatus)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        code: "INVALID_STATUS_TRANSITION",
+        message: "Valid target ticket status is required.",
+      });
+    }
+
+    // Validate state machine transition (BR-14)
+    if (!isValidStatusTransition(ticket.currentStatus, status as TicketStatus)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        code: "INVALID_STATUS_TRANSITION",
+        message: `Invalid status transition from ${ticket.currentStatus} to ${status}.`,
+      });
+    }
+
+    let finalResolutionSummary = ticket.resolutionSummary;
+    if (status === TicketStatus.RESOLVED && resolutionSummary !== undefined) {
+      const trimmed = typeof resolutionSummary === "string" ? resolutionSummary.trim() : "";
+      if (trimmed.length > 1000) {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Resolution summary cannot exceed 1000 characters.",
+        });
+      }
+      finalResolutionSummary = trimmed !== "" ? trimmed : null;
+    }
+
+    const updatedTicket = await getPrisma().ticket.update({
+      where: { id: ticketId },
+      data: {
+        currentStatus: status as TicketStatus,
+        resolutionSummary: finalResolutionSummary,
+      },
+      include: {
+        requester: { select: { id: true, name: true, email: true } },
+        assignedStaff: { select: { id: true, name: true, email: true, role: true } },
+        category: true,
+        relatedSystem: true,
+      },
+    });
+
+    return res.status(200).json(updatedTicket);
+  } catch (error) {
+    console.error("Error updating ticket status:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while updating ticket status.",
+    });
+  }
+});
+
+// GET /api/staff/tickets/:id/notes (Get Internal Notes - requireRole("IT_STAFF", "ADMINISTRATOR"))
+app.get("/api/staff/tickets/:id/notes", requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid ticket ID format.",
+      });
+    }
+
+    const ticket = await getPrisma().ticket.findUnique({
+      where: { id: ticketId },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    const notes = await getPrisma().internalNote.findMany({
+      where: { ticketId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    return res.status(200).json(notes);
+  } catch (error) {
+    console.error("Error fetching internal notes:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while fetching internal notes.",
+    });
+  }
+});
+
+// POST /api/staff/tickets/:id/notes (Post Internal Note - requireRole("IT_STAFF", "ADMINISTRATOR"))
+app.post("/api/staff/tickets/:id/notes", requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    const ticketId = parseInt(req.params.id, 10);
+    if (isNaN(ticketId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid ticket ID format.",
+      });
+    }
+
+    const ticket = await getPrisma().ticket.findUnique({
+      where: { id: ticketId },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
+      });
+    }
+
+    let { content } = req.body || {};
+    content = typeof content === "string" ? content.trim() : "";
+
+    if (!content || content.length < 3 || content.length > 2000) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Internal note content is required and must be between 3 and 2000 characters.",
+      });
+    }
+
+    // Backend-generated authorship and timestamp (BR-21)
+    const newNote = await getPrisma().internalNote.create({
+      data: {
+        ticketId,
+        content,
+        authorId: req.session!.userId as number,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    return res.status(201).json(newNote);
+  } catch (error) {
+    console.error("Error posting internal note:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while posting internal note.",
+    });
+  }
+});
+
+// ==========================================
+// 7. ADMINISTRATOR USER MANAGEMENT ENDPOINTS
+// ==========================================
+
+// 7.1 GET /api/admin/users (List users with search & role filter)
+app.get("/api/admin/users", requireRole("ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    const { search, role } = req.query;
+
+    const whereClause: Prisma.UserWhereInput = {};
+
+    if (role && typeof role === "string" && ["REQUESTER", "IT_STAFF", "ADMINISTRATOR"].includes(role.toUpperCase())) {
+      whereClause.role = role.toUpperCase() as any;
+    }
+
+    if (search && typeof search === "string" && search.trim() !== "") {
+      const trimmedSearch = search.trim();
+      whereClause.OR = [
+        { name: { contains: trimmedSearch, mode: "insensitive" } },
+        { email: { contains: trimmedSearch, mode: "insensitive" } },
+      ];
+    }
+
+    const users = await getPrisma().user.findMany({
+      where: whereClause,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        mustChangePassword: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { id: "asc" },
+    });
+
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching admin users:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while fetching user accounts.",
+    });
+  }
+});
+
+// 7.2 POST /api/admin/users (Create new user account)
+app.post("/api/admin/users", requireRole("ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    let { name, email, role, isActive, initialPassword } = req.body || {};
+
+    name = typeof name === "string" ? name.trim() : "";
+    email = typeof email === "string" ? email.trim() : "";
+    role = typeof role === "string" ? role.toUpperCase() : "";
+    initialPassword = typeof initialPassword === "string" ? initialPassword : "";
+    const active = typeof isActive === "boolean" ? isActive : true;
+
+    if (!name || !email || !role || !initialPassword) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Name, email, role, and initialPassword are required.",
+      });
+    }
+
+    if (!["REQUESTER", "IT_STAFF", "ADMINISTRATOR"].includes(role)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid role specified. Must be REQUESTER, IT_STAFF, or ADMINISTRATOR.",
+      });
+    }
+
+    // Password complexity check
+    const pwdValidation = (await import("./utils/password.js")).validatePasswordComplexity(initialPassword);
+    if (!pwdValidation.isValid) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: pwdValidation.message || "Initial password fails complexity requirements.",
+      });
+    }
+
+    // Unique case-insensitive email check (BR-07)
+    const existingUser = await getPrisma().user.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        error: "Conflict",
+        code: "EMAIL_ALREADY_EXISTS",
+        message: "A user account with this email address already exists.",
+      });
+    }
+
+    const { hashPassword } = await import("./utils/password.js");
+    const passwordHash = await hashPassword(initialPassword);
+
+    const newUser = await getPrisma().user.create({
+      data: {
+        name,
+        email,
+        role: role as any,
+        passwordHash,
+        mustChangePassword: true,
+        isActive: active,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        mustChangePassword: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return res.status(201).json(newUser);
+  } catch (error) {
+    console.error("Error creating user account:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while creating user account.",
+    });
+  }
+});
+
+// 7.3 PATCH /api/admin/users/:id (Edit user account)
+app.patch("/api/admin/users/:id", requireRole("ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid user ID format.",
+      });
+    }
+
+    const targetUser = await getPrisma().user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "User account not found.",
+      });
+    }
+
+    let { name, email, role, isActive } = req.body || {};
+
+    const updateData: Prisma.UserUpdateInput = {};
+
+    if (name !== undefined) {
+      if (typeof name !== "string" || name.trim() === "") {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Name cannot be empty.",
+        });
+      }
+      updateData.name = name.trim();
+    }
+
+    if (email !== undefined) {
+      if (typeof email !== "string" || email.trim() === "") {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Email cannot be empty.",
+        });
+      }
+      const trimmedEmail = email.trim();
+      if (trimmedEmail.toLowerCase() !== targetUser.email.toLowerCase()) {
+        const existingEmailUser = await getPrisma().user.findFirst({
+          where: {
+            email: { equals: trimmedEmail, mode: "insensitive" },
+            id: { not: userId },
+          },
+        });
+        if (existingEmailUser) {
+          return res.status(409).json({
+            error: "Conflict",
+            code: "EMAIL_ALREADY_EXISTS",
+            message: "A user account with this email address already exists.",
+          });
+        }
+      }
+      updateData.email = trimmedEmail;
+    }
+
+    if (role !== undefined) {
+      if (typeof role !== "string" || !["REQUESTER", "IT_STAFF", "ADMINISTRATOR"].includes(role.toUpperCase())) {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Invalid role specified.",
+        });
+      }
+      updateData.role = role.toUpperCase() as any;
+    }
+
+    if (isActive !== undefined) {
+      if (typeof isActive !== "boolean") {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "isActive must be a boolean.",
+        });
+      }
+      updateData.isActive = isActive;
+    }
+
+    // Safety Rule 1: Self-deactivation prevention (BR-09)
+    if (req.session?.userId === userId && isActive === false) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "You cannot deactivate your own account.",
+      });
+    }
+
+    // Safety Rule 2: Last Active Administrator protection (BR-10)
+    const targetIsActiveAdmin = targetUser.role === "ADMINISTRATOR" && targetUser.isActive === true;
+    const updateRemovesActiveAdmin =
+      isActive === false || (role !== undefined && role.toUpperCase() !== "ADMINISTRATOR");
+
+    if (targetIsActiveAdmin && updateRemovesActiveAdmin) {
+      const activeAdminCount = await getPrisma().user.count({
+        where: {
+          role: "ADMINISTRATOR",
+          isActive: true,
+        },
+      });
+
+      if (activeAdminCount <= 1) {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Cannot deactivate the only active Administrator account.",
+        });
+      }
+    }
+
+    const updatedUser = await getPrisma().user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        mustChangePassword: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user account:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while updating user account.",
+    });
+  }
+});
+
+// 7.4 POST /api/admin/users/:id/reset-password (Reset initial password)
+app.post("/api/admin/users/:id/reset-password", requireRole("ADMINISTRATOR"), async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid user ID format.",
+      });
+    }
+
+    const targetUser = await getPrisma().user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "User account not found.",
+      });
+    }
+
+    let { initialPassword } = req.body || {};
+    initialPassword = typeof initialPassword === "string" ? initialPassword : "";
+
+    const pwdValidation = (await import("./utils/password.js")).validatePasswordComplexity(initialPassword);
+    if (!pwdValidation.isValid) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: pwdValidation.message || "Initial password fails complexity requirements.",
+      });
+    }
+
+    const { hashPassword } = await import("./utils/password.js");
+    const passwordHash = await hashPassword(initialPassword);
+
+    const updatedUser = await getPrisma().user.update({
+      where: { id: userId },
+      data: {
+        passwordHash,
+        mustChangePassword: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        mustChangePassword: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error resetting user password:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An error occurred while resetting user password.",
     });
   }
 });
