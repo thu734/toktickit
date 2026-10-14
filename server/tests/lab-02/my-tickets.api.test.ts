@@ -1,3 +1,4 @@
+import { loginAsUser } from "../helpers/login.js";
 import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import request from "supertest";
 import app from "../../src/app.js";
@@ -5,6 +6,7 @@ import { getPrisma } from "../../src/prisma.js";
 
 describe("Lab 2 My Tickets API - Paginated Listing, Search, Filter, Sort & Ownership (API-03, API-04, API-13, API-14)", () => {
   let requester1Id: number;
+  let requester1Agent: Awaited<ReturnType<typeof loginAsUser>>;
   let requester2Id: number;
   let cat1Id: number;
   let cat2Id: number;
@@ -19,6 +21,7 @@ describe("Lab 2 My Tickets API - Paginated Listing, Search, Filter, Sort & Owner
       orderBy: { id: "asc" },
     });
     requester1Id = requesters[0].id; // Jennifer Anderson
+    requester1Agent = await loginAsUser(requester1Id);
     requester2Id = requesters[1].id; // Michael Brown
 
     // Get seeded categories & systems
@@ -98,9 +101,8 @@ describe("Lab 2 My Tickets API - Paginated Listing, Search, Filter, Sort & Owner
   });
 
   it("GET /api/tickets returns paginated listing with ownership isolation (API-03, AC-09, BR-06)", async () => {
-    const res = await request(app)
-      .get("/api/tickets")
-      .set("X-Development-Requester-Id", String(requester1Id));
+    const res = await requester1Agent
+      .get("/api/tickets");
 
     expect(res.status).toBe(200);
     expect(res.body.items).toBeDefined();
@@ -118,9 +120,8 @@ describe("Lab 2 My Tickets API - Paginated Listing, Search, Filter, Sort & Owner
   });
 
   it("GET /api/tickets performs case-insensitive search across summary and description (API-04, AC-10, BR-24)", async () => {
-    const res = await request(app)
-      .get("/api/tickets?search=email")
-      .set("X-Development-Requester-Id", String(requester1Id));
+    const res = await requester1Agent
+      .get("/api/tickets?search=email");
 
     expect(res.status).toBe(200);
     expect(res.body.items.length).toBe(1);
@@ -128,9 +129,8 @@ describe("Lab 2 My Tickets API - Paginated Listing, Search, Filter, Sort & Owner
   });
 
   it("GET /api/tickets applies multi-field filtering by Category, Priority, and Status (API-13, AC-19)", async () => {
-    const res = await request(app)
-      .get(`/api/tickets?categoryId=${cat2Id}&requestedPriority=URGENT&currentStatus=OPEN`)
-      .set("X-Development-Requester-Id", String(requester1Id));
+    const res = await requester1Agent
+      .get(`/api/tickets?categoryId=${cat2Id}&requestedPriority=URGENT&currentStatus=OPEN`);
 
     expect(res.status).toBe(200);
     expect(res.body.items.length).toBe(1);
@@ -138,31 +138,28 @@ describe("Lab 2 My Tickets API - Paginated Listing, Search, Filter, Sort & Owner
   });
 
   it("GET /api/tickets sorts tickets by allowed sort fields and orders (API-14, AC-20)", async () => {
-    const resDesc = await request(app)
-      .get("/api/tickets?sortBy=createdAt&sortOrder=desc")
-      .set("X-Development-Requester-Id", String(requester1Id));
+    const resDesc = await requester1Agent
+      .get("/api/tickets?sortBy=createdAt&sortOrder=desc");
 
     expect(resDesc.status).toBe(200);
     expect(resDesc.body.items[0].ticketNumber).toBe("TKT-2026-000003");
 
-    const resAsc = await request(app)
-      .get("/api/tickets?sortBy=createdAt&sortOrder=asc")
-      .set("X-Development-Requester-Id", String(requester1Id));
+    const resAsc = await requester1Agent
+      .get("/api/tickets?sortBy=createdAt&sortOrder=asc");
 
     expect(resAsc.status).toBe(200);
     expect(resAsc.body.items[0].ticketNumber).toBe("TKT-2026-000001");
   });
 
-  it("GET /api/tickets validates requester context headers and invalid query params", async () => {
-    // Missing header / unauthenticated -> 401 Unauthorized or 400 Bad Request
+  it("GET /api/tickets rejects unauthenticated requests and invalid query params", async () => {
+    // No authenticated session -> 401 Unauthorized
     const resNoHeader = await request(app).get("/api/tickets");
-    expect([400, 401]).toContain(resNoHeader.status);
+    expect(resNoHeader.status).toBe(401);
 
 
     // Invalid sort field -> 400 Bad Request
-    const resInvalidSort = await request(app)
-      .get("/api/tickets?sortBy=invalidField")
-      .set("X-Development-Requester-Id", String(requester1Id));
+    const resInvalidSort = await requester1Agent
+      .get("/api/tickets?sortBy=invalidField");
     expect(resInvalidSort.status).toBe(400);
   });
 });
