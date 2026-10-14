@@ -1,11 +1,12 @@
 # Lab 4 - Sprint 4 Engineering Specification
 
 **Issue:** Issue 18 [Lab 4] Engineering Contract and Baseline Gate
-**Status:** Documentation prepared for review; product decisions pending approval; no Lab 4 feature implementation.
+**Status:** D-01 through D-16 explicitly approved by the user on 2026-10-15; documentation review and baseline verification remain separate; no Lab 4 implementation.
+**Source:** CPE 334 Lab 4 handout, SE+Lab+4.pdf, all 11 pages, reviewed 2026-10-15.
 
-**Provenance:** R = required by Lab 4; I = inherited from Labs 1-3; P = proposed decision requiring approval.
-A combined label separates the required capability from its proposed implementation details.
-Authorization to draft these documents does not approve every P decision.
+**Provenance:** R = required by Lab 4; I = inherited from Labs 1-3; A = user-approved implementation choice, not a handout mandate.
+A combined label separates the required capability from its user-approved implementation details.
+Approval evidence: the user explicitly approved the final D-01 through D-16 choices in this session on 2026-10-15. This approval does not authorize implementation, database changes or release.
 
 ## 1. Sprint Goal
 
@@ -24,7 +25,18 @@ Issue 18 creates only this six-file documentation contract. No model, migration,
 
 ### 3.2 Explicitly Excluded
 
-Excluded (R): SLA clocks/escalation/on-call; notifications; inventory/spare parts/purchasing; billing/payroll/labor costing; approvals/signatures; advanced BI/export warehouses; multi-tenancy/production-scale cloud operations; unapproved features.
+Explicitly excluded by the Lab 4 handout (R, section 4.2):
+
+- Automatic SLA clocks, escalation engines, on-call scheduling and breach notifications.
+- Email, SMS, LINE, push and other external notification services.
+- Inventory consumption, spare-parts management, purchasing and service cost accounting.
+- Time-sheet billing, payroll and detailed labor-cost calculation.
+- Multi-level approval workflows and electronic signatures.
+- Advanced business-intelligence tools, custom report builders and export warehouses.
+- Multi-tenant organizations and production-scale cloud operations.
+- New product features not approved in the Sprint 4 engineering contract.
+
+Additional simplification boundaries requested by the user: no Action IN_PROGRESS state, full immutable revision snapshots, separate Action version system, rolling-seven-day dashboard filter, dual assigned/performed dashboard summaries or changed initial landing pages. These are implementation-scope choices, not exclusions quoted from the handout.
 
 ### 3.3 Inherited Behavior and Effective-Lab Boundaries
 
@@ -36,25 +48,25 @@ Lab 4 explicitly grants Administrators IT Staff behavior (R, section 4.3); histo
 
 1. **FR-01 - Retrieve Actions for accessible Tickets** (R): Owned Requesters and permitted Staff/Admin can read the applicable Action lines.
 2. **FR-02 - Create Actions** (R): Staff/Admin can create an Action with the handout fields under exactly one Ticket.
-3. **FR-03 - Edit Actions** (R/P): Support view/edit mode; retain history according to D-05.
-4. **FR-04 - Assign Actions** (R/P): Support assignment and inactive-assignee rejection; eligible targets follow D-02.
-5. **FR-05 - Action lifecycle** (R/P): Support status transition, completion and cancellation; exact lifecycle follows D-01.
-6. **FR-06 - Automatic performer** (R/P): Derive performer from authenticated identity; attribution timing follows D-03.
+3. **FR-03 - Edit Actions** (R/A): Support view/edit mode; retain history according to D-05.
+4. **FR-04 - Assign Actions** (R/A): Support assignment and inactive-assignee rejection; eligible targets follow D-02.
+5. **FR-05 - Action lifecycle** (R/A): Support status transition, completion and cancellation; exact lifecycle follows D-01.
+6. **FR-06 - Automatic performer** (R/A): Set performer to the authenticated creator and keep it immutable; later actors are recorded only in D-05 audit events.
 7. **FR-07 - Conditional follow-up** (R): Require a nonblank Follow-up Note when Follow-Up Required is true.
 8. **FR-08 - Attachment Notes** (R/I): Provide notes describing relevant existing files without replacing attachment management.
-9. **FR-09 - Final Ticket transitions** (R/I/P): Retain the eight statuses and document the final approved transition matrix.
-10. **FR-10 - Backend resolution rule** (R/P): Enforce the approved resolution predicate even when clients bypass the UI.
+9. **FR-09 - Final Ticket transitions** (R/I/A): Retain the eight statuses and document the final approved transition matrix.
+10. **FR-10 - Backend resolution rule** (R/A): Enforce the approved resolution predicate even when clients bypass the UI.
 11. **FR-11 - Requester resolution indication** (R/I): Keep Problem Appears Resolved advisory and preserve its Public Comment behavior.
-12. **FR-12 - Requester Dashboard** (R/P): Summarize only authenticated Requester-owned Tickets using approved metrics.
-13. **FR-13 - Staff/Admin Dashboard** (R/P): Provide approved operational metrics, current-user Actions and recent/urgent Tickets.
-14. **FR-14 - Authoritative metrics and drill-down** (R/P): Calculate bounded responses on the backend with documented queries and destinations.
-15. **FR-15 - Concurrent/stale writes** (R/P): Prevent unnoticed overwriting of newer workflow changes; mechanism follows D-10.
-16. **FR-16 - Duplicate/failure protection** (R/P): Handle repeated clicks/retries safely and retain entered data after recoverable failures.
-17. **FR-17 - Role navigation and earlier screens** (R/I/P): Add Dashboard navigation while retaining permitted earlier screens; landing policy follows D-13.
+12. **FR-12 - Requester Dashboard** (R/A): Summarize only authenticated Requester-owned Tickets using approved metrics.
+13. **FR-13 - Staff/Admin Dashboard** (R/A): Provide approved operational metrics, current-user Actions and recent/urgent Tickets.
+14. **FR-14 - Authoritative metrics and drill-down** (R/A): Calculate bounded responses on the backend with documented queries and destinations.
+15. **FR-15 - Concurrent/stale writes** (R/A): Prevent unnoticed overwriting of newer workflow changes; mechanism follows D-10.
+16. **FR-16 - Duplicate/failure protection** (R/A): Handle repeated clicks/retries safely and retain entered data after recoverable failures.
+17. **FR-17 - Role navigation and earlier screens** (R/I/A): Add Dashboard navigation while retaining permitted earlier screens; landing policy follows D-13.
 18. **FR-18 - Feedback and accessibility** (R/I): Reuse Zen Green; provide meaningful states, keyboard operation, focus, labels and responsive layouts.
-19. **FR-19 - Migration, backfill and seed** (R/I/P): Preserve prior data and document recovery and repeatable demonstration fixtures.
+19. **FR-19 - Migration, backfill and seed** (R/I/A): Preserve prior data and document recovery and repeatable demonstration fixtures.
 20. **FR-20 - Labs 1-3 regression** (R/I): Preserve prior functionality except explicitly superseded rules and keep current regressions traceable.
-21. **FR-21 - Append-only evidence** (R/P): Demonstrate stable ordering and append-only behavior while supporting required editing; mechanism follows D-05/D-16.
+21. **FR-21 - Append-only evidence** (R/A): Demonstrate stable ordering and append-only behavior while supporting required editing; mechanism follows D-05/D-16.
 
 ## 5. Business Rules
 
@@ -64,34 +76,34 @@ Lab 4 explicitly grants Administrators IT Staff behavior (R, section 4.3); histo
 4. **BR-04** (R): Requesters do not create, assign, edit or transition Actions.
 5. **BR-05** (R/I): Requester Action visibility is restricted to owned Tickets and includes all current Action lines.
 6. **BR-06** (R): Staff/Admin operational permissions are enforced by the backend, not hidden controls.
-7. **BR-07** (R/P): New Action assignments reject inactive accounts; eligible roles and unassigned behavior await D-02.
-8. **BR-08** (R/P): Performed by is automatic; creator versus completion-actor semantics await D-03.
+7. **BR-07** (R/A): assignedTo may be null; assigned targets must be active IT Staff or Administrators, independently of Ticket Owner and performer (D-02).
+8. **BR-08** (R/A): Performed by is the authenticated creator, immutable after creation; later editors/status actors appear only in minimal append-only audit events.
 9. **BR-09** (R): Follow-Up Required implies a nonblank Follow-up Note.
-10. **BR-10** (P): Action input lengths, trimming, required Result conditions and Attachment Notes bounds await D-06.
-11. **BR-11** (R/P): Action transitions follow an approved matrix, not an invented implementation default.
-12. **BR-12** (P): Completion and cancellation validation follow D-06; a cancellation result/reason is proposed.
-13. **BR-13** (R/P): Editing must coexist with append-only evidence; audit representation and visibility await D-05.
-14. **BR-14** (R/P): Action ordering is stable; proposed immutable creation-time/ID ordering awaits D-16.
+10. **BR-10** (R/A): Description is trimmed, nonblank and at most 2000 characters; Result at most 2000; Follow-up Note trimmed and at most 1000, nonblank when required; Attachment Notes optional and at most 1000 (D-06).
+11. **BR-11** (R/A): Action lifecycle is PLANNED -> COMPLETED/CANCELLED; terminal Actions do not reopen. Create another Action for additional work (D-01).
+12. **BR-12** (R/A): Result is required for COMPLETED and CANCELLED Actions (D-06).
+13. **BR-13** (R/A): Editing must coexist with append-only evidence; minimal audit events record the acting user; completed-Action corrections follow D-05 without reopening status.
+14. **BR-14** (R/A): Action ordering is immutable createdAt ASC, then ID ASC; edits do not reorder lines (D-16).
 15. **BR-15** (R/I): Ticket statuses remain New, Open, In Progress, Waiting for Requester, Resolved, Closed, Reopened and Cancelled.
 16. **BR-16** (R/I): Requester resolution indication does not formally resolve or close a Ticket.
-17. **BR-17** (R/P): Backend resolution validation and related writes are concurrency-safe; blocking conditions await D-07.
-18. **BR-18** (R/P): Legacy zero-action Ticket behavior is documented; proposed continued transitionability awaits D-08.
-19. **BR-19** (P): New work-affecting Actions on terminal Tickets follow an approved D-09 policy.
-20. **BR-20** (R/P): Stale updates cannot unknowingly overwrite newer work; token scope, compatibility and error code await D-10.
-21. **BR-21** (R/P): Repeated creation cannot produce accidental duplicates; request-key semantics await D-11.
+17. **BR-17** (R/A): Atomically recheck the gate for both RESOLVED and CLOSED: any PLANNED Action or COMPLETED Action with Follow-Up Required true blocks; CANCELLED Actions do not (D-07).
+18. **BR-18** (R/A): Legacy zero-action Tickets retain existing permitted transitions; zero Actions alone does not block, and no historical Actions are fabricated (D-08).
+19. **BR-19** (R/A): No Action writes on RESOLVED, CLOSED or CANCELLED Tickets. Reopen RESOLVED/CLOSED before work or corrections; CANCELLED remains terminal (D-09).
+20. **BR-20** (R/A): Every Ticket workflow/Action mutation supplies the expected single Ticket workflow revision; mismatch returns 409, success returns the new revision. Non-workflow APIs need no token (D-10).
+21. **BR-21** (R/A): Action creation uses a per-operation request key; identical replay returns the original result and different-payload reuse returns 409 (D-11).
 22. **BR-22** (R): Dashboard values are calculated from authoritative backend data, not browser totals.
-23. **BR-23** (R/P): Each metric has an identity scope, date boundary, empty behavior and drill-down; formulas await D-12.
-24. **BR-24** (R/I/P): Migration and seed behavior preserve earlier records and relationships; new fixture policy awaits D-14.
-25. **BR-25** (I/R/P): Public Comments remain shared; Internal Notes remain restricted; Action audit visibility is separately approved.
+23. **BR-23** (R/A): Dashboard counts use current authoritative state; recent Ticket previews contain up to five sorted updatedAt DESC, id DESC, without a date-window cutoff. My Actions is assigned PLANNED work only (D-12).
+24. **BR-24** (R/A): Use additive migrations, stable seed identities and preservation-oriented fixtures; preserve earlier records and rehearse migration/recovery on disposable test data (D-14).
+25. **BR-25** (I/R/A): Public Comments remain shared; Internal Notes remain restricted. Minimal audit events are stored without a history browser or separate actor-history system (D-05).
 26. **BR-26** (I/R): Apply changes from the Lab in which they became effective and preserve historical documentation/artifacts.
 
 ### 5.1 Authorization Rules
 
-The operation matrix is specified in [api-spec.md](api-spec.md#2-authorization-matrix). Backend enforcement is mandatory (R); hidden buttons are only feedback. Authentication, password-lock and safe-error conventions are inherited (I). Exact new error codes and audit visibility remain D-05/D-15 (P).
+The operation matrix is specified in [api-spec.md](api-spec.md#2-authorization-matrix). Backend enforcement is mandatory (R); hidden buttons are only feedback. Authentication, password-lock and safe-error conventions are inherited (I). D-05 defines minimal internal audit events without a history browser; D-15 fixes safe error codes.
 
 ### 5.2 Ticket Transition Starting Point
 
-The following is the inherited Lab 3 matrix, not a silently approved new policy:
+Retain the inherited Lab 3 paths below, with the approved D-07 resolution/closure gate and D-10 revision checks. Authorized formal transitions are IT Staff/Admin operations; Requester indications remain advisory.
 
 | Current Ticket status | Inherited targets                                       |
 | --------------------- | ------------------------------------------------------- |
@@ -104,81 +116,83 @@ The following is the inherited Lab 3 matrix, not a silently approved new policy:
 | REOPENED              | IN_PROGRESS, WAITING_FOR_REQUESTER, RESOLVED, CANCELLED |
 | CANCELLED             | None                                                    |
 
-R fixes the eight status values; I supplies the starting paths. P recommends preserving those paths and adding the approved resolution/concurrency overlay. D-07 defines blocking work and whether closure repeats validation; D-08 defines zero-action behavior. The handout requires a resolution rule, but does not provide a complete predicate. Do not treat unfinished-work/follow-up assumptions as settled.
+R fixes the eight statuses; I supplies the preserved paths. A supplies the gate and concurrency overlay: recheck both RESOLVED and CLOSED; zero Actions alone never blocks. The blocking predicate is the user-approved D-07 choice, not a predicate supplied by the handout.
 
-### 5.3 Actions Taken Lifecycle Proposal
+### 5.3 Approved Actions Taken Lifecycle and Audit Rules
 
-D-01 proposes PLANNED -> IN_PROGRESS or CANCELLED; IN_PROGRESS -> COMPLETED or CANCELLED; terminal statuses do not reopen. D-05 separately governs audited amendments. These labels/transitions are P, not fixed handout vocabulary.
-D-07 proposes blocking unfinished Actions and completed Actions with follow-up still required, excluding cancelled Actions. If terminal amendments are allowed, clearing follow-up must be possible without reopening terminal Action status. D-09 defines terminal Ticket write restrictions and must not silently change existing comment/attachment behavior.
+D-01: PLANNED -> COMPLETED/CANCELLED. COMPLETED and CANCELLED are terminal; additional work requires another Action. D-03/D-04 preserve the authenticated creator and server creation time immutably.
+D-05: minimal append-only events record Action ID, actor, timestamp, event type and changed fields. No full snapshots, history browser or separate actor-history system. COMPLETED Actions permit only audited corrections to Result, Follow-Up Required, Follow-up Note and Attachment Notes; status, performer and creation time do not change. CANCELLED Actions have no approved correction exception.
+D-07: PLANNED Actions and COMPLETED Actions with Follow-Up Required true block both resolution and closure; CANCELLED Actions do not. Clearing follow-up through a validated audited correction removes that blocker without reopening the Action. A true flag still requires a nonblank note.
+D-09: all Action writes, including these corrections, are forbidden when the parent Ticket is RESOLVED, CLOSED or CANCELLED. Reopen RESOLVED/CLOSED first; CANCELLED remains terminal. Existing Public Comment, Internal Note and Attachment behavior is preserved.
 
-### 5.4 Dashboard Calculation Candidates
+### 5.4 Approved Dashboard Calculations
 
-All following formulas are P under D-12; R requires authoritative, concise, ownership-safe metrics with defined empty behavior and practical drill-downs.
+D-12 approves current-state counts, five recent Tickets and one assigned-PLANNED My Actions preview. The table preserves the concise calculation choices in this contract; these formulas are implementation choices (A). Counts are authoritative backend queries, empty results are zero/empty, and drill-downs retain the same scope.
 
-| Metric                            | Candidate query scope                                                                     | Candidate drill-down                            |
+| Metric                            | Query scope                                                                     | Drill-down                            |
 | --------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------- |
 | Requester active Tickets          | requesterId = session user; status in NEW/OPEN/IN_PROGRESS/WAITING_FOR_REQUESTER/REOPENED | My Tickets with the same active set             |
 | Waiting for Requester             | owned Tickets; currentStatus = WAITING_FOR_REQUESTER                                      | Matching My Tickets filter                      |
 | Resolved Tickets                  | owned Tickets; currentStatus = RESOLVED                                                   | Matching My Tickets filter                      |
-| Recent Requester Tickets          | owned; updatedAt in approved window; up to five                                           | Owned detail or identically scoped list         |
+| Recent Requester Tickets          | owned; five most recently updated, without a date-window cutoff                                           | Owned detail or identically scoped list         |
 | Unassigned operational Tickets    | active set; assignedStaffId is null                                                       | Unassigned active queue                         |
 | My operational Tickets            | active set; assignedStaffId = authenticated Staff/Admin                                   | Current-owner active queue                      |
-| Status/IT Priority counts         | group approved operational scope by status/priority                                       | Queue with the same scope and bucket            |
-| My Actions                        | separate assigned unfinished work from performer-attributed work                          | Approved Action panel/Ticket Detail destination |
-| Recent/urgent operational Tickets | bounded approved active/recent/priority scope                                             | Matching queue or Ticket Detail                 |
+| Status/IT Priority counts         | group operational Tickets by current status/priority                                       | Queue with the same scope and bucket            |
+| My Actions                        | PLANNED Actions assigned to the authenticated IT Staff/Administrator                          | Parent Ticket Detail Actions Taken area |
+| Recent/urgent operational Tickets | five most recently updated accessible operational Tickets                                             | Matching queue or Ticket Detail                 |
 
-D-12 proposes one server asOf and a rolling interval [asOf - 7 days, asOf), UTC storage/comparison and Asia/Bangkok presentation. This is not a calendar-day window. Proposed ordering: recent previews by updatedAt descending then ID descending; urgent preview priority ranking followed by updatedAt and ID. Exact My Actions scope, urgency set, filters and limits require approval.
-Do not call updatedAt a resolution timestamp. A truly recently-resolved metric needs a separately approved trustworthy timestamp/backfill design; current Resolved count is the lower-complexity proposal. Zero data returns zero counts/empty previews; failed queries must not masquerade as zeros (R).
+D-12 uses current-state counts and up to five most recently updated Tickets without a date-window cutoff, sorted updatedAt DESC, id DESC. Requester scope is authenticated ownership; Staff/Admin scope is accessible operational Tickets. Active counts use the explicit status set above. My Actions contains only PLANNED Actions assigned to the authenticated Staff/Admin, with links to parent Ticket Detail; historical performer-only work is excluded. Use the recent-Tickets option of the approved recent/urgent preview, without a separate urgency-ranking feature.
+Do not call updatedAt a resolution timestamp. The approved metric is current Resolved count; dated resolution analytics are outside this contract. Zero data returns zero counts/empty previews; failed queries must not masquerade as zeros (R).
 
 ## 6. UI Specification Summary
 
 R fields: Action Date/Time, Action Description, Result, Performed by (auto), Follow-Up Required, conditional Follow-up Note and Attachment Notes. Assignment and lifecycle operations are required by submission Part 6. I preserves existing attachment storage/download/removal; Attachment Notes do not introduce a new upload system.
-D-02/D-03/D-04/D-06 decide assignment, attribution, date and validation semantics. [ui-spec.md](ui-spec.md) defines modes, layout, feedback and accessibility; it does not implement screens.
+D-03 sets immutable authenticated-creator attribution; D-04 uses immutable server-generated creation time with no editable work-date field. D-02 allows null or active Staff/Admin assignment; D-06 fixes text bounds and terminal Result requirements. [ui-spec.md](ui-spec.md) defines modes, layout, feedback and accessibility; it does not implement screens.
 
 ## 7. Data Changes
 
 R: preserve Users, Categories, Related Systems, Tickets, ownership, Attachments and file references, Public Comments and Internal Notes. Document legacy zero-action behavior, dashboard treatment and tested recovery; justify at least two database-design decisions.
 
-P/D-14: additive Action relationships, audit records and version fields; stable seed identities; no fabricated historical work/events; new fixtures cover zero/one/multiple Actions, statuses/priorities/ownership and zero/nonzero metrics. Proposed indexes support Ticket/stable ordering and assignee/status lookup; proposed versions support conflict detection. These are conceptual decisions only, not Prisma or SQL definitions.
+A/D-14: additive Action relationships, minimal append-only audit events and one Ticket workflow revision; stable seed identities; no fabricated historical work/events; new fixtures cover zero/one/multiple Actions, statuses/priorities/ownership and zero/nonzero metrics. Indexes should support Ticket/stable ordering and assignee/status lookup; one Ticket workflow revision supports conflict detection. These approved conceptual decisions are not Prisma or SQL implementation.
 
-P/D-10: serialize related workflow writes through the parent Ticket; validate expected versions and the resolution predicate atomically. Approve whether new version tokens are mandatory for existing operational endpoints and how current clients/tests migrate.
+A/D-10: serialize related workflow writes through the parent Ticket; validate one expected Ticket workflow revision and the resolution predicate atomically. Every Ticket workflow and Action mutation must send the expected revision; return 409 on mismatch and the new revision on success. Non-workflow APIs retain their existing contract without this token. Current operational clients/tests must be updated in the implementation issues.
 
 Existing migration/schema mismatch is a separate prerequisite. Proposed repair sequence: compare fresh migration output with Prisma and a disposable copy of development; identify all differences; approve a forward repair; rehearse preservation/recovery; separately approve any development history reconciliation. Never edit historical migration files or blindly mark migrations applied as part of Issue 18.
 
-Recovery proposal (P): verified backups and application-version compatibility, rehearsed on disposable data; do not assume new work may be deleted to roll back. Existing seed password/Ticket resets are an observed policy, not an explicit preservation prohibition in the handout; approve new Lab 4 seed behavior without silently rewriting earlier policy.
+Recovery plan (A): verified backups and application-version compatibility, rehearsed on disposable data; do not assume new work may be deleted to roll back. Lab 4 seed fixtures use stable identities and preservation-oriented writes; repeated runs must not reset unrelated existing passwords, Ticket states or ownership. Historical seed evidence remains intact; implementation must verify the approved safe repeated-run behavior.
 
 ## 8. API Contract
 
-[api-spec.md](api-spec.md) contains proposed paths, payload field responsibilities, response/error contracts and examples of conflict scenarios. Paths/shapes/tokens are P/D-15/D-10/D-11. Existing protected functionality and authentication remain I unless R explicitly extends permissions.
+[api-spec.md](api-spec.md) contains approved paths, payload field responsibilities, response/error contracts and examples of conflict scenarios. Paths/shapes/tokens are A/D-15/D-10/D-11. Existing protected functionality and authentication remain I unless R explicitly extends permissions.
 
 ## 9. Acceptance Criteria
 
-1. **AC-01** (R/P): Given permitted Staff/Admin and valid approved data, when an Action is created, then it belongs to the correct Ticket and records authenticated attribution.
+1. **AC-01** (R/A): Given permitted Staff/Admin and valid approved data, when an Action is created, then it belongs to the correct Ticket and records immutable authenticated-creator attribution and server-generated creation time.
 2. **AC-02** (R): Given one Ticket and different permitted Staff members, when Actions are recorded, then work attribution can differ from the primary Ticket Owner.
-3. **AC-03** (R/I/P): Given a Requester, when Action access is requested, then owned-ticket reads are permitted and unauthorized reads/writes are rejected safely.
-4. **AC-04** (R/P): Given missing, blank or out-of-bound Action input, when submitted, then approved validation errors identify the affected fields.
+3. **AC-03** (R/I/A): Given a Requester, when Action access is requested, then owned-ticket reads are permitted and unauthorized reads/writes are rejected safely.
+4. **AC-04** (R/A): Given missing, blank or out-of-bound Action input, when submitted, then approved validation errors identify the affected fields.
 5. **AC-05** (R): Given Follow-Up Required is true and the note is blank, when submitted, then the operation is rejected without saving invalid data.
-6. **AC-06** (R/P): Given an inactive or otherwise ineligible assignee, when assignment is requested, then it is rejected according to the approved policy.
-7. **AC-07** (R/P): Given an existing Action, when an approved edit succeeds, then list ordering remains stable and required previous history remains available.
-8. **AC-08** (R/P): Given an Action state, when a transition is requested, then only transitions from the approved matrix succeed.
-9. **AC-09** (R/P): Given completion or cancellation, when submitted, then the approved Result/follow-up conditions are enforced.
-10. **AC-10** (R/P): Given a stale update or competing workflow changes, when writes race, then newer work is not silently overwritten.
-11. **AC-11** (R/P): Given the same logical create operation is clicked/retried repeatedly, when requests arrive, then accidental duplicate Actions are prevented.
-12. **AC-12** (R/I/P): Given a Ticket status, when a transition is requested, then the final approved eight-status matrix is enforced.
-13. **AC-13** (R/P): Given Actions that block the approved resolution rule, when a direct API resolution request is sent, then resolution is rejected atomically.
-14. **AC-14** (R/P): Given a legacy Ticket without Actions, when workflow operations occur, then the approved zero-action policy applies without fabricated backfill.
+6. **AC-06** (R/A): Given an inactive or otherwise ineligible assignee, when assignment is requested, then it is rejected according to the approved policy.
+7. **AC-07** (R/A): Given an existing Action, when an approved edit succeeds, then list ordering remains stable and a minimal append-only event records the actor; permitted corrections to completed Result/follow-up/Attachment Notes preserve COMPLETED status, performer and creation time.
+8. **AC-08** (R/A): Given an Action state, when a transition is requested, then only transitions from the approved matrix succeed.
+9. **AC-09** (R/A): Given completion or cancellation, when submitted, then the approved Result/follow-up conditions are enforced.
+10. **AC-10** (R/A): Given a stale update or competing workflow changes, when writes race, then a revision mismatch returns 409 without overwriting newer work; success returns the new revision.
+11. **AC-11** (R/A): Given the same logical create operation is clicked/retried repeatedly, when requests arrive, then an identical request-key replay returns the original result; different-payload reuse returns 409.
+12. **AC-12** (R/I/A): Given a Ticket status, when a transition is requested, then the final approved eight-status matrix is enforced.
+13. **AC-13** (R/A): Given Actions that block the approved resolution rule, when a direct API resolution or closure request is sent, then that transition is rejected atomically; after an authorized audited correction clears a completed Action's follow-up blocker, that Action remains COMPLETED and no longer blocks resolution.
+14. **AC-14** (R/A): Given a legacy Ticket without Actions, when workflow operations occur, then the approved zero-action policy applies without fabricated backfill.
 15. **AC-15** (R/I): Given an owned Ticket, when its Requester indicates that the problem appears resolved, then the Public Comment behavior remains and formal status is unchanged.
 16. **AC-16** (R): Given an Administrator, when approved Staff operations are requested, then Lab 4 permissions apply while User Management remains available.
-17. **AC-17** (R/P): Given a Requester Dashboard request, when its metrics/previews are returned, then only authenticated ownership and approved calculations are used.
-18. **AC-18** (R/P): Given a Staff/Admin Dashboard request, when operational and current-user Action data is returned, then the approved calculations and actor/assignee semantics are correct.
-19. **AC-19** (R/P): Given a dashboard card or preview, when its drill-down is followed, then the destination represents the same documented scope and filters.
+17. **AC-17** (R/A): Given a Requester Dashboard request, when its metrics/previews are returned, then only authenticated ownership and approved calculations are used.
+18. **AC-18** (R/A): Given a Staff/Admin Dashboard request, when operational and current-user Action data is returned, then calculations are correct and My Actions contains only PLANNED Actions assigned to that authenticated user, excluding historical performed work.
+19. **AC-19** (R/A): Given a dashboard card or preview, when its drill-down is followed, then the destination represents the same documented scope and filters.
 20. **AC-20** (R): Given loading, zero data, recoverable failure or conflict, when the UI responds, then it shows the correct state and preserves recoverable input.
-21. **AC-21** (R/I/P): Given earlier-lab data and repeat seed/migration runs in isolated test data, when upgraded, then approved preservation, fixture and recovery checks pass.
+21. **AC-21** (R/I/A): Given earlier-lab data and repeat seed/migration runs in isolated test data, when upgraded, then approved preservation, fixture and recovery checks pass.
 22. **AC-22** (R/I): Given the current final application, when complete Labs 1-3 regressions run, then inherited behavior passes except explicitly superseded expectations.
 23. **AC-23** (R/I): Given keyboard users, long content and required viewports, when screens are exercised, then approved focus, style, responsive and accessibility checks pass.
-24. **AC-24** (R/P): Given a final evidence run, when artifacts are reviewed, then required screen/viewport captures and AC-to-run traceability are complete without replacing earlier evidence.
+24. **AC-24** (R/A): Given a final evidence run, when artifacts are reviewed, then required screen/viewport captures and AC-to-run traceability are complete without replacing earlier evidence.
 
-All ACs dependent on P decisions are provisional until those decisions are approved. [tests.md](tests.md) maps every AC to planned evidence; no proposed feature has passed execution evidence yet.
+All ACs reflect the user-approved D-01 through D-16 choices. [tests.md](tests.md) maps every AC to planned evidence; no Lab 4 feature has passed execution evidence yet.
 
 ## 10. Definition of Done
 
@@ -186,7 +200,7 @@ All ACs dependent on P decisions are provisional until those decisions are appro
 
 - [ ] All six documents reviewed and mutually consistent.
 - [ ] Every FR/BR/AC has source provenance and planned test traceability.
-- [ ] All blocking P decisions explicitly approved; no assumption masquerades as a fixed rule.
+- [x] D-01 through D-16 explicitly approved by the user on 2026-10-15; implementation choices remain distinguished from handout mandates.
 - [ ] Baseline limitations, evidence dates and remediation ownership recorded.
 - [ ] Reviewer record remains an honest placeholder until reviews happen.
 - [ ] AI-use record describes actual prompts and leaves personal reflection to the author.
@@ -207,34 +221,32 @@ Course delivery (R): peer review, Kanban evidence, feature PRs into lab4-staging
 
 ## 11. Assumptions and Decisions
 
-### 11.1 Proposed Decisions Requiring Approval
+### 11.1 Approved Decision Register
 
-| Decision | Topic                            | Recommendation / unresolved point                                                                                                                                                  | Handout source                   | Status           |
-| -------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ---------------- |
-| D-01     | Action statuses/transitions      | PLANNED -> IN_PROGRESS/CANCELLED; IN_PROGRESS -> COMPLETED/CANCELLED; no terminal status reopening.                                                                                | 3.4, 6.1, 8.3, submission Part 6 | PENDING APPROVAL |
-| D-02     | Assignment                       | Separate assignee from Ticket Owner; active IT_STAFF/ADMINISTRATOR targets; decide whether unassigned Actions are allowed.                                                         | 4.3, 4.4, submission Part 6      | PENDING APPROVAL |
-| D-03     | Automatic performer              | Capture authenticated creator immutably and record editors/transition actors separately; confirm whether completion should determine performer instead.                            | 3, 8.3, 9.1                      | PENDING APPROVAL |
-| D-04     | Action date/time                 | Server creation time for the required field; separately approve any editable actual-work date or future-date rule.                                                                 | 3, 8.3                           | PENDING APPROVAL |
-| D-05     | Editing and append-only evidence | Current Action plus immutable revisions, no deletion; approve terminal amendments and role-specific history visibility.                                                            | 8.3, submission Parts 6-7        | PENDING APPROVAL |
-| D-06     | Validation                       | Description 5-2000; Result up to 2000 and required for completion/cancellation; Follow-up Note required when true and up to 1000; Attachment Notes optional up to 1000; trim text. | 4.1, 8.3, 8.5                    | PENDING APPROVAL |
-| D-07     | Resolution gate                  | Block PLANNED/IN_PROGRESS Actions and completed Actions with unresolved follow-up; cancelled Actions do not block; decide whether closure repeats the check.                       | 4.5, 6.1, 9 specification table  | PENDING APPROVAL |
-| D-08     | Legacy zero-action Tickets       | Preserve existing permitted transitions; do not require invented historical work or a minimum one-Action rule.                                                                     | 5.2                              | PENDING APPROVAL |
-| D-09     | Terminal-ticket Action writes    | Require reopening Resolved/Closed Tickets before new work; deny work-affecting writes on Cancelled Tickets, which have no inherited reopen path; amendment exceptions remain open. | 4.5, 6.1, 8.3                    | PENDING APPROVAL |
-| D-10     | Concurrency and compatibility    | Action version and parent Ticket workflow version with transactions; approve token requirements, conflict payloads and changes to current-client requests.                         | 5.1, 6.1                         | PENDING APPROVAL |
-| D-11     | Creation retries                 | Per-operation request key; identical replay returns the original result, changed payload with the same key produces a conflict.                                                    | 8.5                              | PENDING APPROVAL |
-| D-12     | Metrics/time/order               | Use section 5.4 formulas, rolling seven days, one server asOf, UTC comparisons, Asia/Bangkok display, preview limit five and deterministic ties.                                     | 4.6, 6.2, 8.1-8.2                | PENDING APPROVAL |
-| D-13     | Navigation/Admin metrics         | Add Dashboard links; approve initial landing page; initially omit optional Admin account-count cards.                                                                              | 4.6, 7                           | PENDING APPROVAL |
-| D-14     | Schema/backfill/seed/recovery    | Additive data evolution, no invented historical Actions/events, stable seed identities, preservation-oriented new fixtures and backup-based recovery rehearsal.                    | 5.1-5.3                          | PENDING APPROVAL |
-| D-15     | API details and safe errors      | Approve proposed paths/payloads, validation response shape, conflict codes and missing/unowned resource behavior against inherited safe-error rules.                               | 6, 6.1-6.2                       | PENDING APPROVAL |
-| D-16     | Stable Action ordering           | Immutable createdAt ascending, then ID ascending; editing does not reorder a line.                                                                                                 | submission Part 7                | PENDING APPROVAL |
+**Approval evidence:** The user explicitly approved D-01 through D-16 in this session on 2026-10-15. Approval covers the choices below; it does not claim implementation or test completion.
 
-No decision is marked approved merely because Issue 18 document creation was authorized. Record approval evidence and date here before using a P rule for implementation.
-
-Please approve or revise D-01 through D-16 before feature implementation; none is silently accepted.
+| Decision | Topic | Approved choice | Handout source | Status |
+| --- | --- | --- | --- | --- |
+| D-01 | Action lifecycle | PLANNED -> COMPLETED/CANCELLED; COMPLETED/CANCELLED are terminal and never reopen. Create another Action for more work. | 9, submission Part 6 | APPROVED |
+| D-02 | Assignment | assignedTo may be null; assigned targets must be active IT Staff/Admin. Assignment is independent of Ticket Owner and performer. | 4.3-4.4, submission Part 6 | APPROVED |
+| D-03 | Automatic performer | Immutable authenticated Action creator; later edits/status actors appear only in minimal D-05 audit events. | 3, 8.3, 9.1 | APPROVED |
+| D-04 | Action Date/Time | Immutable server-generated creation time; no separate editable work date. | 3, 8.3 | APPROVED |
+| D-05 | Minimal audit events | Each append-only event records Action ID, actor, timestamp, event type and changed fields. No full snapshots/history browser. COMPLETED corrections allow only Result, Follow-Up Required, Follow-up Note and Attachment Notes; D-09 applies. | 8.3, submission Parts 6-7 | APPROVED |
+| D-06 | Validation | Description trimmed/nonblank/max 2000; Result max 2000 and required for COMPLETED/CANCELLED; Follow-up Note trimmed/max 1000/nonblank when required; Attachment Notes optional/max 1000. | 4.1, 8.3, 8.5 | APPROVED |
+| D-07 | Resolution/closure gate | Any PLANNED Action or COMPLETED Action with Follow-Up Required true blocks both RESOLVED and CLOSED; recheck atomically. CANCELLED Actions do not block. Audited completed corrections can clear follow-up without reopening. | 4.5, 6.1 | APPROVED |
+| D-08 | Legacy zero-action Tickets | Retain existing permitted transitions; zero Actions alone is not a blocker. Do not fabricate historical Actions. | 5.2 | APPROVED |
+| D-09 | Terminal-Ticket Action writes | No Action writes on RESOLVED/CLOSED/CANCELLED Tickets. Reopen RESOLVED/CLOSED before work or corrections; CANCELLED remains terminal. | 4.5, 6.1, 8.3 | APPROVED |
+| D-10 | Workflow revision | One Ticket workflow revision protects all Ticket workflow/Action mutations; each sends expected revision. Mismatch 409; success returns new revision. Non-workflow APIs need no token. | 5.1, 6.1 | APPROVED |
+| D-11 | Creation request key | Per-operation Action creation key; identical replay returns original result; changed-payload reuse returns conflict (409). | 8.5 | APPROVED |
+| D-12 | Dashboards | Requester: current-state owned counts and five most recently updated owned Tickets. Staff/Admin: operational counts, five recent/urgent Tickets and My Actions = PLANNED Actions assigned to current user. Recent order updatedAt DESC, id DESC. | 4.6, 6.2, 8.1-8.2, submission Part 5 | APPROVED |
+| D-13 | Navigation | Role-appropriate Dashboard links and active-page indication; preserve initial landing pages; omit optional Admin account counts. | 4.6, 7 | APPROVED |
+| D-14 | Migration/seed/recovery | Additive evolution; preserve earlier data; no fabricated historical Actions/events; stable seed identities and preservation-oriented fixtures. Rehearse migration/recovery on disposable test data; never rewrite historical migrations. | 5.1-5.3 | APPROVED |
+| D-15 | API/safe errors | Keep nested Action and dashboard endpoints, inherited safe envelopes; 400 validation, 401 unauthenticated, 403 forbidden role, ownership-safe 404, 409 stale/conflict/resolution-gate. | 6-6.2 | APPROVED |
+| D-16 | Stable Action order | Immutable createdAt ASC, then ID ASC; editing does not reorder an Action. | submission Part 7 | APPROVED |
 
 ### 11.2 Baseline Limitations and Prerequisites
 
-**Gate: BLOCKED for feature implementation; documentation review can proceed.** Snapshot observed 2026-10-15; no fresh automated suites or database audit were run for Issue 18.
+**Design decisions: APPROVED. Baseline gate: BLOCKED until the recorded prerequisites are verified; documentation review can proceed.** Snapshot observed 2026-10-15; no fresh automated suites or database audit were run for Issue 18.
 
 - Remote main/reference origin/main: 83bfc8f, readiness PR #46 merged; original local main remains 74e5144, four commits behind.
 - Local lab4-staging and feature/18-lab4-contract-baseline created from 83bfc8f for this documentation task; no remote Lab 4 branch or push created; no origin/main upstream is assigned to staging.
@@ -249,7 +261,7 @@ Please approve or revise D-01 through D-16 before feature implementation; none i
 - Committed evidence: Lab 2 has 19 PNGs including 9 baseline viewport images; Lab 3 has 31 PNGs including 12 baseline images. Extra images do not substitute for baseline structure.
 - Existing test files: server Lab 1/2/3 = 2/5/11; client = 1/4/7; E2E = 1 Lab 2 and 3 Lab 3 specs. Prior documentation records 98 server, 50 client and 21 E2E passes; these are historical results, not a new Issue 18 gate pass.
 
-Gate release prerequisites: approve this contract; confirm protected-operation matrix and P decisions; verify a clean authoritative staging baseline in an isolated checkout; separately resolve migration prerequisites; verify regression/build/E2E commands against isolated test data. Do not sweep unrelated working-tree changes into the Issue 18 commit.
+Gate release prerequisites: review the updated contract and verify its approved protected-operation matrix; verify a clean authoritative staging baseline in an isolated checkout; separately resolve migration prerequisites; verify regression/build/E2E commands against isolated test data. Do not sweep unrelated working-tree changes into the Issue 18 commit.
 
 ### 11.3 Earlier Contract References
 
