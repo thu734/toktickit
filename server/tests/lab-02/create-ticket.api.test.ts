@@ -1,3 +1,4 @@
+import { loginAsUser } from "../helpers/login.js";
 import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import request from "supertest";
 import { app } from "../../src/app.js";
@@ -57,6 +58,7 @@ describe("Lab 2 Reference Data APIs & Requester Exclusion (API-11)", () => {
 
 describe("POST /api/tickets Creation & Validation (API-01, API-02)", () => {
   let requester1Id: number;
+  let requester1Agent: Awaited<ReturnType<typeof loginAsUser>>;
 
   beforeEach(async () => {
     const requesters = await getPrisma().user.findMany({
@@ -64,6 +66,7 @@ describe("POST /api/tickets Creation & Validation (API-01, API-02)", () => {
       orderBy: { id: "asc" },
     });
     requester1Id = requesters[0].id;
+    requester1Agent = await loginAsUser(requester1Id);
     await getPrisma().user.updateMany({
       where: { id: requester1Id },
       data: { mustChangePassword: false },
@@ -71,10 +74,9 @@ describe("POST /api/tickets Creation & Validation (API-01, API-02)", () => {
   });
 
   it("POST /api/tickets creates a valid ticket with official Ticket Number (API-01, AC-01)", async () => {
-    const res = await request(app)
+    const res = await requester1Agent
       .post("/api/tickets")
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", String(requester1Id))
       .send({
         categoryId: 1,
         relatedSystemId: 1,
@@ -105,10 +107,9 @@ describe("POST /api/tickets Creation & Validation (API-01, API-02)", () => {
     expect(resNoHeader.status).toBe(400);
 
     // 2. Summary too short (< 5 chars) -> 400 Bad Request
-    const resShortSummary = await request(app)
+    const resShortSummary = await requester1Agent
       .post("/api/tickets")
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", String(requester1Id))
       .send({
         categoryId: 1,
         relatedSystemId: 1,
@@ -119,10 +120,9 @@ describe("POST /api/tickets Creation & Validation (API-01, API-02)", () => {
     expect(resShortSummary.status).toBe(400);
 
     // 3. Description too short (< 10 chars) -> 400 Bad Request
-    const resShortDesc = await request(app)
+    const resShortDesc = await requester1Agent
       .post("/api/tickets")
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", String(requester1Id))
       .send({
         categoryId: 1,
         relatedSystemId: 1,
@@ -133,10 +133,9 @@ describe("POST /api/tickets Creation & Validation (API-01, API-02)", () => {
     expect(resShortDesc.status).toBe(400);
 
     // 4. Invalid priority enum -> 400 Bad Request
-    const resInvalidPriority = await request(app)
+    const resInvalidPriority = await requester1Agent
       .post("/api/tickets")
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", String(requester1Id))
       .send({
         categoryId: 1,
         relatedSystemId: 1,

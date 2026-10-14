@@ -114,7 +114,6 @@ test.describe("E2E-01: Full Authentication & Password Change E2E Workflow (AC-01
     page,
   }, testInfo) => {
     const isDesktop = testInfo.project.name === "Desktop Chrome";
-    if (!isDesktop) return;
 
     await page.goto("/");
     const signInBtn = page.getByRole("button", { name: /sign in/i });
@@ -130,28 +129,34 @@ test.describe("E2E-01: Full Authentication & Password Change E2E Workflow (AC-01
     // 1. Invalid credentials
     await page.getByLabel(/email address/i).fill("jennifer.a@toktickit.local");
     await page.locator("#password").fill("CompletelyWrongPassword999!");
+    const invalidLogin = page.waitForResponse((response) =>
+      response.url().endsWith("/api/auth/login") && response.request().method() === "POST"
+    );
     await signInBtn.click();
+    expect((await invalidLogin).status()).toBe(401);
 
     const errAlert = page.locator(".alert-danger");
     await expect(errAlert).toBeVisible({ timeout: 5000 });
     await expect(errAlert).toContainText(/invalid email or password/i);
 
-    await page.screenshot({
-      path: path.join(dirPath, "invalid-login.png"),
-      fullPage: true,
-    });
+    if (isDesktop) {
+      await page.screenshot({ path: path.join(dirPath, "invalid-login.png"), fullPage: true });
+    }
 
     // 2. Inactive account handling (inactive.staff@toktickit.local)
     await page.getByLabel(/email address/i).fill("inactive.staff@toktickit.local");
     await page.locator("#password").fill("Initial123!");
+    const inactiveLogin = page.waitForResponse((response) =>
+      response.url().endsWith("/api/auth/login") && response.request().method() === "POST"
+    );
     await signInBtn.click();
+    expect((await inactiveLogin).status()).toBe(401);
 
     await expect(errAlert).toBeVisible({ timeout: 5000 });
     await expect(errAlert).toContainText(/invalid email or password/i);
 
-    await page.screenshot({
-      path: path.join(dirPath, "inactive-account.png"),
-      fullPage: true,
-    });
+    if (isDesktop) {
+      await page.screenshot({ path: path.join(dirPath, "inactive-account.png"), fullPage: true });
+    }
   });
 });

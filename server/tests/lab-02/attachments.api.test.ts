@@ -1,3 +1,4 @@
+import { loginAsUser } from "../helpers/login.js";
 import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import request from "supertest";
 import path from "path";
@@ -9,7 +10,9 @@ const CSRF_HEADER = { "X-Requested-With": "XMLHttpRequest" };
 
 describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Ownership Security (API-06, API-07, API-08, API-09, API-10, API-12)", () => {
   let requester1Id: number;
+  let requester1Agent: Awaited<ReturnType<typeof loginAsUser>>;
   let requester2Id: number;
+  let requester2Agent: Awaited<ReturnType<typeof loginAsUser>>;
   let ticket1Id: number;
   let samplePdfPath: string;
   let sampleTxtPath: string;
@@ -23,7 +26,9 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
       orderBy: { id: "asc" },
     });
     requester1Id = requesters[0].id;
+    requester1Agent = await loginAsUser(requester1Id);
     requester2Id = requesters[1].id;
+    requester2Agent = await loginAsUser(requester2Id);
 
     const cat = await prisma.category.findFirst({ where: { isActive: true } });
     const sys = await prisma.relatedSystem.findFirst({ where: { isActive: true } });
@@ -64,10 +69,9 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
   });
 
   it("POST /api/tickets/:id/attachments uploads valid PDF file (API-06, AC-04, BR-15, BR-18)", async () => {
-    const res = await request(app)
+    const res = await requester1Agent
       .post(`/api/tickets/${ticket1Id}/attachments`)
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", String(requester1Id))
       .attach("file", samplePdfPath);
 
     expect(res.status).toBe(201);
@@ -78,10 +82,9 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
   });
 
   it("POST /api/tickets/:id/attachments rejects invalid MIME type .exe (API-07, AC-05, BR-15)", async () => {
-    const res = await request(app)
+    const res = await requester1Agent
       .post(`/api/tickets/${ticket1Id}/attachments`)
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", String(requester1Id))
       .attach("file", sampleTxtPath);
 
     expect(res.status).toBe(400);
@@ -106,10 +109,9 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
     }
 
     // Try uploading a 6th attachment
-    const res = await request(app)
+    const res = await requester1Agent
       .post(`/api/tickets/${ticket1Id}/attachments`)
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", String(requester1Id))
       .attach("file", samplePdfPath);
 
     expect(res.status).toBe(400);
@@ -129,10 +131,9 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
       },
     });
 
-    const res = await request(app)
+    const res = await requester1Agent
       .post(`/api/attachments/${att.id}/soft-remove`)
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", String(requester1Id))
       .send({ removalReason: "Uploaded wrong screenshot file" });
 
     expect(res.status).toBe(200);
@@ -157,9 +158,8 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
       },
     });
 
-    const res = await request(app)
-      .get(`/api/attachments/${att.id}/download`)
-      .set("X-Development-Requester-Id", String(requester1Id));
+    const res = await requester1Agent
+      .get(`/api/attachments/${att.id}/download`);
 
     expect(res.status).toBe(410);
     expect(res.body.error).toBe("Gone");
@@ -179,24 +179,21 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
     });
 
     // Upload attempt by Requester 2 -> 403
-    const uploadRes = await request(app)
+    const uploadRes = await requester2Agent
       .post(`/api/tickets/${ticket1Id}/attachments`)
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", String(requester2Id))
       .attach("file", samplePdfPath);
     expect(uploadRes.status).toBe(403);
 
     // Download attempt by Requester 2 -> 404 (BR-16 / Lab 3 API Spec 4.6)
-    const downloadRes = await request(app)
-      .get(`/api/attachments/${att.id}/download`)
-      .set("X-Development-Requester-Id", String(requester2Id));
+    const downloadRes = await requester2Agent
+      .get(`/api/attachments/${att.id}/download`);
     expect([403, 404]).toContain(downloadRes.status);
 
     // Soft-remove attempt by Requester 2 -> 403
-    const removeRes = await request(app)
+    const removeRes = await requester2Agent
       .post(`/api/attachments/${att.id}/soft-remove`)
       .set(CSRF_HEADER)
-      .set("X-Development-Requester-Id", String(requester2Id))
       .send({ removalReason: "Unauthorized removal attempt" });
     expect(removeRes.status).toBe(403);
   });

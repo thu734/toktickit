@@ -372,6 +372,28 @@ async function main() {
     });
   }
 
+  // Add examples without replacing existing conversations or creating duplicates.
+  const exampleTicket = await prisma.ticket.findUniqueOrThrow({
+    where: { ticketNumber: "TKT-2026-000001" },
+  });
+  const authorId = getUserId("alex.t@toktickit.local");
+  const comment = {
+    ticketId: exampleTicket.id,
+    authorId,
+    content: "Please check whether the VPN stays connected after restarting the client.",
+  };
+  if (!(await prisma.comment.findFirst({ where: comment }))) {
+    await prisma.comment.create({ data: comment });
+  }
+  const note = {
+    ticketId: exampleTicket.id,
+    authorId,
+    content: "Example internal note: review VPN gateway connection logs during diagnostics.",
+  };
+  if (!(await prisma.internalNote.findFirst({ where: note }))) {
+    await prisma.internalNote.create({ data: note });
+  }
+
   console.log("Database seeded successfully with Lab 3 users, tickets, and reference data.");
 }
 

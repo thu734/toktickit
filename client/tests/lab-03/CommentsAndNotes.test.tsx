@@ -14,7 +14,6 @@ vi.mock("../../src/api", () => ({
   fetchInternalNotes: vi.fn(),
   postInternalNote: vi.fn(),
   fetchStaffUsers: vi.fn(),
-  fetchTicketAttachments: vi.fn(),
 }));
 
 const mockTicket = {
@@ -41,9 +40,8 @@ const mockComments: api.Comment[] = [
     id: 101,
     content: "Please check your VPN settings.",
     ticketId: 1,
-    authorId: 2,
     createdAt: "2026-01-01T11:00:00.000Z",
-    author: { id: 2, name: "Alex Turner", role: "IT_STAFF" },
+    author: { id: 2, name: "Alex Turner", email: "alex.t@toktickit.local", role: "IT_STAFF" },
   },
 ];
 
@@ -52,9 +50,8 @@ const mockInternalNotes: api.InternalNote[] = [
     id: 201,
     content: "Checked Cisco AnyConnect logs; radius timeout issue.",
     ticketId: 1,
-    authorId: 2,
     createdAt: "2026-01-01T11:15:00.000Z",
-    author: { id: 2, name: "Alex Turner", role: "IT_STAFF" },
+    author: { id: 2, name: "Alex Turner", email: "alex.t@toktickit.local", role: "IT_STAFF" },
   },
 ];
 
@@ -65,7 +62,6 @@ describe("UI-06: Public Comments & Internal Notes UI Tests (AC-08, AC-17, BR-22)
     (api.fetchStaffUsers as any).mockResolvedValue([]);
     (api.fetchTicketComments as any).mockResolvedValue(mockComments);
     (api.fetchInternalNotes as any).mockResolvedValue(mockInternalNotes);
-    (api.fetchTicketAttachments as any).mockResolvedValue([]);
   });
 
   it("renders Public Comments feed with author role badge (AC-08)", async () => {
@@ -84,7 +80,7 @@ describe("UI-06: Public Comments & Internal Notes UI Tests (AC-08, AC-17, BR-22)
       ticketId: 1,
       authorId: 2,
       createdAt: "2026-01-01T11:30:00.000Z",
-      author: { id: 2, name: "Alex Turner", role: "IT_STAFF" },
+      author: { id: 2, name: "Alex Turner", email: "alex.t@toktickit.local", role: "IT_STAFF" },
     });
 
     render(<StaffTicketDetail ticketId={1} currentUserRole="IT_STAFF" currentUserId={2} />);
@@ -111,7 +107,7 @@ describe("UI-06: Public Comments & Internal Notes UI Tests (AC-08, AC-17, BR-22)
       ticketId: 1,
       authorId: 2,
       createdAt: "2026-01-01T12:00:00.000Z",
-      author: { id: 2, name: "Alex Turner", role: "IT_STAFF" },
+      author: { id: 2, name: "Alex Turner", email: "alex.t@toktickit.local", role: "IT_STAFF" },
     });
 
     render(<StaffTicketDetail ticketId={1} currentUserRole="IT_STAFF" currentUserId={2} />);

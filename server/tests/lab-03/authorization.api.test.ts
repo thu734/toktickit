@@ -9,6 +9,7 @@ const CSRF_HEADER = { "X-Requested-With": "XMLHttpRequest" };
 describe("Lab 3 Server Authorization Tests (SEC-API-01, SEC-API-02, SEC-API-04)", () => {
   beforeEach(async () => {
     const prisma = getPrisma();
+    await prisma.user.update({ where: { email: "alex.t@toktickit.local" }, data: { role: "IT_STAFF" } });
     const initialPasswordHash = await bcrypt.hash("Initial123!", 10);
     await prisma.user.updateMany({
       where: {
@@ -31,6 +32,7 @@ describe("Lab 3 Server Authorization Tests (SEC-API-01, SEC-API-02, SEC-API-04)"
 
   afterAll(async () => {
     const prisma = getPrisma();
+    await prisma.user.update({ where: { email: "alex.t@toktickit.local" }, data: { role: "IT_STAFF", isActive: true } });
     await prisma.user.updateMany({
       where: {
         email: {
@@ -48,6 +50,52 @@ describe("Lab 3 Server Authorization Tests (SEC-API-01, SEC-API-02, SEC-API-04)"
     });
   });
 
+
+  it.each([
+    { url: "/api/tickets", email: "jennifer.a@toktickit.local" },
+    { url: "/api/staff/tickets", email: "alex.t@toktickit.local" },
+    { url: "/api/admin/users", email: "admin@toktickit.local" },
+    { url: "/api/tickets/1/comments", email: "jennifer.a@toktickit.local" },
+  ])(
+    "rejects legacy identity headers without authentication on $url", async ({ url, email }) => {
+      const user = await getPrisma().user.findUniqueOrThrow({ where: { email } });
+      const res = await request(app).get(url).set("X-Development-Requester-Id", String(user.id));
+      expect(res.status).toBe(401);
+      expect(res.body.code).toBe("UNAUTHENTICATED");
+    }
+  );
+
+  it("ignores an identity header supplied alongside an authenticated session", async () => {
+    const agent = request.agent(app);
+    await agent.post("/api/auth/login").set(CSRF_HEADER)
+      .send({ email: "jennifer.a@toktickit.local", password: "Initial123!" }).expect(200);
+    const admin = await getPrisma().user.findUniqueOrThrow({ where: { email: "admin@toktickit.local" } });
+    await agent.get("/api/admin/users").set("X-Development-Requester-Id", String(admin.id)).expect(403);
+    const me = await agent.get("/api/auth/me").expect(200);
+    expect(me.body.user.email).toBe("jennifer.a@toktickit.local");
+  });
+
+  it.each([
+    { change: { isActive: false }, expected: 401, name: "deactivation" },
+    { change: { role: "REQUESTER" as const }, expected: 403, name: "demotion" },
+  ])("enforces current Staff account permissions after $name", async ({ change, expected }) => {
+    const staff = await getPrisma().user.findUniqueOrThrow({ where: { email: "alex.t@toktickit.local" } });
+    const staffAgent = request.agent(app);
+    const adminAgent = request.agent(app);
+    await staffAgent.post("/api/auth/login").set(CSRF_HEADER)
+      .send({ email: staff.email, password: "Initial123!" }).expect(200);
+    await adminAgent.post("/api/auth/login").set(CSRF_HEADER)
+      .send({ email: "admin@toktickit.local", password: "Initial123!" }).expect(200);
+    await staffAgent.get("/api/staff/tickets").expect(200);
+    await adminAgent.patch(`/api/admin/users/${staff.id}`).set(CSRF_HEADER).send(change).expect(200);
+    await staffAgent.get("/api/staff/tickets").expect(expected);
+    await staffAgent.get("/api/staff/tickets/1/notes").expect(expected);
+    if (expected === 401) {
+      await staffAgent.get("/api/tickets/1/comments").expect(401);
+    } else {
+      await staffAgent.get("/api/tickets").expect(200);
+    }
+  });
 
   it("SEC-API-04: Unauthenticated access returns HTTP 401 Unauthorized", async () => {
     const res = await request(app).get("/api/tickets");

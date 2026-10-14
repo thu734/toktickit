@@ -1,9 +1,9 @@
 import { execSync } from "child_process";
+import { resolveTestDatabaseUrl } from "./testDatabase.js";
 
 export default async function globalSetup() {
-  const testDbUrl =
-    process.env.TEST_DATABASE_URL ||
-    "postgresql://toktickit:toktickit@localhost:5432/toktickit_test?schema=public";
+  // Validate before invoking any command that can change schema or data.
+  const testDbUrl = resolveTestDatabaseUrl();
 
   const env = { ...process.env, DATABASE_URL: testDbUrl };
 
