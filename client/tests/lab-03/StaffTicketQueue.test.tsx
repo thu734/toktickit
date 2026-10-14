@@ -9,7 +9,12 @@ vi.mock("../../src/api", () => ({
   fetchCategories: vi.fn(),
 }));
 
-const mockTicketsData: api.PaginatedTicketsResponse = {
+type QueueTicket = api.Ticket & {
+  requester: { id: number; name: string; email: string };
+  assignedStaff?: { id: number; name: string; email: string };
+};
+
+const mockTicketsData: Omit<api.PaginatedTicketsResponse, "items"> & { items: QueueTicket[] } = {
   items: [
     {
       id: 1,

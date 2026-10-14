@@ -162,14 +162,11 @@ describe("Lab 2 Attachment Section UI Tests (UI-06, AC-04, AC-07)", () => {
   it("clears selectedFile and resets file input element upon successful upload", async () => {
     vi.spyOn(api, "uploadAttachment").mockResolvedValue({
       id: 99,
-      ticketId: 101,
       filename: "sample.pdf",
-      storedFilename: "99-sample.pdf",
       mimeType: "application/pdf",
-      fileSizeBytes: 1024,
+      fileSize: 1024,
       isRemoved: false,
-      uploadedAt: "2026-01-01T10:00:00Z",
-      uploadedByRequesterId: 1,
+      createdAt: "2026-01-01T10:00:00Z",
     });
 
     const onAttachmentChangeMock = vi.fn();

@@ -289,13 +289,13 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
             <div className="p-3 mb-3 rounded" style={{ backgroundColor: "#F1F5F3" }}>
               <h6 className="text-muted small fw-bold text-uppercase mb-1">Description</h6>
-              <p className="mb-0 text-break" style={{ whitespace: "pre-wrap" }}>{ticket.description}</p>
+              <p className="mb-0 text-break" style={{ whiteSpace: "pre-wrap" }}>{ticket.description}</p>
             </div>
 
             {ticket.resolutionSummary && (
               <div className="p-3 mb-3 rounded border border-success" style={{ backgroundColor: "#EAF6EF" }}>
                 <h6 className="text-success small fw-bold text-uppercase mb-1">Resolution Summary</h6>
-                <p className="mb-0 text-dark" style={{ whitespace: "pre-wrap" }}>{ticket.resolutionSummary}</p>
+                <p className="mb-0 text-dark" style={{ whiteSpace: "pre-wrap" }}>{ticket.resolutionSummary}</p>
               </div>
             )}
 

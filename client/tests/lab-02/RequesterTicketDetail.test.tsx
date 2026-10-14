@@ -122,14 +122,11 @@ describe("Lab 2 Requester Ticket Detail UI Tests (UI-05, AC-03, AC-22)", () => {
       attachments: [
         {
           id: 50,
-          ticketId: 101,
           filename: "test-log.txt",
-          storedFilename: "50-test-log.txt",
           mimeType: "text/plain",
-          fileSizeBytes: 1024,
+          fileSize: 1024,
           isRemoved: false,
-          uploadedAt: "2026-01-01T11:00:00Z",
-          uploadedByRequesterId: 1,
+          createdAt: "2026-01-01T11:00:00Z",
         },
       ],
     });

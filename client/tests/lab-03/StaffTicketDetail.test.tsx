@@ -14,7 +14,6 @@ vi.mock("../../src/api", () => ({
   fetchInternalNotes: vi.fn(),
   postInternalNote: vi.fn(),
   fetchStaffUsers: vi.fn(),
-  fetchTicketAttachments: vi.fn(),
 }));
 
 const mockTicket = {
@@ -48,7 +47,6 @@ describe("UI-05: IT Staff Ticket Detail Component Tests (AC-12..15, BR-19)", () 
     (api.fetchStaffUsers as any).mockResolvedValue(mockStaffUsers);
     (api.fetchTicketComments as any).mockResolvedValue([]);
     (api.fetchInternalNotes as any).mockResolvedValue([]);
-    (api.fetchTicketAttachments as any).mockResolvedValue([]);
   });
 
   it("renders ticket detail header, read-only Requested Priority, and operational controls (AC-12, AC-14)", async () => {
