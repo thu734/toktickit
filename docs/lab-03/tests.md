@@ -46,7 +46,7 @@ The test strategy for TokTickIT Lab 3 applies Spec-Driven Development (Spec DD) 
 | **ADMIN-API-05** | API | AC-23, BR-10 | Deactivation prevention of last active Administrator | HTTP 400 Bad Request when attempting to deactivate last remaining active Admin | `server/tests/lab-03/users-admin.api.test.ts` | PASSED |
 | **ADMIN-API-06** | API | AC-24, BR-08 | Admin reset initial password for user | HTTP 200 OK; resets user password; flags `mustChangePassword = true` | `server/tests/lab-03/users-admin.api.test.ts` | PASSED |
 | **ADMIN-API-07** | API | FR-20, BR-06 | Admin basic user editing, activation toggle & single role enforcement | Admin updates user name, email, role, and toggles `isActive` status | `server/tests/lab-03/users-admin.api.test.ts` | PASSED |
-| **MIG-01** | Migration | AC-07, BR-18 | Database migration verification (`DevelopmentRequester` → `User`) | Existing Lab 2 tickets & attachments intact; legacy `PENDING` mapped to `WAITING_FOR_REQUESTER` | `server/tests/lab-03/migration.test.ts` | PASSED |
+| **MIG-01** | Seeded model checks | AC-07, BR-18 | User, category, and related-system presence after setup | Seeded model assertions only; migration replay and legacy preservation are not covered by this file | `server/tests/lab-03/migration.test.ts` | PASSED: seeded model checks only |
 | **UI-01** | UI Component | AC-01, AC-02 | Login screen rendering, validation & safe failure error banner | Renders form; validates email format; displays safe error on 401 | `client/tests/lab-03/Login.test.tsx` | PASSED |
 | **UI-02** | UI Component | AC-03, AC-04 | Mandatory Change Password modal interaction & rule validation | Locks screen; checks complexity rules; updates password; unlocks app | `client/tests/lab-03/ChangePassword.test.tsx` | PASSED |
 | **UI-03** | UI Component | AC-05, AC-06 | Application Shell role-based navigation & Logout action | Displays user name and role badge; renders permitted links per role | `client/tests/lab-03/AppShell.test.tsx` | PASSED |
@@ -54,8 +54,8 @@ The test strategy for TokTickIT Lab 3 applies Spec-Driven Development (Spec DD) 
 | **UI-05** | UI Component | AC-12, AC-13, AC-14, AC-15, BR-19 | IT Staff Ticket Detail claim, assign, IT priority, status & optional resolution summary | Interactive staff dashboard; state-machine dropdown; optional resolution summary input | `client/tests/lab-03/StaffTicketDetail.test.tsx` | PASSED |
 | **UI-06** | UI Component | AC-08, AC-17, BR-22 | Public Comments feed and Internal Notes tab UI rendering & safe HTML escaping | Renders distinct green Public Comments vs amber Internal Notes tabs; verifies XSS safe rendering | `client/tests/lab-03/CommentsAndNotes.test.tsx` | PASSED |
 | **UI-07** | UI Component | AC-18, AC-19, AC-20, AC-21 | Admin User Management list, search, create/edit modals | User table, role filter, create user modal, duplicate email 409 error | `client/tests/lab-03/UserManagement.test.tsx` | PASSED |
-| **UI-08** | UI Responsive | AC-26 | Multi-viewport responsive layout rendering | Controls operable across Desktop (1280px), Tablet (800px), Mobile (390px) | `client/tests/lab-03/ResponsiveUI.test.tsx` | PASSED |
-| **UI-STYLE-01** | UI Style | AC-26 | Zen Green design system tokens & WCAG 2.1 AA focus rings | `#006B3C` primary buttons, `#0B7A46` focus rings, `#F1F5F3` read-only fields | `client/tests/lab-03/ZenGreenStyle.test.tsx` | PASSED |
+| **UI-08** | UI Responsive | AC-26 | Multi-viewport responsive layout rendering | Desktop, Tablet, and Mobile screenshot evidence; automated geometry/overflow assertions are not implemented | `e2e/lab-02/requester-ticket-flow.spec.ts`, `e2e/lab-03/*.spec.ts` | PARTIAL: screenshots and workflow assertions |
+| **UI-STYLE-01** | UI Style | AC-26 | Zen Green design tokens & focus rings | Dedicated computed-style/contrast/focus tests are not implemented | No dedicated Lab 3 style test file | NOT AUTOMATED |
 | **E2E-01** | E2E | AC-01, AC-02, AC-04, AC-05 | Full Authentication & Password Change E2E workflow | Login with initial password -> Forced password change -> Shell -> Logout | `e2e/lab-03/authentication.spec.ts` | PASSED |
 | **E2E-02** | E2E | AC-10, AC-12, AC-15, AC-17 | IT Staff Ticket Queue & Ticket Operations E2E workflow | Queue search -> Claim ticket -> Change status -> Write Internal Note | `e2e/lab-03/staff-ticket-flow.spec.ts` | PASSED |
 | **E2E-03** | E2E | AC-18, AC-20, AC-24, AC-25, BR-08 | Admin User Management, Password Reset & Forced Next-Login Change E2E workflow | Admin resets password -> User logs in -> Forced next-login password change -> Shell access | `e2e/lab-03/user-administration.spec.ts` | PASSED |
@@ -98,15 +98,15 @@ Every Acceptance Criterion (`AC-01` through `AC-26`) maps to planned tests:
 ---
 
 ## 4. Execution Summary Baseline
-*All planned unit, API, security, migration, component, style, and Playwright E2E tests have been executed and verified as PASSED.*
+The execution output below is historical evidence for the original Lab 3 release. It does not demonstrate every planned test. In particular, `ResponsiveUI.test.tsx` and `ZenGreenStyle.test.tsx` are absent from the current repository; the traceability rows above now state the actual coverage. `migration.test.ts` verifies seeded model data, not SQL migration replay. The migration/schema mismatch remains a separate repair task.
 
 | Test Suite | Total Planned | Passed | Failed | Status |
 | :--- | :---: | :---: | :---: | :---: |
 | Server Unit Tests (`server/tests/lab-03/`) | 1 | 1 | 0 | PASSED |
 | Server API, Security & Migration Tests (`server/tests/lab-03/`) | 37 | 37 | 0 | PASSED |
-| Client UI Component & Style Tests (`client/tests/lab-03/`) | 9 | 9 | 0 | PASSED |
+| Client UI Component Tests (`client/tests/lab-03/`) | 7 implemented; 2 missing planned files | 7 implemented files | 0 | PARTIAL PLAN COVERAGE |
 | E2E Tests (`e2e/lab-03/`) | 3 | 3 | 0 | PASSED |
-| **Total Planned Tests** | **50** | **50** | **0** | **PASSED** |
+| **Plan coverage** | Historical planned IDs differ from executable test cases | See actual suite output below | 0 recorded | Not all planned coverage implemented |
 
 ### Automated Test Execution Output
 
@@ -183,3 +183,30 @@ Running 18 tests using 1 worker
 
   18 passed (51.3s)
 ```
+
+
+## 5. Pre-Lab 4 Readiness Regression Coverage
+
+- `server/tests/lab-03/authorization.api.test.ts`: 11 cases, including unauthenticated identity-header rejection, authenticated header ignoring, and current-session permission checks after Administrator deactivation/demotion.
+- Lab 2 API regression fixtures now log in with session cookies; identity headers are not a test authentication mechanism.
+- `server/tests/lab-03/test-database.unit.test.ts`: validates the dedicated `toktickit_test` database before setup, with assertions that unsafe URLs cannot invoke Prisma or seed commands.
+- `server/tests/lab-03/seed-examples.test.ts`: verifies sample Public Comments/Internal Notes, repeat-seed idempotence, and preservation of unrelated conversation records.
+- Invalid/inactive login E2E assertions execute on Desktop, Tablet, and Mobile; each awaits the actual login response and checks HTTP 401. Screenshot captures remain Desktop-only.
+- Client production type checking includes test fixtures and uses `noEmit`, so type checking does not generate JavaScript beside source files.
+
+Existing migration SQL and the development migration baseline are unchanged. Default Playwright database isolation and the broader conditional screenshot workflows remain outside this approved change.
+
+
+### Verified readiness-fix results (2026-10-15)
+
+| Check | Result |
+| --- | --- |
+| Full server regression | 18 files, 98 passed, 0 failed/skipped |
+| Full client regression | 12 files, 50 passed, 0 failed/skipped |
+| Targeted authorization regression | 1 file, 11 passed, 0 failed/skipped |
+| Client production build | Passed (`tsc && vite build`) |
+| Server build | Passed (`tsc`) |
+| Full Playwright regression | 21 passed, 0 failed/skipped, Desktop/Tablet/Mobile, retries disabled |
+| Diff whitespace validation | Passed (`git diff --check`) |
+
+Database-mutating server runs were executed sequentially for the final verified results. E2E used a separate schema inside `toktickit_test` and a temporary repository copy so committed screenshot evidence was not overwritten. Development data fingerprints were unchanged. No migration repair was performed.
