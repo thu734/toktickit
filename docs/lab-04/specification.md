@@ -1,7 +1,7 @@
 # Lab 4 - Sprint 4 Engineering Specification
 
 **Issue:** Issue 18 [Lab 4] Engineering Contract and Baseline Gate
-**Status:** D-01 through D-16 explicitly approved by the user on 2026-10-15; documentation review and baseline verification remain separate; no Lab 4 implementation.
+**Status:** D-01 through D-16 approved; Issue 19 storage/migration/seed foundation implemented for review. Action APIs/UI, Ticket workflow enforcement and dashboards are not implemented by Issue 19.
 **Source:** CPE 334 Lab 4 handout, SE+Lab+4.pdf, all 11 pages, reviewed 2026-10-15.
 
 **Provenance:** R = required by Lab 4; I = inherited from Labs 1-3; A = user-approved implementation choice, not a handout mandate.
@@ -21,7 +21,7 @@ Ticket Owner coordinates the Ticket; different Staff members may record work. Re
 ### 3.1 Included
 
 Included future work (R): Actions Taken, assignment/edit/status/complete/cancel evidence, backend workflow enforcement, Requester/Staff/Admin dashboards, concurrency, migration/seed/recovery, final regression and accessibility.
-Issue 18 creates only this six-file documentation contract. No model, migration, API, UI, seed, application test or E2E code is implemented here.
+Issue 18 established the documentation contract. Issue 19 implements only its data, migration, seed and persistence-test foundation; later issues implement API/UI/workflow/dashboard behavior.
 
 ### 3.2 Explicitly Excluded
 
@@ -153,13 +153,38 @@ D-03 sets immutable authenticated-creator attribution; D-04 uses immutable serve
 
 R: preserve Users, Categories, Related Systems, Tickets, ownership, Attachments and file references, Public Comments and Internal Notes. Document legacy zero-action behavior, dashboard treatment and tested recovery; justify at least two database-design decisions.
 
-A/D-14: additive Action relationships, minimal append-only audit events and one Ticket workflow revision; stable seed identities; no fabricated historical work/events; new fixtures cover zero/one/multiple Actions, statuses/priorities/ownership and zero/nonzero metrics. Indexes should support Ticket/stable ordering and assignee/status lookup; one Ticket workflow revision supports conflict detection. These approved conceptual decisions are not Prisma or SQL implementation.
+A/D-14: additive Action relationships, minimal append-only audit events and one Ticket workflow revision; stable seed identities; no fabricated historical work/events; new fixtures cover zero/one/multiple Actions, statuses/priorities/ownership and zero/nonzero metrics.
+
+### 7.1 Issue 19 Storage Representation
+
+| Model | Implemented representation |
+| --- | --- |
+| ActionTaken | Required Ticket and immutable performer User; nullable assignee User; PLANNED/COMPLETED/CANCELLED enum; approved bounded text, conditional follow-up fields, immutable server-created timestamp and updatedAt. No editable work date. |
+| Ticket | One nonnegative workflowRevision integer initialized to 0 for legacy/new Tickets. No Action-level version. |
+| ActionAuditEvent | Action ID, actor User ID, timestamp, event type and JSON changed-field deltas. Creation events describe inserted fields; later events describe changes only. SQL rejects event UPDATE/DELETE; no full revision snapshots or history browser. |
+| ActionCreationRequest | Key unique within creator + Ticket, creation-payload SHA-256, Action reference and immutable original creation result. Composite FK anchors creator/Ticket to that same Action. This is one retry result, not revision history. |
+
+Named SQL checks enforce nonblank Description, terminal Result and conditional Follow-up Note; database column bounds enforce 2000/1000 limits. Seed inputs are trimmed; application input normalization remains Issue 20. New foreign keys use restrictive deletion to preserve evidence. SQL triggers reject changes to Action identity, Ticket, performer or creation time and mutation/deletion of audit/retry evidence. These triggers do not implement authorization, active-assignee validation, Action transitions, Ticket gates or revision increments for application requests.
+
+Design justifications: (1) separate owner, creator and nullable assignee preserve the required coordination/work distinction; (2) a single Ticket revision provides the shared boundary needed by Action/resolve races; (3) preserving an original creation result allows retry after later Action edits without reconstructing or overwriting history. The future API owns request canonicalization and replay/conflict handling; seed fingerprints identify only deterministic fixture insertions.
+
+Indexes: Action (ticketId, createdAt, id), (assignedToId, status), (ticketId, status, followUpRequired); audit (actionId, timestamp, id); unique request (creatorId, ticketId, requestKey). The extra unique Action/creation-request relation keys enforce consistent Ticket/creator references. Earlier indexes and relationship behavior are preserved.
 
 A/D-10: serialize related workflow writes through the parent Ticket; validate one expected Ticket workflow revision and the resolution predicate atomically. Every Ticket workflow and Action mutation must send the expected revision; return 409 on mismatch and the new revision on success. Non-workflow APIs retain their existing contract without this token. Current operational clients/tests must be updated in the implementation issues.
 
-Existing migration/schema mismatch is a separate prerequisite. Proposed repair sequence: compare fresh migration output with Prisma and a disposable copy of development; identify all differences; approve a forward repair; rehearse preservation/recovery; separately approve any development history reconciliation. Never edit historical migration files or blindly mark migrations applied as part of Issue 18.
+### 7.2 Separate Prerequisite Repair and Additive Migration
 
-Recovery plan (A): verified backups and application-version compatibility, rehearsed on disposable data; do not assume new work may be deleted to roll back. Lab 4 seed fixtures use stable identities and preservation-oriented writes; repeated runs must not reset unrelated existing passwords, Ticket states or ownership. Historical seed evidence remains intact; implementation must verify the approved safe repeated-run behavior.
+Disposable replay reproduced two differences: historical SQL leaves Category while Prisma maps categories, and users.updatedAt retains a SQL default absent from Prisma. `20261015090000_reconcile_lab3_schema` renames the Category table/constraint/index/sequence and removes only that default; existing row values and Ticket FKs survive. It refuses an ambiguous existing categories table rather than dropping or merging records. This prerequisite repair is separate from `20261015090100_lab4_actions_foundation`, which only adds the new storage and workflowRevision. No historical migration was edited.
+
+Migration tests replay representative Lab 2 data through Lab 3 before taking the preservation snapshot; approved historical PENDING/priority transformations happen only in that old increment. Issue 19 preserves the resulting Users, Categories, Systems, Tickets, ownership, timestamps, attachment metadata/file references, Comments and Internal Notes. Legacy Tickets gain revision 0 and no invented Actions/events. Fresh SQL replay matches the current Prisma model. Development migration-history reconciliation remains separately authorized work and has not been performed.
+
+Recovery (A): a disposable PostgreSQL dump and a separately copied referenced attachment file were restored and compared with pre-loss records, Actions, events and retry results. This is not authorization to restore/reset development data. A real backup must capture both database and uploads; do not discard new work to roll back.
+
+### 7.3 Seed Preservation
+
+Both seed profiles create missing records without updating existing passwords, account state, reference-data activity, Ticket content/ownership/status or timestamps. A transaction-level advisory lock serializes seed runs. Default `all` adds dedicated Lab 4 accounts/Tickets (including an empty Requester), all eight Ticket statuses, all priorities, zero/one/multiple Actions, nullable/active assignment, all three Action states and both follow-up states. New fixture events record actual fixture insertion, not invented past transitions. No Actions are backfilled onto any existing Ticket, including an existing fixture Ticket. Completed/cancelled demo records are initial fixture state, not runtime writes on terminal Tickets.
+
+The explicit `baseline` profile supplies unchanged Lab 1–3 fixture coverage for regression suites that clean up Tickets. Full-seed tests verify all Lab 4 scenarios, repeated/concurrent runs and preservation after user edits. Initial passwords are assigned only on account creation. Earlier historical documents/artifacts remain unchanged.
 
 ## 8. API Contract
 
@@ -192,7 +217,7 @@ Recovery plan (A): verified backups and application-version compatibility, rehea
 23. **AC-23** (R/I): Given keyboard users, long content and required viewports, when screens are exercised, then approved focus, style, responsive and accessibility checks pass.
 24. **AC-24** (R/A): Given a final evidence run, when artifacts are reviewed, then required screen/viewport captures and AC-to-run traceability are complete without replacing earlier evidence.
 
-All ACs reflect the user-approved D-01 through D-16 choices. [tests.md](tests.md) maps every AC to planned evidence; no Lab 4 feature has passed execution evidence yet.
+All ACs reflect the user-approved D-01 through D-16 choices. [tests.md](tests.md) distinguishes completed Issue 19 storage evidence from the still-planned API/UI/workflow tests; data tests alone do not complete those later ACs.
 
 ## 10. Definition of Done
 
@@ -245,6 +270,8 @@ Course delivery (R): peer review, Kanban evidence, feature PRs into lab4-staging
 | D-16 | Stable Action order | Immutable createdAt ASC, then ID ASC; editing does not reorder an Action. | submission Part 7 | APPROVED |
 
 ### 11.2 Baseline Limitations and Prerequisites
+
+Issue 19 update (2026-10-15): Issue 18 merged through PR #58; this branch started at lab4-staging 7c2cfd7. The separate forward repair and Lab 4 migration passed disposable replay/preservation tests. Active server tests now own fresh migrated schemas per file rather than using db push. Development migration history, Playwright isolation and later product behavior remain outside this issue. The original Issue 18 observations below are retained as a dated baseline, not current claims that these resolved items are still unimplemented.
 
 **Design decisions: APPROVED. Baseline gate: BLOCKED until the recorded prerequisites are verified; documentation review can proceed.** Snapshot observed 2026-10-15; no fresh automated suites or database audit were run for Issue 18.
 
