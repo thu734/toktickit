@@ -1,8 +1,9 @@
 import { getPrisma } from "../src/prisma.js";
 import bcrypt from "bcryptjs";
+import { seedLab4 } from "./lab4-seed.js";
 
 /**
- * TokTickIT Lab 3 Idempotent Seed Data Script
+ * TokTickIT preservation-oriented Lab 1-4 demonstration seed.
  * 
  * DISCLAIMER:
  * Seed credentials and initial password ("Initial123!") are strictly for
@@ -11,6 +12,11 @@ import bcrypt from "bcryptjs";
 async function main() {
   const prisma = getPrisma();
   const initialPasswordHash = await bcrypt.hash("Initial123!", 10);
+  const scope = process.env.TOKTICKIT_SEED_SCOPE || "all";
+  if (!["all", "baseline"].includes(scope)) throw new Error("Unknown seed scope; use all or baseline.");
+  await prisma.$transaction(async (prisma) => {
+  // Serialize seed invocations, including legacy comment/note existence checks.
+  await prisma.$queryRaw`SELECT pg_advisory_xact_lock(334, 4)::text`;
 
   // 1. Seed Categories (Idempotent)
   const categories = [
@@ -23,7 +29,7 @@ async function main() {
   for (const cat of categories) {
     await prisma.category.upsert({
       where: { name: cat.name },
-      update: { isActive: cat.isActive },
+      update: {},
       create: { name: cat.name, isActive: cat.isActive },
     });
   }
@@ -42,7 +48,7 @@ async function main() {
   for (const sys of relatedSystems) {
     await prisma.relatedSystem.upsert({
       where: { name: sys.name },
-      update: { isActive: sys.isActive },
+      update: {},
       create: { name: sys.name, isActive: sys.isActive },
     });
   }
@@ -129,13 +135,7 @@ async function main() {
   for (const u of users) {
     await prisma.user.upsert({
       where: { email: u.email },
-      update: {
-        name: u.name,
-        role: u.role,
-        isActive: u.isActive,
-        passwordHash: initialPasswordHash,
-        mustChangePassword: u.mustChangePassword,
-      },
+      update: {},
       create: {
         name: u.name,
         email: u.email,
@@ -152,9 +152,13 @@ async function main() {
   const allSystems = await prisma.relatedSystem.findMany();
   const allUsers = await prisma.user.findMany();
 
-  const getCatId = (name: string) => allCategories.find((c) => c.name === name)?.id || allCategories[0].id;
-  const getSysId = (name: string) => allSystems.find((s) => s.name === name)?.id || allSystems[0].id;
-  const getUserId = (email: string) => allUsers.find((u) => u.email === email)?.id || allUsers[0].id;
+  const requiredId = (record: { id: number } | undefined, label: string) => {
+    if (!record) throw new Error(`Missing seed dependency: ${label}`);
+    return record.id;
+  };
+  const getCatId = (name: string) => requiredId(allCategories.find((c) => c.name === name), name);
+  const getSysId = (name: string) => requiredId(allSystems.find((s) => s.name === name), name);
+  const getUserId = (email: string) => requiredId(allUsers.find((u) => u.email === email), email);
 
   const ticketsToSeed = [
     {
@@ -344,18 +348,7 @@ async function main() {
   for (const t of ticketsToSeed) {
     await prisma.ticket.upsert({
       where: { ticketNumber: t.ticketNumber },
-      update: {
-        summary: t.summary,
-        description: t.description,
-        requestedPriority: t.requestedPriority,
-        itPriority: t.itPriority,
-        currentStatus: t.currentStatus,
-        resolutionSummary: t.resolutionSummary || null,
-        requesterId: t.requesterId,
-        assignedStaffId: t.assignedStaffId,
-        categoryId: t.categoryId,
-        relatedSystemId: t.relatedSystemId,
-      },
+      update: {},
       create: {
         ticketNumber: t.ticketNumber,
         summary: t.summary,
@@ -394,7 +387,9 @@ async function main() {
     await prisma.internalNote.create({ data: note });
   }
 
-  console.log("Database seeded successfully with Lab 3 users, tickets, and reference data.");
+  if (scope === "all") await seedLab4(prisma, initialPasswordHash);
+  }, { timeout: 30000, maxWait: 30000 });
+  console.log(`Database seed complete (${scope}); existing records preserved.`);
 }
 
 main()
