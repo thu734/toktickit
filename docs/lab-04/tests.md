@@ -1,7 +1,7 @@
 # Lab 4 - Planned Tests and AC Traceability
 
 **Issue:** Issue 18 [Lab 4] Engineering Contract and Baseline Gate
-**Status:** Test plan only; no new test code or test execution in Issue 18.
+**Status:** Issue 18 contract plus executed Issue 19 data/migration/seed evidence; API/UI/workflow/E2E implementation remains planned.
 **Provenance:** R = Lab 4 requirement; I = inherited; A = user-approved implementation choice, not a handout mandate.
 **Contract:** [specification.md](specification.md), [api-spec.md](api-spec.md), [ui-spec.md](ui-spec.md).
 
@@ -11,11 +11,11 @@ R: cover unit, API/integration, component, UI style, responsive, authorization, 
 I: preserve complete current Labs 1-3 regression; use sessions for current application tests while leaving accurate historical identity-header documentation intact.
 A: D-01 through D-16 are explicitly approved by the user. Test fixtures and assertions must implement those choices; performance measurements are recorded on isolated data, without adding a new product timing promise.
 
-PLANNED means no execution evidence; BLOCKED means a design/baseline prerequisite is unresolved; PASS requires an actual executed result and code revision. None of the new scenarios below is marked PASS. The incomplete sample E2E row in the handout is an example, not supplied passing evidence.
+PLANNED means no execution evidence; BLOCKED means a design/baseline prerequisite is unresolved; PASS requires an actual executed result and code revision. Only the completed Issue 19 data scenarios below have PASS evidence. The incomplete sample E2E row in the handout is an example, not supplied passing evidence.
 
 ## 2. Planned Test Matrix
 
-All automated paths below are planned future files, except the explicitly inherited suite group; manual evidence is labelled separately. Creating test code belongs to later issues, not Issue 18. The Requirement / AC column retains FR, BR and AC links; Expected Result is distinct from the test scenario. Final remains PLANNED until actual execution, and expected results use the approved decision register.
+All automated paths below are planned future files, except the explicitly inherited suite group; manual evidence is labelled separately. Issue 19 now supplies migration, seed and data-integrity tests; endpoint/UI tests still belong to later issues. The Requirement / AC column retains FR, BR and AC links; Expected Result is distinct from the test scenario. Final changes only after actual execution, and expected results use the approved decision register.
 
 | Test ID | Type | Requirement / AC | What It Tests | Expected Result | Automated Test File | Final |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -38,8 +38,9 @@ All automated paths below are planned future files, except the explicitly inheri
 | WF-UI-01 | UI component | FR-09, FR-10, FR-11, FR-15, FR-18; BR-15, BR-16, BR-17, BR-18, BR-19, BR-20; AC-10, AC-12, AC-13, AC-14, AC-15, AC-16, AC-20 | Permitted options, blocked resolution explanation, current status refresh, role controls and recoverable conflict input. | Only approved transitions are offered, blocked resolution is explained safely, successful changes refresh status and conflicts preserve recoverable input. | client/tests/lab-04/TicketWorkflow.test.tsx | PLANNED |
 | REQ-UI-01 | UI component | FR-12, FR-14, FR-17, FR-18; BR-22, BR-23; AC-17, AC-19, AC-20 | Correct labelled cards/previews, destinations, zero/loading/error/retry, no fabricated zero on failure. | Labels/values/previews and destinations agree with the contract; zero/loading/error/retry states remain distinct. | client/tests/lab-04/RequesterDashboard.test.tsx | PLANNED |
 | STAFF-UI-01 | UI component | FR-13, FR-14, FR-17, FR-18; BR-22, BR-23; AC-18, AC-19, AC-20 | Operational cards/current-user Action preview, Admin navigation, filter destinations and meaningful states. | Approved operational cards, current-user Actions, Admin navigation and drill-downs render correctly with meaningful processing/empty/failure feedback. | client/tests/lab-04/StaffDashboard.test.tsx | PLANNED |
-| MIG-01 | Migration/regression | FR-19, FR-20; BR-01, BR-24, BR-26; AC-14, AC-21, AC-22 | Fresh SQL migration replay and representative Lab 2/3 upgrade: IDs, owners, data/file refs preserved; no fabricated history; approved recovery rehearsal. | Upgrade/fresh replay preserve prior IDs, ownership, records and file references, avoid fabricated history and pass the approved recovery rehearsal. | server/tests/lab-04/migration-regression.test.ts | PLANNED |
-| SEED-01 | API/integration (Seed integration) | FR-19; BR-24; AC-21 | Repeated Lab 4 seed runs; zero/one/multiple Actions; zero/nonzero dashboard cases; unrelated conversations/users/Tickets preserved according to approved policy. | Repeated seeds produce required fixtures without duplicates and preserve unrelated records according to the approved seed policy. | server/tests/lab-04/seed.test.ts | PLANNED |
+| MIG-01 | Migration/regression | FR-19, FR-20; BR-01, BR-24, BR-26; AC-14, AC-21, AC-22 | Fresh SQL migration replay and representative Lab 2/3 upgrade: IDs, owners, data/file refs preserved; no fabricated history; approved recovery rehearsal. | Upgrade/fresh replay preserve prior IDs, ownership, records and file references, avoid fabricated history and pass the approved recovery rehearsal. | server/tests/lab-04/migration-regression.test.ts | PASS (Issue 19 data) |
+| DATA-01 | Data integration / constraints | FR-02, FR-04, FR-06, FR-07, FR-15, FR-16, FR-19, FR-21; BR-01, BR-02, BR-08, BR-09, BR-10, BR-13, BR-14, BR-20, BR-21; AC-01, AC-04, AC-05, AC-07, AC-10, AC-11, AC-21 | FK integrity, nullable assignment, enum/bounds/conditional checks, immutable creator/time, append-only events, scoped retry uniqueness/original result, stable ordering/indexes and guarded test targets. | Persistence invariants hold; API authentication, active-role assignment, HTTP replay/409 and workflow races are not claimed by these storage tests. | server/tests/lab-04/actions-data-integrity.test.ts | PASS (Issue 19 data) |
+| SEED-01 | API/integration (Seed integration) | FR-19; BR-24; AC-21 | Repeated Lab 4 seed runs; zero/one/multiple Actions; zero/nonzero dashboard cases; unrelated conversations/users/Tickets preserved according to approved policy. | Repeated seeds produce required fixtures without duplicates and preserve unrelated records according to the approved seed policy. | server/tests/lab-04/seed.test.ts | PASS (Issue 19 data) |
 | REG-01 | Migration/regression (earlier labs) | FR-11, FR-17, FR-20; BR-03, BR-15, BR-16, BR-25, BR-26; AC-15, AC-16, AC-22 | Health/categories, auth/lock/logout, Requester tickets/search/filter/sort/page, attachments/removal/download, comments/notes, Staff queue/ownership/priority and Admin safety. | All inherited current-application regressions pass; only explicitly superseded Lab 4 expectations change, with no weakening or historical evidence rewrite. | Existing `server/tests/lab-01/` through `lab-03/`, `client/tests/lab-01/` through `lab-03/`, and `e2e/lab-02/`, `e2e/lab-03/` suites | PLANNED |
 | STYLE-01 | UI style | FR-18; BR-25; AC-23 | Browser-computed tokens/read-only/shared-private cues; non-color status meaning; specify assertions, not screenshot-only proof. | Approved computed-style and non-color/shared-private/read-only cues are verified with real assertions rather than inferred from screenshot presence. | client/tests/lab-04/ZenGreenStyle.test.tsx | PLANNED |
 | RESP-A11Y-01 | Responsive/accessibility | FR-18; BR-25; AC-20, AC-23 | Keyboard/focus/dialog/labels/feedback, approved viewports, zoom/narrow width, long content, overflow/geometry and manual visual checklist. | Approved viewports and long-content states remain keyboard usable, correctly labelled/focused and free of geometry/overflow defects; manual checklist is completed. | e2e/lab-04/accessibility-responsive.spec.ts | PLANNED |
@@ -100,7 +101,7 @@ Committed baseline reference: origin/main 83bfc8f, readiness PR #46. Local stagi
 | Artifacts | Lab 2: 19 PNGs/9 baseline; Lab 3: 31 PNGs/12 baseline | Existing structure only; screenshot names are not behavior proof |
 | Builds | Server tsc; client tsc then Vite | Previous passing evidence; current Issue 18 creates no new build result |
 
-Gate is BLOCKED for feature implementation until baseline prerequisites are verified; D-01 through D-16 are approved. Missing migration replay, default E2E isolation and style/responsive evidence are explicitly recorded, not disguised by green unit counts. Development migration history is an earlier environment-specific finding requiring revalidation. See [Baseline Limitations and Prerequisites](specification.md#112-baseline-limitations-and-prerequisites).
+Issue 18 baseline gate (historical): feature work required verified prerequisites; D-01 through D-16 are approved. Issue 19 results and remaining limitations are recorded below. Missing migration replay, default E2E isolation and style/responsive evidence are explicitly recorded, not disguised by green unit counts. Development migration history is an earlier environment-specific finding requiring revalidation. See [Baseline Limitations and Prerequisites](specification.md#112-baseline-limitations-and-prerequisites).
 
 ## 6. Future Execution Procedure and Isolation Prerequisites
 
@@ -115,7 +116,7 @@ These are documented intentions, not commands executed by Issue 18.
 7. Capture failures and exact counts; do not weaken, skip or conditionally bypass required assertions to make a run pass.
 8. Record final-main output after approved release integration, with code revision and run links.
 
-Existing command entry points to verify in the isolated checkout: `npm test --prefix server`, `npm test --prefix client`, `npm run build --prefix server`, `npm run build --prefix client`, and `npx playwright test --retries=0`. The root `npm run test:e2e` currently selects Lab 2 only. These are not a ready-to-run isolated E2E harness; correcting/documenting that harness belongs to later approved work. Both TEST_DATABASE_URL and application DATABASE_URL must identify the approved test target where applicable, and pre-existing servers must not be reused without verification.
+Existing command entry points to verify in the isolated checkout: `npm test --prefix server`, `npm test --prefix client`, `npm run build --prefix server`, `npm run build --prefix client`, and `npx playwright test --retries=0`. `npm test --prefix server` now runs existing tests and then `test:data`; fresh random schemas replay actual migrations. The root `npm run test:e2e` currently selects Lab 2 only. These are not a ready-to-run isolated E2E harness; correcting/documenting that harness belongs to later approved work. Both TEST_DATABASE_URL and application DATABASE_URL must identify the approved test target where applicable, and pre-existing servers must not be reused without verification.
 
 ## 7. Evidence and Artifact Strategy
 
@@ -126,9 +127,30 @@ Performance smoke (R): document the isolated dataset/environment; verify bounded
 
 ## 8. Known Limitations / Deferred Execution
 
-- D-01 through D-16 are explicitly approved; tests remain PLANNED and baseline prerequisites still require verification.
-- SQL migration/schema mismatch is not repaired in Issue 18; no schema or database writes are authorized here.
+- D-01 through D-16 are explicitly approved; tests outside the completed Issue 19 data scope remain PLANNED and remaining baseline prerequisites still require verification.
+- Issue 19 repairs migration/schema drift through separate forward SQL rehearsed only on disposable test schemas; development migration-history reconciliation remains outstanding.
 - Current old-resource 403/404 behavior and conditional screenshot workflows need later verification/hardening against approved contracts.
 - Existing style/responsive and Admin reset-to-next-login evidence is incomplete; plan actual cases in later issues instead of revising historical Lab 2 artifacts.
 - reviewer.md is a placeholder; no peer verdict or PR exists for this documentation task.
-- No new test file, screenshot, test run, migration rehearsal or performance result is produced by Issue 18.
+- Issue 18 itself produced no execution evidence; Issue 19 data results below are separate. No Lab 4 screenshot/E2E or performance-budget claim is made.
+
+## 9. Issue 19 Execution Evidence (2026-10-15)
+
+Branch `feature/19-lab4-actions-data`, based on merged staging `7c2cfd7`; results refer to this uncommitted working tree, not a final-main release.
+
+| Check | Exact result | Scope |
+| --- | --- | --- |
+| Existing server suites | 18 files, 98 tests passed | Complete Labs 1–3 suite, including 11 authorization regressions |
+| Data suites | 3 files, 26 tests passed | 19 integrity, 3 migration/recovery, 4 seed tests |
+| Server build | PASS | TypeScript compilation |
+| Client suites | 12 files, 50 tests passed | Existing component regressions; one pre-existing React act warning |
+| Client validation/build | PASS | tsc --noEmit and Vite production build; existing generated JavaScript preserved |
+| E2E | NOT RUN | Existing reusable-server isolation remains a separate prerequisite; no Lab 4 E2E implementation |
+
+Migration tests reproduce Category/categories drift, replay a representative Lab 2→3→4 upgrade, compare retained records and file references, confirm an empty Prisma schema diff after migration, verify seven applied migration records and rehearse dump/file recovery. An intentionally ambiguous Category/categories case must fail without removing either table. Historical migrations are unchanged.
+
+Seed tests check all required scenarios, repeat-run equality including timestamps/password hashes/revisions, preservation after user edits, and concurrent first-run safety. Dedicated full-seed schemas contain eight Actions and matching audit/retry records; earlier-lab suites use the explicit baseline fixture profile so existing Ticket cleanup does not delete new evidence. No existing assertion was skipped or weakened.
+
+Test infrastructure: `tests/lab-04/migrationTestDatabase.ts` validates toktickit_test and generated schema names before creating or dropping anything. `vitest.migrations.config.ts` runs the data suites without default setup; `tests/setup.ts` gives every earlier-lab file its own migrated schema and baseline seed. All schemas are removed after their suite. The old global db-push setup is no longer used by the active configuration. PostgreSQL psql/pg_dump are required for the disposable recovery test.
+
+Issue 19 supports AC-01/04/05/07/10/11 through storage integrity and completes the data portion of AC-14/21/22. API role checks, active-assignee enforcement, lifecycle restrictions, gate races and HTTP revision/retry behavior still require Issues 20/22; dashboard calculations require Issues 23/24. Those matrix rows remain PLANNED. Development database reconciliation and a verified E2E server-isolation harness remain separate work.
