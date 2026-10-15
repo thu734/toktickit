@@ -49,7 +49,7 @@ An end-user facing IT support ticketing system built with a unified Zen Green de
 toktickit/
 ├── client/          # Frontend React + Vite application
 ├── server/          # Backend Express + Prisma API
-│   ├── prisma/      # Database schema, migrations (0_init_lab03_users), and seed scripts
+│   ├── prisma/      # Versioned SQL migrations, Prisma schema and preservation-oriented seeds
 │   ├── src/         # Express server source code & RBAC middleware
 │   └── tests/       # Vitest unit, API, authorization, and migration tests
 ├── e2e/             # Playwright End-to-End multi-viewport test suites
@@ -91,13 +91,24 @@ npm install
 
 ### 3. Database Migration & Idempotent Seeding
 
-Ensure local PostgreSQL service is running on port 5432, then execute:
+Issue 19 adds the Actions storage foundation only; Action APIs/UI, workflow enforcement and dashboards remain later issues.
+
+The historical chain creates `Category` but the schema maps `categories`. The forward prerequisite migration `20261015090000_reconcile_lab3_schema` renames that table, its index/sequence and aligns the existing `users.updatedAt` default without rewriting data. The separate `20261015090100_lab4_actions_foundation` adds Actions, minimal audit events, creation-retry records and a Ticket workflow revision.
+
+For a **new empty database**, deliberately configure its `DATABASE_URL`, then apply the checked-in chain:
 
 ```bash
 cd server
-npx prisma migrate dev
+npx prisma migrate deploy
+npx prisma generate
 npx prisma db seed
 ```
+
+For an **existing database**, verify schema and migration history first. If it already has `categories`, has both table names, or lacks `_prisma_migrations`, stop and prepare a separate baseline reconciliation with backups. Do not reset it, replay the old User migration over existing data, edit historical migrations, or blindly mark migrations applied. Issue 19 rehearses repairs only on disposable test schemas; the development database is not reconciled automatically.
+
+The default seed includes Labs 1–4. Existing accounts, password hashes, activity, ownership, Ticket/Action state and timestamps are preserved. Newly created demonstration accounts use `Initial123!` and require a password change; this password does not replace an existing user's password. Stable new fixture identities supply all eight Ticket states, zero/one/multiple Actions, all three Action states, assigned/unassigned work, different creators/owners and an empty Requester dashboard. Seed insertion events describe only new fixture creation, never fabricated legacy work.
+
+`TOKTICKIT_SEED_SCOPE=baseline` is an explicit fixture profile used by earlier-lab regression suites. It creates the original Lab 1–3 examples without Action fixtures so their Ticket cleanup remains valid. The separate Lab 4 seed suite always runs the full seed. Both profiles preserve existing records; neither is a reset command.
 
 ### 4. Running Development Servers
 
@@ -123,6 +134,10 @@ npx prisma db seed
   npm test
   ```
 
+  This runs all existing server tests followed by `npm run test:data` (migration, seed and persistence integrity). Each file owns a randomly named schema in the dedicated `toktickit_test` database. The URL is validated before any mutation; actual migrations replace `db push` in the active test setup. No test may target the development database or drop `public`. PostgreSQL's `pg_dump` and `psql` must be on `PATH` for the disposable recovery rehearsal. Application role/transition/replay handlers remain later implementation work; passing storage tests does not claim those endpoints exist.
+
+  `npm run test:data` runs only the new data suites. Migration tests replay the historical chain, separately verify the prerequisite repair, compare the migrated schema with Prisma and restore a disposable dump plus a referenced attachment-file copy. Normal database backups must include uploads separately; database dumps do not contain file bytes.
+
 - **Run Client Component & Style Test Suites (Vitest)**:
   ```bash
   cd client
@@ -133,3 +148,5 @@ npx prisma db seed
   ```bash
   npx playwright test
   ```
+
+  First verify that both application servers use isolated test data. The current Playwright config reuses existing servers, so setting a test URL alone is not sufficient. Issue 19 does not run or implement Lab 4 E2E; the root `npm run test:e2e` still selects only Lab 2.
