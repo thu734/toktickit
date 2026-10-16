@@ -74,6 +74,28 @@ Approved concurrency boundary (A): parent Ticket serialization/single-workflow-r
 Both RESOLVED and CLOSED transitions recheck the gate: PLANNED Actions and COMPLETED Actions with Follow-Up Required true block; CANCELLED and zero Actions do not.
 Requester Problem Appears Resolved retains its existing Public Comment behavior and cannot set RESOLVED/CLOSED (I/R).
 
+### 4.1 Issue 22 Implemented Workflow Payloads and Errors
+
+Existing PATCH `/api/staff/tickets/:id/assign`, `/priority`, and `/status` accept the
+inherited operation fields plus mandatory nonnegative integer `workflowRevision`.
+Both IT_STAFF and ADMINISTRATOR are authorized. Successful responses remain updated
+Ticket objects with incremented `workflowRevision`; no new mutation route is added.
+
+- Invalid/missing revision: 400 `INVALID_WORKFLOW_REVISION`.
+- Invalid transition, including same-state: 400 `INVALID_STATUS_TRANSITION`.
+- Invalid owner target: 400 `INVALID_ASSIGNMENT_TARGET`.
+- Invalid priority or resolution summary: 400 `INVALID_IT_PRIORITY` / `INVALID_RESOLUTION_SUMMARY`.
+- Missing Ticket: 404 `RESOURCE_NOT_FOUND`; role violations remain 403 before resource disclosure.
+- Revision mismatch: 409 `STALE_REVISION`, with refresh guidance.
+- Outstanding-work gate: 409 `RESOLUTION_BLOCKED`, with safe `blockingWork: { planned, followUp }`
+  counts and guidance to review Actions Taken. No private content or extra resource data is returned.
+
+Owner/priority/status changes and Action mutations serialize on the same parent row.
+Resolution/closure check current Action fields inside the workflow transaction.
+Failures leave Ticket status/revision and existing Action/audit/retry evidence unchanged.
+Action GET returns its list and revision from one consistent database snapshot.
+Requester advisory resolution, comments, notes and attachments do not require workflow revisions.
+
 ## 5. Approved Dashboard Endpoints and Scope
 
 | Method | Path | Scope |

@@ -155,7 +155,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
     setSuccessBanner("");
     try {
       const updated = await assignStaffTicket(ticketId, currentUserId, ticket.workflowRevision);
-      setTicket(updated);
+      setTicket((previous: any) => ({ ...previous, ...updated }));
       setSuccessBanner("Ticket claimed successfully.");
     } catch (err: any) {
       workflowFailure(err, "Failed to claim ticket.");
@@ -173,7 +173,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
     try {
       const targetId = targetIdStr === "unassigned" || targetIdStr === "" ? null : parseInt(targetIdStr, 10);
       const updated = await assignStaffTicket(ticketId, targetId, ticket.workflowRevision);
-      setTicket(updated);
+      setTicket((previous: any) => ({ ...previous, ...updated }));
       setSuccessBanner("Ticket assignment updated successfully.");
     } catch (err: any) {
       workflowFailure(err, "Failed to reassign ticket.");
@@ -190,7 +190,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
     setSuccessBanner("");
     try {
       const updated = await updateStaffTicketPriority(ticketId, newPriority, ticket.workflowRevision);
-      setTicket(updated);
+      setTicket((previous: any) => ({ ...previous, ...updated }));
       setSelectedPriority(updated.itPriority);
       setSuccessBanner("IT Priority updated successfully.");
     } catch (err: any) {
@@ -231,7 +231,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
         selectedStatus === "RESOLVED" ? resolutionSummaryInput : undefined,
         ticket.workflowRevision
       );
-      setTicket(updated);
+      setTicket((previous: any) => ({ ...previous, ...updated }));
       setSelectedStatus(updated.currentStatus);
       setSuccessBanner("Ticket status updated successfully.");
     } catch (err: any) {
@@ -617,6 +617,9 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
               {isStaff && allowedNextStatuses.some(s => ['RESOLVED', 'CLOSED'].includes(s)) && gateBlocked && <p role="status" className="small">
                 {!actionsState || actionsState.workflowRevision !== ticket.workflowRevision ? 'Checking current Actions before resolution or closure.' : `Resolution and closure blocked: ${planned} planned Actions, ${followUp} completed Actions requiring follow-up.`}
                 {' '}<a href={`#actions-heading-${ticketId}`}>Review Actions Taken</a>
+              </p>}
+              {selectedStatus !== ticket.currentStatus && !allowedNextStatuses.includes(selectedStatus) && <p role="status" className="small">
+                Your draft target {selectedStatus.replace(/_/g, ' ')} is no longer permitted from {ticket.currentStatus.replace(/_/g, ' ')}. Choose an allowed transition; your summary is retained.
               </p>}
               <form onSubmit={handleStatusSubmit}>
                 <label htmlFor="update-status-select" className="form-label small fw-bold text-muted">Update Status</label>

@@ -158,6 +158,17 @@ describe('WF-API-01 / WF-SEC-01', () => {
 });
 
 describe('WF-RACE-01', () => {
+  it('returns an Actions list and workflow revision from one consistent snapshot during writes', async () => {
+    const t = await ticket();
+    await Promise.all([
+      (async () => { for (let revision = 0; revision < 12; revision++) await create(t.id, revision).expect(201); })(),
+      (async () => { for (let read = 0; read < 12; read++) {
+        const response = await staff.get(`/api/tickets/${t.id}/actions-taken`).expect(200);
+        expect(response.body.actions).toHaveLength(response.body.workflowRevision);
+      } })(),
+    ]);
+    const final = await state(t.id); expect(final.ticket.workflowRevision).toBe(12); expect(final.actions).toHaveLength(12);
+  });
   it.each(['create','edit','transition'])('serializes resolve versus Action %s without gate escape', async operation => {
     const t = await ticket(); let actionId = 0, revision = 0;
     if (operation !== 'create') {
@@ -187,13 +198,13 @@ describe('WF-RACE-01', () => {
     expect(s.ticket.assignedStaffId === adminId).toBe(res[0].status === 200);
     expect(s.ticket.itPriority === 'URGENT').toBe(res[1].status === 200);
   });
-  it('rolls back a database failure after the workflow write', async () => {
+  it.each(['assign','priority','status'])('rolls back a database failure after the %s write', async operation => {
     const t = await ticket(), before = await state(t.id);
     await db().$executeRawUnsafe(`CREATE FUNCTION issue22_reject() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'isolated failure'; END; $$`);
     await db().$executeRawUnsafe(`CREATE TRIGGER issue22_reject AFTER UPDATE ON tickets FOR EACH ROW EXECUTE FUNCTION issue22_reject()`);
     const log = vi.spyOn(console,'error').mockImplementation(()=>{});
     try {
-      const res = await status(admin,t.id,'RESOLVED').expect(500);
+      const res = await mutate(admin,t.id,operation,{workflowRevision:0,status:'RESOLVED',itPriority:'HIGH',assignedStaffId:adminId}).expect(500);
       expect(JSON.stringify(res.body)).not.toMatch(/isolated failure|postgres|stack/i);
       expect(await state(t.id)).toEqual(before);
     } finally {

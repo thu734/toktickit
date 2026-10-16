@@ -77,7 +77,7 @@ export interface Ticket {
   description: string;
   requestedPriority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   itPriority: "UNASSIGNED" | "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-  currentStatus: "NEW" | "OPEN" | "PENDING" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+  currentStatus: "NEW" | "OPEN" | "PENDING" | "IN_PROGRESS" | "WAITING_FOR_REQUESTER" | "RESOLVED" | "CLOSED" | "REOPENED" | "CANCELLED";
   requesterId: number;
   categoryId: number;
   relatedSystemId: number;

@@ -71,10 +71,16 @@ actionsRouter.get("/tickets/:ticketId/actions-taken", requireAuth, async (req, r
     const access = await canAccessTicket(req, ticketId);
     if (access.kind === "unauthenticated") return fail(res, 401, "UNAUTHENTICATED", "Authentication required.");
     if (access.kind === "missing") return fail(res, 404, "RESOURCE_NOT_FOUND", "Ticket not found.");
-    const actions = await getPrisma().actionTaken.findMany({
-      where: { ticketId }, orderBy: [{ createdAt: "asc" }, { id: "asc" }], select: actionSelect,
-    });
-    return res.status(200).json({ actions, workflowRevision: access.ticket.workflowRevision });
+    const result = await getPrisma().$transaction(async tx => {
+      const ticket = await tx.ticket.findUnique({ where: { id: ticketId }, select: { workflowRevision: true } });
+      if (!ticket) return null;
+      const actions = await tx.actionTaken.findMany({
+        where: { ticketId }, orderBy: [{ createdAt: "asc" }, { id: "asc" }], select: actionSelect,
+      });
+      return { actions, workflowRevision: ticket.workflowRevision };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
+    if (!result) return fail(res, 404, "RESOURCE_NOT_FOUND", "Ticket not found.");
+    return res.status(200).json(result);
   } catch (error) {
     console.error("Error retrieving Actions:", error);
     return res.status(500).json({ error: "Internal Server Error", code: "INTERNAL_ERROR" });

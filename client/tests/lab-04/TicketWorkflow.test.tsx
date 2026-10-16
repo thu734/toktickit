@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { StaffTicketDetail } from '../../src/components/StaffTicketDetail';
+import { RequesterTicketDetail } from '../../src/components/RequesterTicketDetail';
 import { ActionsTaken } from '../../src/components/ActionsTaken';
 import * as api from '../../src/api';
 
 vi.mock('../../src/api', () => ({ fetchStaffTicketDetail: vi.fn(), assignStaffTicket: vi.fn(), updateStaffTicketPriority: vi.fn(), updateStaffTicketStatus: vi.fn(),
   fetchTicketComments: vi.fn(), postTicketComment: vi.fn(), fetchInternalNotes: vi.fn(), postInternalNote: vi.fn(), fetchStaffUsers: vi.fn(),
+  fetchTicketDetail: vi.fn(), indicateTicketResolved: vi.fn(),
   fetchActions: vi.fn(), createAction: vi.fn(), updateAction: vi.fn(),
 }));
 const base = { id: 7, ticketNumber: 'WF-7', summary: 'Network issue', description: 'Test description', requestedPriority: 'MEDIUM', itPriority: 'HIGH', currentStatus: 'OPEN',
@@ -18,6 +20,7 @@ let actions: api.ActionTaken[];
 beforeEach(() => {
   vi.resetAllMocks(); latest = { ...base }; actions = [];
   vi.mocked(api.fetchStaffTicketDetail).mockImplementation(async () => ({ ...latest }));
+  vi.mocked(api.updateStaffTicketStatus).mockImplementation(async (_id,status) => { latest={...latest,currentStatus:status,workflowRevision:latest.workflowRevision+1}; return {...latest}; });
   vi.mocked(api.fetchActions).mockImplementation(async () => ({ actions, workflowRevision: latest.workflowRevision }));
   vi.mocked(api.fetchStaffUsers).mockResolvedValue([]); vi.mocked(api.fetchTicketComments).mockResolvedValue([]); vi.mocked(api.fetchInternalNotes).mockResolvedValue([]);
 });
@@ -131,5 +134,67 @@ describe('WF-UI-01', () => {
   it('keeps Requester Actions read-only', async () => {
     render(<ActionsTaken ticketId={7} ticketStatus="OPEN" viewer={{name:'Requester',role:'REQUESTER'}} />);
     await screen.findByText('No Actions Taken yet.');expect(screen.queryByRole('button',{name:'Add Action'})).not.toBeInTheDocument();
+  });
+});
+
+describe('Workflow synchronization recovery', () => {
+  it('loads the latest Ticket when Actions reveal a newer revision', async () => {
+    vi.mocked(api.fetchStaffTicketDetail).mockResolvedValueOnce({...latest}).mockImplementation(async()=>({...latest,workflowRevision:5}));
+    vi.mocked(api.fetchActions).mockResolvedValue({actions:[],workflowRevision:5});
+    await open(); await waitFor(()=>expect(screen.getByRole('option',{name:'RESOLVED'})).toBeEnabled());
+    resolve();await waitFor(()=>expect(api.updateStaffTicketStatus).toHaveBeenCalledWith(7,'RESOLVED','Retain my summary',5));
+  });
+  it('keeps an uncertain Action create retry available when workflow changes to resolved', async () => {
+    vi.mocked(api.createAction).mockRejectedValueOnce(new Error('Network lost')).mockResolvedValueOnce({action,workflowRevision:5});
+    const props = {ticketId:7,ticketStatus:'OPEN',workflowRevision:4,viewer:{name:'Staff',role:'IT_STAFF' as const}};
+    const view=render(<ActionsTaken {...props}/>);fireEvent.click(await screen.findByRole('button',{name:'Add Action'}));
+    fireEvent.change(screen.getByLabelText('Description'),{target:{value:'Keep uncertain draft'}});fireEvent.click(screen.getByRole('button',{name:'Create Action'}));
+    await screen.findByRole('button',{name:'Retry same create request'});
+    latest.workflowRevision=6;view.rerender(<ActionsTaken {...props} ticketStatus="RESOLVED" workflowRevision={6}/>);
+    await waitFor(()=>expect(screen.getByRole('button',{name:'Retry same create request'})).toBeEnabled());
+    expect(screen.getByLabelText('Description')).toHaveValue('Keep uncertain draft');
+    fireEvent.click(screen.getByRole('button',{name:'Retry same create request'}));await screen.findByText('Action saved.');
+    expect(vi.mocked(api.createAction).mock.calls[1][1]).toEqual(vi.mocked(api.createAction).mock.calls[0][1]);
+  });
+  it('retains a now-forbidden target and summary for review without allowing submission', async()=>{
+    vi.mocked(api.updateStaffTicketStatus).mockRejectedValueOnce({status:409,code:'STALE_REVISION'});
+    await open();resolve();await screen.findByRole('button',{name:'Refresh and review Ticket'});
+    latest={...latest,currentStatus:'CLOSED',workflowRevision:5};
+    fireEvent.click(screen.getByRole('button',{name:'Refresh and review Ticket'}));
+    const review=await screen.findByRole('button',{name:'I have reviewed the latest Ticket'});await waitFor(()=>expect(review).toBeEnabled());fireEvent.click(review);
+    expect(screen.getByText(/Your draft target RESOLVED is no longer permitted/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Resolution Summary/)).toHaveValue('Retain my summary');
+    expect(screen.getByRole('button',{name:'Save Transition to RESOLVED'})).toBeDisabled();
+  });
+});
+
+
+describe('Requester advisory and terminal workflow controls', () => {
+  it('retains advisory resolution as a public comment without formal transitions', async () => {
+    vi.mocked(api.fetchTicketDetail).mockResolvedValue({...latest,requester:{id:1,name:'Requester',email:'requester@test.local',department:'IT'},requesterId:1,categoryId:1,relatedSystemId:1,createdAt:'2026-01-01T10:00:00Z',updatedAt:'2026-01-01T10:00:00Z',requestedPriority:'MEDIUM',itPriority:'HIGH'} as api.TicketDetail);
+    vi.mocked(api.indicateTicketResolved).mockResolvedValue({message:'Recorded',comment:{id:1,ticketId:7,content:'Looks fixed now',createdAt:'2026-01-01T10:00:00Z',author:{id:1,name:'Requester',email:'requester@test.local',role:'REQUESTER'}}});
+    render(<RequesterTicketDetail ticketId={7} onBack={()=>{}}/>);
+    fireEvent.click(await screen.findByRole('button',{name:/Problem Appears Resolved/}));
+    fireEvent.change(screen.getByLabelText(/Resolution Comment/),{target:{value:'Looks fixed now'}});
+    fireEvent.click(screen.getByRole('button',{name:'Submit Resolution Comment'}));
+    await screen.findByText('Looks fixed now');
+    expect(api.indicateTicketResolved).toHaveBeenCalledWith(7,'Looks fixed now');
+    expect(api.updateStaffTicketStatus).not.toHaveBeenCalled();
+    expect(screen.queryByLabelText('Update Status')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button',{name:/Confirm Resolution|Reject Resolution|Reopen Ticket/})).not.toBeInTheDocument();
+    expect(screen.getAllByText('OPEN').length).toBeGreaterThan(0);
+  });
+  it('disables formal controls for Requesters even if the detail component is mounted directly',async()=>{
+    await open('REQUESTER'); expect(screen.getByLabelText('Update Status')).toBeDisabled();expect(screen.getByLabelText('IT Priority')).toBeDisabled();
+    expect(screen.queryByRole('button',{name:'Claim Ticket'})).not.toBeInTheDocument();
+  });
+  it('closes a resolved zero-action Ticket',async()=>{
+    latest.currentStatus='RESOLVED';await open('ADMINISTRATOR');choose('CLOSED');fireEvent.click(screen.getByRole('button',{name:'Save Transition to CLOSED'}));
+    await screen.findByText('Ticket status updated successfully.');expect(api.updateStaffTicketStatus).toHaveBeenCalledWith(7,'CLOSED',undefined,4);
+  });
+  it.each(['CANCELLED','REOPENED'])('retains confirmation before %s',async target=>{
+    latest.currentStatus=target==='REOPENED'?'CLOSED':'OPEN';await open();choose(target);expect(api.updateStaffTicketStatus).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button',{name:'Confirm'}));fireEvent.click(screen.getByRole('button',{name:`Save Transition to ${target}`}));
+    await screen.findByText('Ticket status updated successfully.');expect(api.updateStaffTicketStatus).toHaveBeenCalledWith(7,target,undefined,4);
   });
 });

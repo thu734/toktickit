@@ -71,7 +71,7 @@ function ActionsPanel({ ticketId, ticketStatus, onRefreshTicket, workflowRevisio
     const previous = observedWorkflow.current;
     observedWorkflow.current = { workflowRevision, refreshKey };
     if (previous.workflowRevision === workflowRevision && previous.refreshKey === refreshKey) return;
-    if (editing && workflowRevision !== revision) {
+    if (editing && !uncertain && workflowRevision !== revision) {
       setConflict('refresh');
       setError('Ticket workflow changed. Your draft is retained. Refresh and review before saving again.');
     }
@@ -86,7 +86,7 @@ function ActionsPanel({ ticketId, ticketStatus, onRefreshTicket, workflowRevisio
     setEditing(action); setError(''); setSuccess(''); setConflict(null); setUncertain(false); createAttempt.current = null;
   }
   async function save(fields: ActionFields | ActionChanges, retry = false) {
-    if (saving.current || !writable || revision === null || conflict || loading || (!retry && uncertain)) return;
+    if (saving.current || (retry ? !canWrite : !writable) || revision === null || conflict || loading || (!retry && uncertain)) return;
     if (editing !== 'new' && Object.keys(fields).length === 0) { setError('No changes to save.'); return; }
     saving.current = true; setBusy(true); setError(''); setSuccess('');
     try {
@@ -132,7 +132,7 @@ function ActionsPanel({ ticketId, ticketStatus, onRefreshTicket, workflowRevisio
     {conflict === 'review' && <div role="status"><p>Latest Actions loaded below. Review them against your retained draft. Nothing has been resubmitted.</p>
       <button className="btn btn-outline-success" disabled={loading || !!readError || !!changedLifecycle || !writable} onClick={() => setConflict(null)}>I have reviewed the latest Actions</button></div>}
     {changedLifecycle && <p role="alert">This Action's status changed. Your draft is retained for reference; discard it and open the current Action to continue.</p>}
-    {uncertain && <button className="btn btn-outline-success" disabled={busy || !writable || loading} onClick={() => void save(createAttempt.current!, true)}>Retry same create request</button>}
+    {uncertain && <button className="btn btn-outline-success" disabled={busy || !canWrite || loading} onClick={() => void save(createAttempt.current!, true)}>Retry same create request</button>}
     {!loading && !readError && revision !== null && actions.length === 0 && <p>No Actions Taken yet.</p>}
     <ol className="action-list">
       {ordered.map(action => <li key={action.id} className="action-item" role="article" aria-label={`Action ${action.id}`}>
