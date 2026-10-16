@@ -203,6 +203,12 @@ describe("Actions Taken list", () => {
     expect(screen.getAllByText("Existing diagnostic file")).toHaveLength(2);
     expect(screen.queryByRole("button", { name: /create|edit|complete|cancel/i })).not.toBeInTheDocument();
     expect(api.fetchStaffUsers).not.toHaveBeenCalled();
+    expect(screen.queryByText(/Shared with the Ticket Requester/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Read-only Actions/i)).not.toBeInTheDocument();
+  });
+  it.each(["IT_STAFF", "ADMINISTRATOR"] as const)("shows the concise shared-content reminder in %s view", async role => {
+    render(<ActionsTaken ticketId={7} ticketStatus="OPEN" viewer={{ ...viewer, role }} />);
+    expect(await screen.findByText("Actions Taken are shared with the Requester. Private information belongs in Internal Notes.")).toBeInTheDocument();
   });
   it("distinguishes loading from empty", async () => {
     vi.mocked(api.fetchActions).mockResolvedValue({ actions: [], workflowRevision: 0 });

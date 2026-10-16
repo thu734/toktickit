@@ -107,8 +107,7 @@ function ActionsPanel({ ticketId, ticketStatus, onRefreshTicket, performerName, 
 
   return <section className="actions-taken card p-3 mt-3" aria-labelledby={`actions-heading-${ticketId}`}>
     <h2 id={`actions-heading-${ticketId}`} ref={heading} tabIndex={-1} className="h4">Actions Taken</h2>
-    <p>Shared with the Ticket Requester. Do not include private information.</p>
-    {!canWrite && <p>Read-only Actions.</p>}
+    {canWrite && <p className="text-muted small">Actions Taken are shared with the Requester. Private information belongs in Internal Notes.</p>}
     {terminal && <p>{ticketStatus === 'CANCELLED' ? 'This Ticket is cancelled. Actions are read-only.' : 'Reopen this Ticket before adding or correcting Actions.'}</p>}
     {loading && <p role="status">{revision === null ? 'Loading Actions…' : 'Refreshing Actions…'}</p>}
     {readError && <div role="alert">{readError} <button className="btn btn-outline-secondary" disabled={loading || busy} onClick={() => void loadActions()}>Retry loading Actions</button></div>}

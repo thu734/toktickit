@@ -115,10 +115,10 @@ describe("UI-06: Public Comments & Internal Notes UI Tests (AC-08, AC-17, BR-22)
     render(<StaffTicketDetail ticketId={1} currentUserRole="IT_STAFF" currentUserId={2} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/internal notes/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /internal notes/i })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText(/internal notes/i));
+    fireEvent.click(screen.getByRole("button", { name: /internal notes/i }));
 
     await waitFor(() => {
       expect(screen.getByText("Checked Cisco AnyConnect logs; radius timeout issue.")).toBeInTheDocument();
