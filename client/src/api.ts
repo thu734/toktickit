@@ -126,6 +126,20 @@ export interface RequesterTicketFilters {
   currentStatus?: string;
 }
 
+export interface RequesterDashboardResponse {
+  asOf: string;
+  counts: { active: number; waitingForRequester: number; resolved: number };
+  recentTickets: Pick<Ticket, "id" | "ticketNumber" | "summary" | "currentStatus" | "updatedAt">[];
+  drillDowns: Record<"active" | "waitingForRequester" | "resolved", { destination: "my-tickets"; filters: RequesterTicketFilters }>;
+}
+
+export async function fetchRequesterDashboard(signal?: AbortSignal): Promise<RequesterDashboardResponse> {
+  const response = await fetch(`${API_URL}/api/dashboard/requester`, { credentials: "include", signal });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw Object.assign(new Error(data.message || data.error || "Unable to retrieve your dashboard."), { status: response.status, code: data.code });
+  return data;
+}
+
 export interface FetchTicketsParams extends RequesterTicketFilters {
   search?: string;
   categoryId?: string;

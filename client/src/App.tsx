@@ -9,15 +9,18 @@ import { MyTicketsList } from "./components/MyTicketsList.js";
 import { RequesterTicketDetail } from "./components/RequesterTicketDetail.js";
 import { StaffTicketQueue } from "./components/StaffTicketQueue.js";
 import { StaffTicketDetail } from "./components/StaffTicketDetail.js";
+import { RequesterDashboard } from "./components/RequesterDashboard.js";
+import type { RequesterTicketFilters } from "./api.js";
 import { UserManagement } from "./components/UserManagement.js";
 
-type TabView = "create-ticket" | "my-tickets" | "ticket-detail" | "ticket-queue" | "staff-ticket-detail" | "user-management";
+type TabView = "requester-dashboard" | "create-ticket" | "my-tickets" | "ticket-detail" | "ticket-queue" | "staff-ticket-detail" | "user-management";
 
 function MainContent() {
   const { user, loading, refreshUser } = useAuth();
   const { activeRequester, setActiveRequester } = useRequester();
   const [activeTab, setActiveTab] = useState<TabView>("my-tickets");
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const [requesterFilters, setRequesterFilters] = useState<RequesterTicketFilters>({});
 
   useEffect(() => {
     if (user) {
@@ -72,16 +75,26 @@ function MainContent() {
   };
 
   return (
-    <AppShell currentTab={activeTab} onTabChange={(tab) => setActiveTab(tab as TabView)}>
+    <AppShell currentTab={activeTab} onTabChange={(tab) => {
+      if (tab === "my-tickets") setRequesterFilters({});
+      setActiveTab(tab as TabView);
+    }}>
       <div className="container-fluid px-3 px-md-4 px-xl-5 py-4" style={{ maxWidth: 1440 }}>
         {user.role === "REQUESTER" && (
           <>
+            {activeTab === "requester-dashboard" && (
+              <RequesterDashboard
+                onNavigateTickets={(filters) => { setRequesterFilters(filters); setActiveTab("my-tickets"); }}
+                onOpenTicket={(id) => { setRequesterFilters({}); handleOpenRequesterTicket(id); }}
+                onNavigateCreate={() => setActiveTab("create-ticket")}
+              />
+            )}
             {activeTab === "create-ticket" && (
               <CreateTicketForm onViewTicketDetail={handleOpenRequesterTicket} />
             )}
 
             {activeTab === "my-tickets" && (
-              <MyTicketsList
+              <MyTicketsList key={`${user.id}-${JSON.stringify(requesterFilters)}`} initialFilters={requesterFilters}
                 onNavigateCreate={() => setActiveTab("create-ticket")}
                 onOpenTicket={handleOpenRequesterTicket}
               />

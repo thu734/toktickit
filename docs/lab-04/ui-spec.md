@@ -24,6 +24,26 @@ R: summarize authenticated ownership only; concise attention/recent/resolved inf
 Cards require a descriptive label, visible value and keyboard-operable drill-down. Backend failure is a retryable error, not zero. An empty account displays zero/empty feedback and keeps Create Ticket/My Tickets reachable. Current-status resolved information must not be labelled a dated resolution metric without a trustworthy approved timestamp.
 Desktop uses concise card/list grouping; smaller screens stack sections without page overflow (R). Current-state cards and recent-five previews have no date-window cutoff; recent ordering is updatedAt DESC, id DESC and query/drill-down scopes match the specification.
 
+### 3.1 Issue 23 Integration
+
+The Requester Dashboard adds a Requester-only navigation button with `aria-current="page"` when active.
+My Tickets remains the initial landing screen. Three labelled cards show current Active Tickets,
+Waiting for Requester, and Resolved Tickets; each has a keyboard-operable View tickets control.
+Recent Tickets show at most five ticket numbers, summaries, textual statuses and last-updated times,
+with direct actions opening existing owned Ticket Detail. My Tickets and Create Ticket remain available.
+
+Cards stack below the existing medium breakpoint and use inherited Zen Green/Bootstrap card/button styles.
+Long preview text wraps. UTC API timestamps are displayed with inherited locale date/time formatting
+and an explicit local-timezone cue. The As of label describes the common backend read transaction,
+not a date cutoff or a resolution date metric.
+
+Loading renders no invented count values. A valid empty response shows three zeros and an empty list.
+A failed request or failed refresh shows a retryable error, without stale-success counts or a false empty state.
+401, forbidden role and first-password-lock messages are distinct. Account changes/unmount abort the old read;
+late old-account results are ignored. Cards apply matching server-side list filters, starting at page one
+with unrelated filters cleared. Ordinary My Tickets navigation clears dashboard filters; existing Clear Filters
+also removes the active group. The list exposes Active Tickets as a filter grouping, not a new Ticket status.
+
 ## 4. Staff/Admin Dashboard
 
 R: concise operational starting point with approved metrics, recent/urgent Tickets and current-user Actions. A/D-12 uses unassigned active Tickets, current-owner active Tickets, status/priority groups and one My Actions preview: PLANNED Actions assigned to the authenticated Staff/Admin, excluding historical performed work.
