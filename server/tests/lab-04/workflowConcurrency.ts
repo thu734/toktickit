@@ -35,4 +35,3 @@ export async function overlap(ticketId: number, run: () => Promise<request.Respo
   expect(waiting).toBeGreaterThanOrEqual(2);
   return responses;
 }
-

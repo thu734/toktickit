@@ -19,6 +19,7 @@ vi.mock("../../src/api", () => ({
 
 const mockTicket = {
   id: 1,
+  workflowRevision: 0,
   ticketNumber: "TKT-2026-000001",
   summary: "VPN Connection drops frequently",
   description: "Connecting to campus VPN fails every 10 minutes.",
@@ -77,7 +78,7 @@ describe("UI-05: IT Staff Ticket Detail Component Tests (AC-12..15, BR-19)", () 
     fireEvent.click(screen.getByRole("button", { name: /claim ticket/i }));
 
     await waitFor(() => {
-      expect(api.assignStaffTicket).toHaveBeenCalledWith(1, 2);
+      expect(api.assignStaffTicket).toHaveBeenCalledWith(1, 2, 0);
     });
   });
 
@@ -96,7 +97,7 @@ describe("UI-05: IT Staff Ticket Detail Component Tests (AC-12..15, BR-19)", () 
     fireEvent.change(screen.getByLabelText(/it priority/i), { target: { value: "URGENT" } });
 
     await waitFor(() => {
-      expect(api.updateStaffTicketPriority).toHaveBeenCalledWith(1, "URGENT");
+      expect(api.updateStaffTicketPriority).toHaveBeenCalledWith(1, "URGENT", 0);
     });
   });
 
@@ -118,7 +119,7 @@ describe("UI-05: IT Staff Ticket Detail Component Tests (AC-12..15, BR-19)", () 
     fireEvent.click(saveStatusBtn);
 
     await waitFor(() => {
-      expect(api.updateStaffTicketStatus).toHaveBeenCalledWith(1, "OPEN", undefined);
+      expect(api.updateStaffTicketStatus).toHaveBeenCalledWith(1, "OPEN", undefined, 0);
     });
   });
 });

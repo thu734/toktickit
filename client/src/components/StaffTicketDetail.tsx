@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { ActionsTaken } from "./ActionsTaken";
 import {
   fetchStaffTicketDetail,
@@ -10,7 +10,7 @@ import {
   fetchInternalNotes,
   postInternalNote,
   fetchStaffUsers,
-  StaffUser,
+  ActionsResponse,
   Comment,
   InternalNote,
 } from "../api.js";
@@ -45,6 +45,36 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successBanner, setSuccessBanner] = useState("");
+  const [workflowConflict, setWorkflowConflict] = useState<'refresh' | 'review' | null>(null);
+  const [workflowRefreshing, setWorkflowRefreshing] = useState(false);
+  const [actionsState, setActionsState] = useState<ActionsResponse | null>(null);
+  const [actionsRefreshKey, setActionsRefreshKey] = useState(0);
+  const workflowSaving = useRef(false);
+  const onWorkflowState = useCallback((state: ActionsResponse | null) => setActionsState(state), []);
+  const refreshTicket = useCallback(async () => {
+    const latest = await fetchStaffTicketDetail(ticketId);
+    setTicket(latest);
+    // Preserve all in-progress workflow/comment/note drafts.
+    return latest;
+  }, [ticketId]);
+  const workflowFailure = (err: any, fallback: string) => {
+    if (err.status === 409 || !err.status || err.status >= 500) {
+      setWorkflowConflict('refresh');
+      setError(err.code === 'RESOLUTION_BLOCKED'
+        ? `Outstanding Actions block resolution or closure (${err.blockingWork?.planned ?? '?'} planned, ${err.blockingWork?.followUp ?? '?'} requiring follow-up). Review Actions Taken. Your draft is retained.`
+        : 'Ticket may have changed. Your draft is retained. Refresh and review before saving again.');
+    } else if (err.status === 401) setError('Your session has expired. Sign in again.');
+    else if (err.code === 'MUST_CHANGE_PASSWORD') setError('Change your password before continuing.');
+    else if (err.status === 403) setError('You do not have permission to change this Ticket.');
+    else if (err.status === 404) setError('This Ticket is unavailable.');
+    else setError(err.message || fallback);
+  };
+  const refreshWorkflow = async () => {
+    setWorkflowRefreshing(true);
+    try { await refreshTicket(); setActionsRefreshKey(key => key + 1); setWorkflowConflict('review'); setError(''); }
+    catch (err: any) { setError(err.message || 'Unable to refresh. Retry when available.'); }
+    finally { setWorkflowRefreshing(false); }
+  };
 
   // Operational states
   const [assigning, setAssigning] = useState(false);
@@ -89,7 +119,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
       setInternalNotes(fetchedNotes);
     } catch (err: any) {
       if (err?.status === 403) {
-        setError("Access Denied: IT Staff authorization required.");
+        setError("Access Denied: IT Staff or Administrator authorization required.");
       } else {
         setError(err.message || "Failed to load ticket details.");
       }
@@ -109,51 +139,64 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
       .catch(() => setStaffUsers([]));
   }, []);
 
+  useEffect(() => {
+    if (!actionsState || !ticket || actionsState.workflowRevision === ticket.workflowRevision) return;
+    let active = true;
+    refreshTicket().catch(() => { if (active) { setWorkflowConflict('refresh'); setError('Unable to synchronize Ticket. Refresh and review before saving.'); } });
+    return () => { active = false; };
+  }, [actionsState, ticket?.workflowRevision, refreshTicket]);
+
   const handleClaimTicket = async () => {
     if (!currentUserId) return;
+    if (workflowSaving.current || workflowConflict || workflowRefreshing) return;
+    workflowSaving.current = true;
     setAssigning(true);
     setError("");
     setSuccessBanner("");
     try {
-      const updated = await assignStaffTicket(ticketId, currentUserId);
+      const updated = await assignStaffTicket(ticketId, currentUserId, ticket.workflowRevision);
       setTicket(updated);
       setSuccessBanner("Ticket claimed successfully.");
     } catch (err: any) {
-      setError(err.message || "Failed to claim ticket.");
+      workflowFailure(err, "Failed to claim ticket.");
     } finally {
-      setAssigning(false);
+      workflowSaving.current = false; setAssigning(false);
     }
   };
 
   const handleAssignChange = async (targetIdStr: string) => {
+    if (workflowSaving.current || workflowConflict || workflowRefreshing) return;
+    workflowSaving.current = true;
     setAssigning(true);
     setError("");
     setSuccessBanner("");
     try {
       const targetId = targetIdStr === "unassigned" || targetIdStr === "" ? null : parseInt(targetIdStr, 10);
-      const updated = await assignStaffTicket(ticketId, targetId);
+      const updated = await assignStaffTicket(ticketId, targetId, ticket.workflowRevision);
       setTicket(updated);
       setSuccessBanner("Ticket assignment updated successfully.");
     } catch (err: any) {
-      setError(err.message || "Failed to reassign ticket.");
+      workflowFailure(err, "Failed to reassign ticket.");
     } finally {
-      setAssigning(false);
+      workflowSaving.current = false; setAssigning(false);
     }
   };
 
   const handlePriorityChange = async (newPriority: string) => {
+    if (workflowSaving.current || workflowConflict || workflowRefreshing) return;
+    workflowSaving.current = true;
     setPriorityUpdating(true);
     setError("");
     setSuccessBanner("");
     try {
-      const updated = await updateStaffTicketPriority(ticketId, newPriority);
+      const updated = await updateStaffTicketPriority(ticketId, newPriority, ticket.workflowRevision);
       setTicket(updated);
       setSelectedPriority(updated.itPriority);
       setSuccessBanner("IT Priority updated successfully.");
     } catch (err: any) {
-      setError(err.message || "Failed to update IT priority.");
+      workflowFailure(err, "Failed to update IT priority.");
     } finally {
-      setPriorityUpdating(false);
+      workflowSaving.current = false; setPriorityUpdating(false);
     }
   };
 
@@ -175,7 +218,8 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
   const handleStatusSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedStatus || selectedStatus === ticket.currentStatus) return;
+    if (!selectedStatus || !ALLOWED_TRANSITIONS[ticket.currentStatus]?.includes(selectedStatus) || workflowSaving.current || workflowConflict || workflowRefreshing || gateBlocked && ["RESOLVED", "CLOSED"].includes(selectedStatus)) return;
+    workflowSaving.current = true;
 
     setStatusUpdating(true);
     setError("");
@@ -184,15 +228,16 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
       const updated = await updateStaffTicketStatus(
         ticketId,
         selectedStatus,
-        selectedStatus === "RESOLVED" ? resolutionSummaryInput : undefined
+        selectedStatus === "RESOLVED" ? resolutionSummaryInput : undefined,
+        ticket.workflowRevision
       );
       setTicket(updated);
       setSelectedStatus(updated.currentStatus);
       setSuccessBanner("Ticket status updated successfully.");
     } catch (err: any) {
-      setError(err.message || "Invalid status transition.");
+      workflowFailure(err, "Invalid status transition.");
     } finally {
-      setStatusUpdating(false);
+      workflowSaving.current = false; setStatusUpdating(false);
     }
   };
 
@@ -240,7 +285,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
     );
   }
 
-  if (error || !ticket) {
+  if (!ticket) {
     return (
       <div className="container py-4">
         <button type="button" className="btn btn-outline-secondary mb-3" onClick={onBack}>
@@ -253,7 +298,11 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
     );
   }
 
-  const isStaff = currentUserRole === "IT_STAFF";
+  const isStaff = currentUserRole === "IT_STAFF" || currentUserRole === "ADMINISTRATOR";
+  const workflowBusy = assigning || priorityUpdating || statusUpdating || workflowRefreshing || !!workflowConflict;
+  const planned = actionsState?.actions.filter(a => a.status === 'PLANNED').length ?? 0;
+  const followUp = actionsState?.actions.filter(a => a.status === 'COMPLETED' && a.followUpRequired).length ?? 0;
+  const gateBlocked = !actionsState || actionsState.workflowRevision !== ticket.workflowRevision || planned > 0 || followUp > 0;
   const allowedNextStatuses = ALLOWED_TRANSITIONS[ticket.currentStatus] || [];
 
   return (
@@ -279,9 +328,16 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
         </div>
       )}
 
+      {workflowConflict && <div role="status" className="alert alert-warning">
+        {workflowConflict === 'refresh' ? <button type="button" className="btn btn-outline-success" disabled={workflowRefreshing} onClick={() => void refreshWorkflow()}>Refresh and review Ticket</button>
+          : <><p>Latest Ticket and Actions loaded. Review the current status and your retained draft before saving. Nothing has been resubmitted.</p>
+            <button type="button" className="btn btn-outline-success" disabled={workflowRefreshing || !actionsState || actionsState.workflowRevision !== ticket.workflowRevision}
+              onClick={() => setWorkflowConflict(null)}>I have reviewed the latest Ticket</button></>}
+      </div>}
       <ActionsTaken key={ticketId} ticketId={ticketId} ticketStatus={ticket.currentStatus}
         viewer={{ role: currentUserRole || "REQUESTER", name: currentUserName || "Current signed-in user" }}
-        onRefreshTicket={async () => { setTicket(await fetchStaffTicketDetail(ticketId)); }} />
+        onRefreshTicket={async () => { await refreshTicket(); }} workflowRevision={ticket.workflowRevision}
+        refreshKey={actionsRefreshKey} onWorkflowState={onWorkflowState} />
 
       {/* Main 2-column Dashboard Grid (desktop ≥ 992px) */}
       <div className="row g-4">
@@ -486,12 +542,6 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
           <div className="card p-4 surface-card sticky-lg-top" style={{ top: "1rem", borderColor: "#E2E8F0" }}>
             <h5 className="mb-3 text-dark border-bottom pb-2">Operational Controls</h5>
 
-            {!isStaff && (
-              <div className="alert alert-info small p-2 mb-3">
-                <strong>Read Oversight Mode:</strong> You are logged in as Administrator. IT Staff operational controls (Claim, Priority, Status) require IT Staff role per SEC-API-04.
-              </div>
-            )}
-
             {/* Ownership / Assignment Control */}
             <div className="mb-4">
               <label className="form-label small fw-bold text-muted">Assigned Owner</label>
@@ -504,7 +554,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                     type="button"
                     className="btn btn-sm btn-zen-primary ms-auto"
                     onClick={handleClaimTicket}
-                    disabled={assigning}
+                    disabled={workflowBusy}
                   >
                     {assigning ? "Claiming..." : "Claim Ticket"}
                   </button>
@@ -517,7 +567,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                     className="form-select"
                     value={ticket.assignedStaffId || "unassigned"}
                     onChange={(e) => handleAssignChange(e.target.value)}
-                    disabled={assigning}
+                    disabled={workflowBusy}
                   >
                     <option value="unassigned">Unassigned</option>
                     {staffUsers.length > 0
@@ -553,7 +603,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                 className="form-select form-select-sm"
                 value={selectedPriority}
                 onChange={(e) => handlePriorityChange(e.target.value)}
-                disabled={!isStaff || priorityUpdating}
+                disabled={!isStaff || workflowBusy}
               >
                 <option value="LOW">Low</option>
                 <option value="MEDIUM">Medium</option>
@@ -564,6 +614,10 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
             {/* State-Machine Status Transition */}
             <div className="mb-3">
+              {isStaff && allowedNextStatuses.some(s => ['RESOLVED', 'CLOSED'].includes(s)) && gateBlocked && <p role="status" className="small">
+                {!actionsState || actionsState.workflowRevision !== ticket.workflowRevision ? 'Checking current Actions before resolution or closure.' : `Resolution and closure blocked: ${planned} planned Actions, ${followUp} completed Actions requiring follow-up.`}
+                {' '}<a href={`#actions-heading-${ticketId}`}>Review Actions Taken</a>
+              </p>}
               <form onSubmit={handleStatusSubmit}>
                 <label htmlFor="update-status-select" className="form-label small fw-bold text-muted">Update Status</label>
                 {allowedNextStatuses.length === 0 ? (
@@ -577,11 +631,11 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                       className="form-select form-select-sm mb-2"
                       value={selectedStatus}
                       onChange={handleStatusSelectChange}
-                      disabled={!isStaff || statusUpdating}
+                      disabled={!isStaff || workflowBusy}
                     >
                       <option value={ticket.currentStatus}>{ticket.currentStatus.replace(/_/g, " ")} (Current)</option>
                       {allowedNextStatuses.map((st) => (
-                        <option key={st} value={st}>
+                        <option key={st} value={st} disabled={gateBlocked && ["RESOLVED", "CLOSED"].includes(st)}>
                           {st.replace(/_/g, " ")}
                         </option>
                       ))}
@@ -589,10 +643,11 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
                     {selectedStatus === "RESOLVED" && (
                       <div className="mb-2">
-                        <label className="form-label extra-small text-muted fw-bold">Resolution Summary (Optional, up to 1000 chars)</label>
+                        <label htmlFor="resolution-summary" className="form-label extra-small text-muted fw-bold">Resolution Summary (Optional, up to 1000 chars)</label>
                         <textarea
                           className="form-control form-control-sm"
                           rows={3}
+                          id="resolution-summary"
                           placeholder="Describe resolution details..."
                           value={resolutionSummaryInput}
                           onChange={(e) => setResolutionSummaryInput(e.target.value)}
@@ -605,7 +660,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                       <button
                         type="submit"
                         className="btn btn-sm btn-zen-primary w-100 mt-2"
-                        disabled={statusUpdating}
+                        disabled={workflowBusy || !allowedNextStatuses.includes(selectedStatus) || gateBlocked && ["RESOLVED", "CLOSED"].includes(selectedStatus)}
                       >
                         {statusUpdating
                           ? "Updating Status..."
