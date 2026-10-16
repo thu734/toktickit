@@ -125,6 +125,15 @@ No full descriptions, Internal Notes, attachment paths, account secrets, or full
 The endpoint accepts no identity override or configurable preview limit.
 Session/account checks, first-password lock and 401/403 behavior are inherited; query failures return a safe 500 without counts.
 
+### 5.2 Requester Dashboard Drill-down Filters
+
+Existing GET `/api/tickets` additionally accepts `statusGroup=active`, applying the five approved active statuses
+in the database before both counting and pagination. It is a filter group, never a Ticket status.
+Omitted groups preserve existing behavior; unsupported/repeated groups return 400.
+When combined with `currentStatus`, the predicates intersect. Ownership is always session-derived.
+Waiting/resolved drill-downs use existing single-status filters. Dashboard navigation starts at page one,
+updatedAt DESC (with inherited ID DESC tie-break), clearing unrelated filters.
+
 ## 6. Safe Error and Conflict Plan
 
 | Condition | Inherited / approved behavior | Basis |

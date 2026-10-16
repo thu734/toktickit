@@ -121,7 +121,12 @@ export interface PaginatedTicketsResponse {
   };
 }
 
-export interface FetchTicketsParams {
+export interface RequesterTicketFilters {
+  statusGroup?: "active";
+  currentStatus?: string;
+}
+
+export interface FetchTicketsParams extends RequesterTicketFilters {
   search?: string;
   categoryId?: string;
   requestedPriority?: string;
@@ -222,6 +227,7 @@ export async function fetchTickets(
   if (params.categoryId) query.append("categoryId", params.categoryId);
   if (params.requestedPriority) query.append("requestedPriority", params.requestedPriority);
   if (params.currentStatus) query.append("currentStatus", params.currentStatus);
+  if ("statusGroup" in params && params.statusGroup) query.append("statusGroup", params.statusGroup);
   if (params.sortBy) query.append("sortBy", params.sortBy);
   if (params.sortOrder) query.append("sortOrder", params.sortOrder);
   if (params.page) query.append("page", String(params.page));

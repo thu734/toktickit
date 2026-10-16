@@ -115,3 +115,40 @@ describe('REQ-TIME-01 bounded ordering and consistent PostgreSQL snapshot',()=>{
     }finally{enabled=false;release();if(timer)clearTimeout(timer);await response;}
   });
 });
+
+
+describe('REQ-DASH-01 metric / drill-down parity before pagination',()=>{
+  it('returns all active owned Tickets across pages despite interleaved inactive and other-owner records',async()=>{
+    const {user,agent}=await account(),other=await account();const expected=[];
+    const active:TicketStatus[]=['NEW','OPEN','IN_PROGRESS','WAITING_FOR_REQUESTER','REOPENED'];
+    for(let i=0;i<15;i++) {
+      expected.push(await ticket(user.id,active[i%5],new Date(2020,0,i+1)));
+      await ticket(user.id,i%2?'CLOSED':'CANCELLED',new Date(2030,0,i+1));
+      await ticket(other.user.id,active[i%5],new Date(2040,0,i+1));
+    }
+    const dashboard=(await agent.get(path).expect(200)).body;
+    expect(dashboard.counts.active).toBe(15);
+    const all=[];
+    for(let page=1;page<=4;page++) {
+      const res=await agent.get('/api/tickets').query({...dashboard.drillDowns.active.filters,page,limit:4,sortBy:'updatedAt',sortOrder:'desc',requesterId:other.user.id}).expect(200);
+      expect(res.body.pagination).toMatchObject({totalItems:15,totalPages:4,page});
+      expect(res.body.items).toHaveLength(page===4?3:4);
+      all.push(...res.body.items.map((t:{id:number})=>t.id));
+    }
+    expect(all).toEqual(expected.reverse().map(t=>t.id));
+    for(const metric of ['waitingForRequester','resolved']) {
+      const res=await agent.get('/api/tickets').query(dashboard.drillDowns[metric].filters).expect(200);
+      expect(res.body.pagination.totalItems).toBe(dashboard.counts[metric]);
+    }
+    const intersection=await agent.get('/api/tickets').query({statusGroup:'active',currentStatus:'RESOLVED'}).expect(200);
+    expect(intersection.body.pagination.totalItems).toBe(0);expect(intersection.body.items).toEqual([]);
+    const ordinary=await agent.get('/api/tickets').expect(200);expect(ordinary.body.pagination.totalItems).toBe(30);
+    const recentFirst=dashboard.recentTickets[0];
+    const detail=await agent.get(`/api/tickets/${recentFirst.id}`).expect(200);expect(detail.body.requesterId).toBe(user.id);
+  });
+  it('validates the new group filter without introducing a Ticket status',async()=>{
+    const {agent}=await account();
+    await agent.get('/api/tickets?statusGroup=unknown').expect(400);
+    await agent.get('/api/tickets?statusGroup=active&statusGroup=active').expect(400);
+  });
+});
