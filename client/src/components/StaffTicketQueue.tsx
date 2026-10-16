@@ -214,9 +214,10 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
           </div>
 
           <div className="col-6 col-md-2">
-            <label className="form-label small fw-bold text-muted">Status</label>
+            <label htmlFor="staff-status-filter" className="form-label small fw-bold text-muted">Status</label>
             <select
               className="form-select"
+              id="staff-status-filter"
               value={currentStatus}
               onChange={(e) => {
                 setCurrentStatus(e.target.value);

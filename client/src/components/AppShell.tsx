@@ -61,6 +61,13 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
               </>
             )}
 
+            {(user.role === "IT_STAFF" || user.role === "ADMINISTRATOR") && (
+              <button className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "staff-dashboard" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
+                aria-current={currentTab === "staff-dashboard" ? "page" : undefined} onClick={() => onTabChange("staff-dashboard")}>
+                Dashboard
+              </button>
+            )}
+
             {user.role === "IT_STAFF" && (
               <button
                 className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "ticket-queue" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
