@@ -107,6 +107,7 @@ function MainContent() {
                 ticketId={selectedTicketId}
                 currentUserRole={user.role}
                 currentUserId={user.id}
+                currentUserName={user.name}
                 onBack={() => setActiveTab("ticket-queue")}
               />
             )}

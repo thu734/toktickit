@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { ActionsTaken } from "./ActionsTaken";
 import {
   fetchTicketDetail,
   TicketDetail,
@@ -385,6 +386,7 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
         </div>
       </section>
 
+      <ActionsTaken key={ticket.id} ticketId={ticket.id} ticketStatus={ticket.currentStatus} />
       {/* Surface Card 2: Attachments */}
       <section className="card border-0 shadow-sm p-4 mb-4" style={{ borderRadius: 12, backgroundColor: "#FFFFFF" }}>
         <AttachmentSection ticketId={ticket.id} attachments={ticket.attachments || []} onAttachmentChange={() => loadTicket(false)} />

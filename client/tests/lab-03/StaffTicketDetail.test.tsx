@@ -14,6 +14,7 @@ vi.mock("../../src/api", () => ({
   fetchInternalNotes: vi.fn(),
   postInternalNote: vi.fn(),
   fetchStaffUsers: vi.fn(),
+  fetchActions: vi.fn(),
 }));
 
 const mockTicket = {
@@ -43,6 +44,7 @@ const mockStaffUsers: api.StaffUser[] = [
 describe("UI-05: IT Staff Ticket Detail Component Tests (AC-12..15, BR-19)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(api.fetchActions).mockResolvedValue({ actions: [], workflowRevision: 0 });
     (api.fetchStaffTicketDetail as any).mockResolvedValue(mockTicket);
     (api.fetchStaffUsers as any).mockResolvedValue(mockStaffUsers);
     (api.fetchTicketComments as any).mockResolvedValue([]);
