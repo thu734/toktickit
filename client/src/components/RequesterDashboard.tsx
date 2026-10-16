@@ -43,9 +43,10 @@ function DashboardContent({ onNavigateTickets, onOpenTicket, onNavigateCreate }:
   }, [attempt]);
 
   const metrics = [
-    { key: 'active', label: 'Active Tickets' },
+    { key: 'open', label: 'Open' },
+    { key: 'inProgress', label: 'In Progress' },
     { key: 'waitingForRequester', label: 'Waiting for Requester' },
-    { key: 'resolved', label: 'Resolved Tickets' },
+    { key: 'resolved', label: 'Resolved' },
   ] as const;
   const formatTime = (value: string) => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 
@@ -63,8 +64,15 @@ function DashboardContent({ onNavigateTickets, onOpenTicket, onNavigateCreate }:
     {!loading && data && <>
       <p className="small text-muted" role="status">As of <time dateTime={data.asOf}>{formatTime(data.asOf)}</time>. Times shown in your local timezone.
         {' '}<button type="button" className="btn btn-link btn-sm" onClick={() => setAttempt(value => value + 1)}>Refresh dashboard</button></p>
-      <div className="row g-3 mb-4">
-        {metrics.map(metric => <div className="col-12 col-md-4" key={metric.key}>
+      <div className="mb-3" aria-label="Active Tickets summary">
+        <p className="mb-1"><strong>Active Tickets: {data.counts.active}</strong>{' '}
+          <button type="button" className="btn btn-link btn-sm" aria-label={`View All Active (${data.counts.active})`}
+            onClick={() => onNavigateTickets(data.drillDowns.active.filters)}>View All Active</button>
+        </p>
+        <p className="small text-muted mb-0">Includes New, Open, In Progress, Waiting for Requester, and Reopened.</p>
+      </div>
+      <div className="row g-3 mb-3">
+        {metrics.map(metric => <div className="col-12 col-md-6 col-xl-3" key={metric.key}>
           <article className="card h-100 shadow-sm p-3" aria-labelledby={`dashboard-${metric.key}`}>
             <h2 id={`dashboard-${metric.key}`} className="h6">{metric.label}</h2>
             <p className="fs-2 fw-bold" style={{ color: '#006B3C' }}>{data.counts[metric.key]}</p>
@@ -72,6 +80,12 @@ function DashboardContent({ onNavigateTickets, onOpenTicket, onNavigateCreate }:
               aria-label={`View ${metric.label} (${data.counts[metric.key]})`}>View tickets</button>
           </article>
         </div>)}
+      </div>
+      <div className="d-flex flex-wrap gap-3 mb-4" role="group" aria-label="Additional Ticket statuses">
+        <button type="button" className="btn btn-link btn-sm p-0" aria-label={`View New (${data.counts.new})`}
+          onClick={() => onNavigateTickets(data.drillDowns.new.filters)}>New: {data.counts.new}</button>
+        <button type="button" className="btn btn-link btn-sm p-0" aria-label={`View Reopened (${data.counts.reopened})`}
+          onClick={() => onNavigateTickets(data.drillDowns.reopened.filters)}>Reopened: {data.counts.reopened}</button>
       </div>
       <section className="card shadow-sm p-3 p-md-4" aria-labelledby="recent-tickets-heading">
         <h2 id="recent-tickets-heading" className="h5">Recent Tickets</h2>

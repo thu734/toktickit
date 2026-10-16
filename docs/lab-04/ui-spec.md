@@ -20,11 +20,11 @@ D-13: preserve each role's existing initial landing page; add Dashboard links wi
 
 ## 3. Requester Dashboard
 
-R: summarize authenticated ownership only; concise attention/recent/resolved information and practical detailed-view links. A/D-12 uses active, waiting and currently-resolved cards plus up to five recently updated Tickets.
+R: summarize authenticated ownership only; concise attention/recent/resolved information and practical detailed-view links. A/D-12 originally used active, waiting and currently-resolved cards; the explicitly approved 2026-10-16 D-12-R1 revision in §3.2 defines the current layout. Up to five recently updated Tickets remain.
 Cards require a descriptive label, visible value and keyboard-operable drill-down. Backend failure is a retryable error, not zero. An empty account displays zero/empty feedback and keeps Create Ticket/My Tickets reachable. Current-status resolved information must not be labelled a dated resolution metric without a trustworthy approved timestamp.
 Desktop uses concise card/list grouping; smaller screens stack sections without page overflow (R). Current-state cards and recent-five previews have no date-window cutoff; recent ordering is updatedAt DESC, id DESC and query/drill-down scopes match the specification.
 
-### 3.1 Issue 23 Integration
+### 3.1 Initial Issue 23 Integration (history; presentation superseded by §3.2)
 
 The Requester Dashboard adds a Requester-only navigation button with `aria-current="page"` when active.
 My Tickets remains the initial landing screen. Three labelled cards show current Active Tickets,
@@ -43,6 +43,23 @@ A failed request or failed refresh shows a retryable error, without stale-succes
 late old-account results are ignored. Cards apply matching server-side list filters, starting at page one
 with unrelated filters cleared. Ordinary My Tickets navigation clears dashboard filters; existing Clear Filters
 also removes the active group. The list exposes Active Tickets as a filter grouping, not a new Ticket status.
+
+### 3.2 D-12-R1 Requester Layout (approved 2026-10-16)
+
+This approval follows the initial implemented design; §3.1 is retained as historical decision context.
+Preserve the heading, navigation, initial landing pages, As of timestamp and Refresh dashboard control.
+Show a compact Active Tickets total with View All Active and the explanation:
+“Includes New, Open, In Progress, Waiting for Requester, and Reopened.”
+Below it, four primary cards appear in order: Open, In Progress, Waiting for Requester, Resolved.
+Use four columns on wide screens, two on tablets, and one on narrow screens.
+Then show smaller New and Reopened status links, always present in successful responses including zero counts.
+Recent Tickets remains below these controls without changing its five-item bound or detail navigation.
+
+Each of the seven metrics has an accessible, keyboard-operable drill-down. Open means exactly OPEN.
+The six status-specific controls use corresponding currentStatus filters; View All Active uses statusGroup=active.
+All counts come from the backend. Their presentation never changes workflow or auto-transitions a Ticket.
+Loading and error states do not invent counts; successful empty data renders all seven zeros.
+Existing ownership/session safety, retry behavior, Zen Green styles, status text and long-content wrapping remain unchanged.
 
 ## 4. Staff/Admin Dashboard
 

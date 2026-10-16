@@ -32,18 +32,28 @@ describe('REQ-DASH-01 authoritative owned metrics and access',()=>{
     for(const status of Object.values(TicketStatus)) await ticket(user.id,status);
     await ticket(user.id,'WAITING_FOR_REQUESTER');await ticket(user.id,'RESOLVED');
     const res=await agent.get(path).expect(200);
-    expect(res.body.counts).toEqual({active:6,waitingForRequester:2,resolved:2});
+    expect(res.body.counts).toEqual({active:6,new:1,open:1,inProgress:1,waitingForRequester:2,resolved:2,reopened:1});
     expect(Object.keys(res.body).sort()).toEqual(['asOf','counts','drillDowns','recentTickets']);
     expect(res.body.recentTickets).toHaveLength(5);
     expect(res.body.drillDowns).toEqual({active:{destination:'my-tickets',filters:{statusGroup:'active'}},
+      new:{destination:'my-tickets',filters:{currentStatus:'NEW'}},open:{destination:'my-tickets',filters:{currentStatus:'OPEN'}},
+      inProgress:{destination:'my-tickets',filters:{currentStatus:'IN_PROGRESS'}},reopened:{destination:'my-tickets',filters:{currentStatus:'REOPENED'}},
       waitingForRequester:{destination:'my-tickets',filters:{currentStatus:'WAITING_FOR_REQUESTER'}},resolved:{destination:'my-tickets',filters:{currentStatus:'RESOLVED'}}});
   });
+  it('reconciles Active from five distinct backend buckets and keeps OPEN exact',async()=>{
+    const {user,agent}=await account();
+    const frequencies:Partial<Record<TicketStatus,number>>={NEW:3,OPEN:2,IN_PROGRESS:4,WAITING_FOR_REQUESTER:1,REOPENED:5,RESOLVED:6,CLOSED:2,CANCELLED:2};
+    for(const [status,count] of Object.entries(frequencies)) for(let i=0;i<count;i++) await ticket(user.id,status as TicketStatus);
+    const {counts}= (await agent.get(path).expect(200)).body;
+    expect(counts).toEqual({active:15,new:3,open:2,inProgress:4,waitingForRequester:1,resolved:6,reopened:5});
+    expect(counts.active).toBe(counts.new+counts.open+counts.inProgress+counts.waitingForRequester+counts.reopened);
+  });
   it('ignores forged identity and keeps both Requesters isolated',async()=>{
-    const a=await account(),b=await account();await ticket(a.user.id,'OPEN');await ticket(b.user.id,'RESOLVED');
+    const a=await account(),b=await account();await ticket(a.user.id,'OPEN');for(const status of Object.values(TicketStatus)) await ticket(b.user.id,status);
     const res=await a.agent.get(path).query({requesterId:b.user.id,userId:b.user.id}).set('X-Development-Requester-Id',String(b.user.id)).expect(200);
-    expect(res.body.counts).toEqual({active:1,waitingForRequester:0,resolved:0});
+    expect(res.body.counts).toEqual({active:1,new:0,open:1,inProgress:0,waitingForRequester:0,resolved:0,reopened:0});
     expect(res.body.recentTickets).toHaveLength(1);expect(res.body.recentTickets[0].currentStatus).toBe('OPEN');
-    expect((await b.agent.get(path).expect(200)).body.counts).toEqual({active:0,waitingForRequester:0,resolved:1});
+    expect((await b.agent.get(path).expect(200)).body.counts).toEqual({active:5,new:1,open:1,inProgress:1,waitingForRequester:1,resolved:1,reopened:1});
   });
   it.each([false,true])('requires authentication even with a legacy header (%s)',async header=>{
     const req=request(app).get(path);if(header)req.set('X-Development-Requester-Id','1');
@@ -60,7 +70,7 @@ describe('REQ-DASH-01 authoritative owned metrics and access',()=>{
   });
   it('returns real zeros and an empty list for an empty owner',async()=>{
     const {agent}=await account();const res=await agent.get(path).expect(200);
-    expect(res.body.counts).toEqual({active:0,waitingForRequester:0,resolved:0});expect(res.body.recentTickets).toEqual([]);
+    expect(res.body.counts).toEqual({active:0,new:0,open:0,inProgress:0,waitingForRequester:0,resolved:0,reopened:0});expect(res.body.recentTickets).toEqual([]);
     expect(new Date(res.body.asOf).toISOString()).toBe(res.body.asOf);
   });
   it('does not expose private or unbounded Ticket data',async()=>{
@@ -85,7 +95,7 @@ describe('REQ-TIME-01 bounded ordering and consistent PostgreSQL snapshot',()=>{
     const res=await agent.get(path).query({limit:1000,since:'2026-01-01'}).expect(200);
     const expected=[...rows].sort((a,b)=>b.updatedAt.getTime()-a.updatedAt.getTime()||b.id-a.id).slice(0,5);
     expect(res.body.recentTickets.map((t:{id:number})=>t.id)).toEqual(expected.map(t=>t.id));
-    expect(res.body.counts).toEqual({active:0,waitingForRequester:0,resolved:0});
+    expect(res.body.counts).toEqual({active:0,new:0,open:0,inProgress:0,waitingForRequester:0,resolved:0,reopened:0});
   });
   it('keeps asOf, all counts and previews in the original snapshot across a real concurrent commit',async()=>{
     const prisma=getPrisma(), {user,agent}=await account();const t=await ticket(user.id,'OPEN');
@@ -109,12 +119,13 @@ describe('REQ-TIME-01 bounded ordering and consistent PostgreSQL snapshot',()=>{
       const [boundary]=await prisma.$queryRaw<Array<{time:Date}>>`SELECT clock_timestamp() AS time`;
       await prisma.ticket.update({where:{id:t.id},data:{currentStatus:'RESOLVED',summary:'New committed summary'}});
       await ticket(user.id,'WAITING_FOR_REQUESTER',new Date());
+      for(const status of ['NEW','IN_PROGRESS','REOPENED'] as TicketStatus[]) await ticket(user.id,status,new Date());
       release();const res=await response;expect(res.status).toBe(200);
-      expect(res.body.counts).toEqual({active:1,waitingForRequester:0,resolved:0});
+      expect(res.body.counts).toEqual({active:1,new:0,open:1,inProgress:0,waitingForRequester:0,resolved:0,reopened:0});
       expect(res.body.recentTickets).toHaveLength(1);expect(res.body.recentTickets[0]).toMatchObject({id:t.id,currentStatus:'OPEN',summary:'Owned preview',updatedAt:t.updatedAt.toISOString()});
       expect(databaseAsOf).toBeInstanceOf(Date);expect(res.body.asOf).toBe(databaseAsOf!.toISOString());
       const asOf=new Date(res.body.asOf).getTime();expect(asOf).toBeGreaterThanOrEqual(before.time.getTime());expect(asOf).toBeLessThanOrEqual(boundary.time.getTime());
-      const fresh=await agent.get(path).expect(200);expect(fresh.body.counts).toEqual({active:1,waitingForRequester:1,resolved:1});expect(fresh.body.recentTickets).toHaveLength(2);
+      const fresh=await agent.get(path).expect(200);expect(fresh.body.counts).toEqual({active:4,new:1,open:0,inProgress:1,waitingForRequester:1,resolved:1,reopened:1});expect(fresh.body.recentTickets).toHaveLength(5);
     }finally{enabled=false;release();if(timer)clearTimeout(timer);await response;}
   });
 });
@@ -139,7 +150,7 @@ describe('REQ-DASH-01 metric / drill-down parity before pagination',()=>{
       all.push(...res.body.items.map((t:{id:number})=>t.id));
     }
     expect(all).toEqual(expected.reverse().map(t=>t.id));
-    for(const metric of ['waitingForRequester','resolved']) {
+    for(const metric of ['new','open','inProgress','waitingForRequester','resolved','reopened']) {
       const res=await agent.get('/api/tickets').query(dashboard.drillDowns[metric].filters).expect(200);
       expect(res.body.pagination.totalItems).toBe(dashboard.counts[metric]);
     }

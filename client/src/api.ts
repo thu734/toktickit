@@ -128,9 +128,9 @@ export interface RequesterTicketFilters {
 
 export interface RequesterDashboardResponse {
   asOf: string;
-  counts: { active: number; waitingForRequester: number; resolved: number };
+  counts: { active: number; new: number; open: number; inProgress: number; waitingForRequester: number; resolved: number; reopened: number };
   recentTickets: Pick<Ticket, "id" | "ticketNumber" | "summary" | "currentStatus" | "updatedAt">[];
-  drillDowns: Record<"active" | "waitingForRequester" | "resolved", { destination: "my-tickets"; filters: RequesterTicketFilters }>;
+  drillDowns: Record<"active" | "new" | "open" | "inProgress" | "waitingForRequester" | "resolved" | "reopened", { destination: "my-tickets"; filters: RequesterTicketFilters }>;
 }
 
 export async function fetchRequesterDashboard(signal?: AbortSignal): Promise<RequesterDashboardResponse> {

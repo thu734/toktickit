@@ -144,6 +144,34 @@ D-12 approves current-state counts, five recent Tickets and one assigned-PLANNED
 D-12 uses current-state counts and up to five most recently updated Tickets without a date-window cutoff, sorted updatedAt DESC, id DESC. Requester scope is authenticated ownership; Staff/Admin scope is accessible operational Tickets. Active counts use the explicit status set above. My Actions contains only PLANNED Actions assigned to the authenticated Staff/Admin, with links to parent Ticket Detail; historical performer-only work is excluded. Use the recent-Tickets option of the approved recent/urgent preview, without a separate urgency-ranking feature.
 Do not call updatedAt a resolution timestamp. The approved metric is current Resolved count; dated resolution analytics are outside this contract. Zero data returns zero counts/empty previews; failed queries must not masquerade as zeros (R).
 
+#### D-12-R1 — Approved Requester metric revision (2026-10-16)
+
+The user explicitly approved this Issue 23 revision after reviewing the implemented three-card design.
+Original approval on 2026-10-15 and its calculation table above are retained as decision history.
+The original Requester presentation used Active Tickets, Waiting for Requester and Resolved Tickets cards.
+D-12-R1 supersedes that Requester presentation and adds exact status counts; Staff/Admin D-12 choices are unchanged.
+The handout requires authoritative, owned metrics and practical drill-downs; this particular layout is an approved design choice (A).
+
+All predicates below also require `requesterId = authenticated session user ID`.
+
+| Presentation | Label | Exact current-status predicate | My Tickets filter |
+| --- | --- | --- | --- |
+| Compact summary | Active Tickets | IN NEW, OPEN, IN_PROGRESS, WAITING_FOR_REQUESTER, REOPENED | statusGroup=active |
+| Primary card | Open | OPEN only | currentStatus=OPEN |
+| Primary card | In Progress | IN_PROGRESS | currentStatus=IN_PROGRESS |
+| Primary card | Waiting for Requester | WAITING_FOR_REQUESTER | currentStatus=WAITING_FOR_REQUESTER |
+| Primary card | Resolved | RESOLVED | currentStatus=RESOLVED |
+| Smaller, always-visible status link | New | NEW | currentStatus=NEW |
+| Smaller, always-visible status link | Reopened | REOPENED | currentStatus=REOPENED |
+
+Active = New + Open + In Progress + Waiting for Requester + Reopened; Resolved is separate.
+Open never includes NEW or REOPENED. New/Reopened links display zero as well as positive values.
+The Active summary includes View All Active and a short explanation naming its five statuses.
+Closed/Cancelled remain excluded from Active but accessible in My Tickets and eligible for recent previews.
+All seven counts, the database-supplied asOf and at most five recent previews share the same read-only snapshot.
+Existing ownership, ordering/no-cutoff policy, safe failures, navigation, and Ticket/Action workflow rules remain in force.
+
+
 ## 6. UI Specification Summary
 
 R fields: Action Date/Time, Action Description, Result, Performed by (auto), Follow-Up Required, conditional Follow-up Note and Attachment Notes. Assignment and lifecycle operations are required by submission Part 6. I preserves existing attachment storage/download/removal; Attachment Notes do not introduce a new upload system.
@@ -268,6 +296,12 @@ Course delivery (R): peer review, Kanban evidence, feature PRs into lab4-staging
 | D-14 | Migration/seed/recovery | Additive evolution; preserve earlier data; no fabricated historical Actions/events; stable seed identities and preservation-oriented fixtures. Rehearse migration/recovery on disposable test data; never rewrite historical migrations. | 5.1-5.3 | APPROVED |
 | D-15 | API/safe errors | Keep nested Action and dashboard endpoints, inherited safe envelopes; 400 validation, 401 unauthenticated, 403 forbidden role, ownership-safe 404, 409 stale/conflict/resolution-gate. | 6-6.2 | APPROVED |
 | D-16 | Stable Action order | Immutable createdAt ASC, then ID ASC; editing does not reorder an Action. | submission Part 7 | APPROVED |
+
+**D-12 approval history:** The D-12 register row above retains the original 2026-10-15 approval.
+On 2026-10-16, the user explicitly approved **D-12-R1** for Issue 23: compact Active summary,
+four exact-status cards (Open, In Progress, Waiting for Requester, Resolved), and smaller New/Reopened
+links including zero counts. Section 5.4 defines the revised predicates and destinations.
+This revision changes only Requester metric design; Staff/Admin choices and D-13 navigation policy remain unchanged.
 
 ### 11.2 Baseline Limitations and Prerequisites
 

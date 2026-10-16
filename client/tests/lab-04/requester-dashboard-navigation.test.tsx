@@ -4,9 +4,11 @@ import App from '../../src/App';
 import * as api from '../../src/api';
 const owner:api.User={id:1,name:'Requester',email:'owner@test.local',role:'REQUESTER',isActive:true,mustChangePassword:false};
 const empty={items:[],pagination:{page:1,limit:10,totalItems:0,totalPages:1}};
-const data:api.RequesterDashboardResponse={asOf:'2026-10-16T12:00:00Z',counts:{active:2,waitingForRequester:1,resolved:0},
+const data:api.RequesterDashboardResponse={asOf:'2026-10-16T12:00:00Z',counts:{active:2,new:0,open:1,inProgress:0,waitingForRequester:1,resolved:0,reopened:0},
   recentTickets:[{id:7,ticketNumber:'DASH-TICKET-7',summary:'Recent owned issue',currentStatus:'OPEN',updatedAt:'2026-10-16T11:00:00Z'}],
-  drillDowns:{active:{destination:'my-tickets',filters:{statusGroup:'active'}},waitingForRequester:{destination:'my-tickets',filters:{currentStatus:'WAITING_FOR_REQUESTER'}},resolved:{destination:'my-tickets',filters:{currentStatus:'RESOLVED'}}}};
+  drillDowns:{active:{destination:'my-tickets',filters:{statusGroup:'active'}},
+    new:{destination:'my-tickets',filters:{currentStatus:'NEW'}},open:{destination:'my-tickets',filters:{currentStatus:'OPEN'}},
+    inProgress:{destination:'my-tickets',filters:{currentStatus:'IN_PROGRESS'}},reopened:{destination:'my-tickets',filters:{currentStatus:'REOPENED'}},waitingForRequester:{destination:'my-tickets',filters:{currentStatus:'WAITING_FOR_REQUESTER'}},resolved:{destination:'my-tickets',filters:{currentStatus:'RESOLVED'}}}};
 beforeEach(()=>{
   vi.spyOn(api,'fetchCurrentUser').mockResolvedValue(owner);vi.spyOn(api,'fetchCategories').mockResolvedValue([]);
   vi.spyOn(api,'fetchTickets').mockResolvedValue(empty);vi.spyOn(api,'fetchStaffTickets').mockResolvedValue(empty);vi.spyOn(api,'fetchAdminUsers').mockResolvedValue([]);
@@ -19,12 +21,12 @@ describe('Requester dashboard application integration',()=>{
     fireEvent.click(screen.getByRole('button',{name:'Dashboard'}));expect(await screen.findByRole('heading',{name:'Requester Dashboard'})).toBeInTheDocument();
     expect(screen.getByRole('button',{name:'Dashboard'})).toHaveAttribute('aria-current','page');
   });
-  it.each(['active','waitingForRequester','resolved']as const)('applies %s drill-down then ordinary My Tickets clears it',async metric=>{
+  it.each(['active','new','open','inProgress','waitingForRequester','resolved','reopened']as const)('applies %s drill-down then ordinary My Tickets clears it',async metric=>{
     render(<App/>);await screen.findByText('No Tickets Yet');fireEvent.click(screen.getByRole('button',{name:'Dashboard'}));
-    const labels={active:'Active Tickets (2)',waitingForRequester:'Waiting for Requester (1)',resolved:'Resolved Tickets (0)'};
+    const labels={active:'All Active (2)',new:'New (0)',open:'Open (1)',inProgress:'In Progress (0)',waitingForRequester:'Waiting for Requester (1)',resolved:'Resolved (0)',reopened:'Reopened (0)'};
     fireEvent.click(await screen.findByRole('button',{name:`View ${labels[metric]}`}));
     await waitFor(()=>expect(api.fetchTickets).toHaveBeenLastCalledWith(expect.objectContaining({...data.drillDowns[metric].filters,page:1,sortBy:'updatedAt',sortOrder:'desc'}),1));
-    expect(screen.getByLabelText('Current Status')).toHaveValue(metric==='active'?'ACTIVE':metric==='resolved'?'RESOLVED':'WAITING_FOR_REQUESTER');
+    expect(screen.getByLabelText('Current Status')).toHaveValue(metric==='active'?'ACTIVE':data.drillDowns[metric].filters.currentStatus);
     fireEvent.click(screen.getByRole('button',{name:/My Tickets/}));
     await waitFor(()=>expect(api.fetchTickets).toHaveBeenLastCalledWith(expect.objectContaining({statusGroup:undefined,currentStatus:undefined,page:1}),1));
     expect(screen.getByLabelText('Current Status')).toHaveValue('ALL');
