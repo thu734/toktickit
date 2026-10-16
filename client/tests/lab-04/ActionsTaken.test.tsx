@@ -82,10 +82,15 @@ describe("Actions management", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
     await waitFor(() => expect(api.updateAction).toHaveBeenCalledWith(7, 10, { attachmentNotes: "Corrected reference", workflowRevision: 4 }));
   });
-  it.each(["RESOLVED", "CLOSED", "CANCELLED"])("hides writes on a %s parent", async status => {
+  it.each(["RESOLVED", "CLOSED", "CANCELLED"])("hides writes and shows guidance on a %s parent", async status => {
     render(<ActionsTaken ticketId={7} ticketStatus={status} viewer={viewer} />);
     await screen.findByText("Inspect workstation");
     expect(screen.queryByRole("button", { name: /Add Action|Edit Action|Correct completed Action/ })).not.toBeInTheDocument();
+    if (status === "CANCELLED") {
+      expect(screen.getByText("This Ticket is cancelled. Actions are read-only.")).toBeInTheDocument();
+    } else {
+      expect(screen.getByText("Reopen this Ticket before adding or correcting Actions.")).toBeInTheDocument();
+    }
   });
   it("does not offer edits on cancelled Actions", async () => {
     vi.mocked(api.fetchActions).mockResolvedValue({ actions: [{ ...action, status: "CANCELLED", result: "Not needed" }], workflowRevision: 4 });
@@ -145,6 +150,35 @@ describe("Actions management", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create Action" }));
     await waitFor(() => expect(api.createAction).toHaveBeenCalledTimes(2));
     expect(vi.mocked(api.createAction).mock.calls[1][1].workflowRevision).toBe(9);
+  });
+  it("discards draft and returns focus to the section heading", async () => {
+    await openCreate();
+    enter("Description", "Discard me");
+    const discard = screen.getByRole("button", { name: "Discard draft" });
+    fireEvent.click(discard);
+    expect(screen.queryByRole("form", { name: "Create Action" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Actions Taken" })).toHaveFocus();
+  });
+  it("shows error when attempting to save with no changes", async () => {
+    await openEdit();
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    expect(await screen.findByText("No changes to save.")).toBeInTheDocument();
+    expect(api.updateAction).not.toHaveBeenCalled();
+  });
+  it("detects concurrent lifecycle changes and blocks saving the retained draft", async () => {
+    vi.mocked(api.updateAction).mockRejectedValueOnce({ status: 409, code: "STALE_REVISION" });
+    await openEdit();
+    enter("Description", "Changed description");
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    expect(await screen.findByText(/Newer work or a conflicting request exists/)).toBeInTheDocument();
+    vi.mocked(api.fetchActions).mockResolvedValue({
+      actions: [{ ...action, status: "COMPLETED", result: "Completed by another staff" }],
+      workflowRevision: 5,
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Refresh and review" }));
+    expect(await screen.findByText(/This Action's status changed. Your draft is retained for reference/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "I have reviewed the latest Actions" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
   });
 });
 
