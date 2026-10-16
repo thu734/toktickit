@@ -1,3 +1,4 @@
+import { lockTicket } from "../services/ticketWorkflow.js";
 import { Router, Request, Response } from "express";
 import { ActionEventType, ActionStatus, Prisma, TicketStatus, UserRole } from "@prisma/client";
 import { createHash } from "node:crypto";
@@ -53,13 +54,6 @@ async function validateAssignee(tx: Prisma.TransactionClient, assignedToId: numb
 }
 
 function canonical(value: unknown) { return JSON.stringify(value, Object.keys(value as object).sort()); }
-
-async function lockTicket(tx: Prisma.TransactionClient, ticketId: number) {
-  // Serialize BEFORE reading retry/lifecycle state. A waiting identical create
-  // sees the first committed response rather than incorrectly losing a CAS race.
-  const rows = await tx.$queryRaw<Array<{ id: number }>>`SELECT id FROM tickets WHERE id = ${ticketId} FOR UPDATE`;
-  if (!rows.length) throw Object.assign(new Error("Ticket not found."), { code: "RESOURCE_NOT_FOUND" });
-}
 
 async function advanceRevision(tx: Prisma.TransactionClient, ticketId: number, expectedRevision: number) {
   const updated = await tx.ticket.updateMany({ where: { id: ticketId, workflowRevision: expectedRevision, currentStatus: { notIn: [TicketStatus.RESOLVED, TicketStatus.CLOSED, TicketStatus.CANCELLED] } }, data: { workflowRevision: { increment: 1 } } });
