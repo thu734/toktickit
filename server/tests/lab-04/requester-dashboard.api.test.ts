@@ -92,10 +92,12 @@ describe('REQ-TIME-01 bounded ordering and consistent PostgreSQL snapshot',()=>{
     let release!:()=>void,ready!:()=>void;
     const paused=new Promise<void>(resolve=>{ready=resolve;});const resume=new Promise<void>(resolve=>{release=resolve;});
     let enabled=true,used=false;
+    let databaseAsOf: Date | undefined;
     // Pause AFTER the first real count, leaving the transaction and snapshot open.
     // The concurrent write uses another pool connection and commits before remaining reads.
     prisma.$use(async(params,next)=>{
       const value=await next(params);
+      if(enabled && params.action==='queryRaw' && Array.isArray(value) && value[0]?.asOf instanceof Date) databaseAsOf=value[0].asOf;
       if(enabled&&!used&&params.model==='Ticket'&&params.action==='count'&&params.runInTransaction){used=true;ready();await resume;}
       return value;
     });
@@ -110,6 +112,7 @@ describe('REQ-TIME-01 bounded ordering and consistent PostgreSQL snapshot',()=>{
       release();const res=await response;expect(res.status).toBe(200);
       expect(res.body.counts).toEqual({active:1,waitingForRequester:0,resolved:0});
       expect(res.body.recentTickets).toHaveLength(1);expect(res.body.recentTickets[0]).toMatchObject({id:t.id,currentStatus:'OPEN',summary:'Owned preview',updatedAt:t.updatedAt.toISOString()});
+      expect(databaseAsOf).toBeInstanceOf(Date);expect(res.body.asOf).toBe(databaseAsOf!.toISOString());
       const asOf=new Date(res.body.asOf).getTime();expect(asOf).toBeGreaterThanOrEqual(before.time.getTime());expect(asOf).toBeLessThanOrEqual(boundary.time.getTime());
       const fresh=await agent.get(path).expect(200);expect(fresh.body.counts).toEqual({active:1,waitingForRequester:1,resolved:1});expect(fresh.body.recentTickets).toHaveLength(2);
     }finally{enabled=false;release();if(timer)clearTimeout(timer);await response;}
