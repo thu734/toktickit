@@ -1,3 +1,4 @@
+import { lockTicket } from "../services/ticketWorkflow.js";
 import { Router, Request, Response } from "express";
 import { ActionEventType, ActionStatus, Prisma, TicketStatus, UserRole } from "@prisma/client";
 import { createHash } from "node:crypto";
@@ -54,13 +55,6 @@ async function validateAssignee(tx: Prisma.TransactionClient, assignedToId: numb
 
 function canonical(value: unknown) { return JSON.stringify(value, Object.keys(value as object).sort()); }
 
-async function lockTicket(tx: Prisma.TransactionClient, ticketId: number) {
-  // Serialize BEFORE reading retry/lifecycle state. A waiting identical create
-  // sees the first committed response rather than incorrectly losing a CAS race.
-  const rows = await tx.$queryRaw<Array<{ id: number }>>`SELECT id FROM tickets WHERE id = ${ticketId} FOR UPDATE`;
-  if (!rows.length) throw Object.assign(new Error("Ticket not found."), { code: "RESOURCE_NOT_FOUND" });
-}
-
 async function advanceRevision(tx: Prisma.TransactionClient, ticketId: number, expectedRevision: number) {
   const updated = await tx.ticket.updateMany({ where: { id: ticketId, workflowRevision: expectedRevision, currentStatus: { notIn: [TicketStatus.RESOLVED, TicketStatus.CLOSED, TicketStatus.CANCELLED] } }, data: { workflowRevision: { increment: 1 } } });
   if (updated.count !== 1) {
@@ -77,10 +71,16 @@ actionsRouter.get("/tickets/:ticketId/actions-taken", requireAuth, async (req, r
     const access = await canAccessTicket(req, ticketId);
     if (access.kind === "unauthenticated") return fail(res, 401, "UNAUTHENTICATED", "Authentication required.");
     if (access.kind === "missing") return fail(res, 404, "RESOURCE_NOT_FOUND", "Ticket not found.");
-    const actions = await getPrisma().actionTaken.findMany({
-      where: { ticketId }, orderBy: [{ createdAt: "asc" }, { id: "asc" }], select: actionSelect,
-    });
-    return res.status(200).json({ actions, workflowRevision: access.ticket.workflowRevision });
+    const result = await getPrisma().$transaction(async tx => {
+      const ticket = await tx.ticket.findUnique({ where: { id: ticketId }, select: { workflowRevision: true } });
+      if (!ticket) return null;
+      const actions = await tx.actionTaken.findMany({
+        where: { ticketId }, orderBy: [{ createdAt: "asc" }, { id: "asc" }], select: actionSelect,
+      });
+      return { actions, workflowRevision: ticket.workflowRevision };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
+    if (!result) return fail(res, 404, "RESOURCE_NOT_FOUND", "Ticket not found.");
+    return res.status(200).json(result);
   } catch (error) {
     console.error("Error retrieving Actions:", error);
     return res.status(500).json({ error: "Internal Server Error", code: "INTERNAL_ERROR" });

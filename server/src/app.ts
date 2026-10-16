@@ -12,7 +12,7 @@ import { mustChangePasswordLock } from "./middleware/mustChangePasswordLock.js";
 import { requireAuth, requireRole } from "./middleware/authorization.js";
 import { authRouter } from "./routes/auth.js";
 import { actionsRouter } from "./routes/actions.js";
-import { isValidStatusTransition } from "./utils/statusTransition.js";
+import { mutateTicketWorkflow, WorkflowError } from "./services/ticketWorkflow.js";
 
 
 export const app = express();
@@ -1051,204 +1051,25 @@ app.get("/api/staff/tickets/:id", requireRole("IT_STAFF", "ADMINISTRATOR"), asyn
   }
 });
 
-// PATCH /api/staff/tickets/:id/assign (Claim/Assign/Reassign Ownership - requireRole("IT_STAFF"))
-app.patch("/api/staff/tickets/:id/assign", requireRole("IT_STAFF"), async (req: Request, res: Response) => {
-  try {
-    const ticketId = parseInt(req.params.id, 10);
-    if (isNaN(ticketId)) {
-      return res.status(400).json({
-        error: "Bad Request",
-        message: "Invalid ticket ID format.",
-      });
-    }
-
-    const ticket = await getPrisma().ticket.findUnique({
-      where: { id: ticketId },
-    });
-
-    if (!ticket) {
-      return res.status(404).json({
-        error: "Not Found",
-        message: "Ticket not found.",
-      });
-    }
-
-    const { assignedStaffId } = req.body || {};
-
-    if (assignedStaffId !== null && assignedStaffId !== undefined) {
-      const targetId = parseInt(String(assignedStaffId), 10);
-      if (isNaN(targetId) || targetId <= 0) {
-        return res.status(400).json({
-          error: "Bad Request",
-          code: "INVALID_ASSIGNMENT_TARGET",
-          message: "Cannot assign ticket to selected account.",
-        });
+// Preserve existing routes/envelopes; Staff and Admin share the Lab 4 workflow.
+for (const operation of ["assign", "priority", "status"] as const) {
+  app.patch(`/api/staff/tickets/:id/${operation}`, requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      if (!/^\d+$/.test(req.params.id) || !Number.isSafeInteger(ticketId) || ticketId <= 0 || ticketId > 2147483647) {
+        return res.status(400).json({ error: "Bad Request", code: "INVALID_TICKET_ID", message: "Invalid ticket ID format." });
       }
-
-      const targetUser = await getPrisma().user.findUnique({
-        where: { id: targetId },
-      });
-
-      if (!targetUser || !targetUser.isActive || (targetUser.role !== "IT_STAFF" && targetUser.role !== "ADMINISTRATOR")) {
-        return res.status(400).json({
-          error: "Bad Request",
-          code: "INVALID_ASSIGNMENT_TARGET",
-          message: "Cannot assign ticket to selected account. Target must be an active IT Staff or Administrator.",
-        });
+      return res.status(200).json(await mutateTicketWorkflow(ticketId, operation, req.body || {}));
+    } catch (error) {
+      if (error instanceof WorkflowError) {
+        return res.status(error.status).json({ error: error.status === 400 ? "Bad Request" : error.status === 404 ? "Not Found" : "Conflict",
+          code: error.code, message: error.message, ...(error.blockingWork ? { blockingWork: error.blockingWork } : {}) });
       }
+      console.error("Error updating ticket workflow:", error);
+      return res.status(500).json({ error: "Internal Server Error", message: "An error occurred while updating ticket workflow." });
     }
-
-    const newAssignedId = assignedStaffId === null ? null : parseInt(String(assignedStaffId), 10);
-
-    const updatedTicket = await getPrisma().ticket.update({
-      where: { id: ticketId },
-      data: { assignedStaffId: newAssignedId },
-      include: {
-        requester: { select: { id: true, name: true, email: true } },
-        assignedStaff: { select: { id: true, name: true, email: true, role: true } },
-        category: true,
-        relatedSystem: true,
-      },
-    });
-
-    return res.status(200).json(updatedTicket);
-  } catch (error) {
-    console.error("Error assigning ticket:", error);
-    return res.status(500).json({
-      error: "Internal Server Error",
-      message: "An error occurred while updating ticket assignment.",
-    });
-  }
-});
-
-// PATCH /api/staff/tickets/:id/priority (Update IT Priority - requireRole("IT_STAFF"))
-app.patch("/api/staff/tickets/:id/priority", requireRole("IT_STAFF"), async (req: Request, res: Response) => {
-  try {
-    const ticketId = parseInt(req.params.id, 10);
-    if (isNaN(ticketId)) {
-      return res.status(400).json({
-        error: "Bad Request",
-        message: "Invalid ticket ID format.",
-      });
-    }
-
-    const { itPriority } = req.body || {};
-
-    if (!itPriority || !Object.values(RequestedPriority).includes(itPriority as RequestedPriority)) {
-      return res.status(400).json({
-        error: "Bad Request",
-        message: "Valid IT Priority (LOW, MEDIUM, HIGH, URGENT) is required.",
-      });
-    }
-
-    const ticket = await getPrisma().ticket.findUnique({
-      where: { id: ticketId },
-    });
-
-    if (!ticket) {
-      return res.status(404).json({
-        error: "Not Found",
-        message: "Ticket not found.",
-      });
-    }
-
-    const updatedTicket = await getPrisma().ticket.update({
-      where: { id: ticketId },
-      data: { itPriority: itPriority as RequestedPriority },
-      include: {
-        requester: { select: { id: true, name: true, email: true } },
-        assignedStaff: { select: { id: true, name: true, email: true, role: true } },
-        category: true,
-        relatedSystem: true,
-      },
-    });
-
-    return res.status(200).json(updatedTicket);
-  } catch (error) {
-    console.error("Error updating IT priority:", error);
-    return res.status(500).json({
-      error: "Internal Server Error",
-      message: "An error occurred while updating IT priority.",
-    });
-  }
-});
-
-// PATCH /api/staff/tickets/:id/status (Update Ticket Status per Matrix - requireRole("IT_STAFF"))
-app.patch("/api/staff/tickets/:id/status", requireRole("IT_STAFF"), async (req: Request, res: Response) => {
-  try {
-    const ticketId = parseInt(req.params.id, 10);
-    if (isNaN(ticketId)) {
-      return res.status(400).json({
-        error: "Bad Request",
-        message: "Invalid ticket ID format.",
-      });
-    }
-
-    const ticket = await getPrisma().ticket.findUnique({
-      where: { id: ticketId },
-    });
-
-    if (!ticket) {
-      return res.status(404).json({
-        error: "Not Found",
-        message: "Ticket not found.",
-      });
-    }
-
-    const { status, resolutionSummary } = req.body || {};
-
-    if (!status || !Object.values(TicketStatus).includes(status as TicketStatus)) {
-      return res.status(400).json({
-        error: "Bad Request",
-        code: "INVALID_STATUS_TRANSITION",
-        message: "Valid target ticket status is required.",
-      });
-    }
-
-    // Validate state machine transition (BR-14)
-    if (!isValidStatusTransition(ticket.currentStatus, status as TicketStatus)) {
-      return res.status(400).json({
-        error: "Bad Request",
-        code: "INVALID_STATUS_TRANSITION",
-        message: `Invalid status transition from ${ticket.currentStatus} to ${status}.`,
-      });
-    }
-
-    let finalResolutionSummary = ticket.resolutionSummary;
-    if (status === TicketStatus.RESOLVED && resolutionSummary !== undefined) {
-      const trimmed = typeof resolutionSummary === "string" ? resolutionSummary.trim() : "";
-      if (trimmed.length > 1000) {
-        return res.status(400).json({
-          error: "Bad Request",
-          message: "Resolution summary cannot exceed 1000 characters.",
-        });
-      }
-      finalResolutionSummary = trimmed !== "" ? trimmed : null;
-    }
-
-    const updatedTicket = await getPrisma().ticket.update({
-      where: { id: ticketId },
-      data: {
-        currentStatus: status as TicketStatus,
-        resolutionSummary: finalResolutionSummary,
-      },
-      include: {
-        requester: { select: { id: true, name: true, email: true } },
-        assignedStaff: { select: { id: true, name: true, email: true, role: true } },
-        category: true,
-        relatedSystem: true,
-      },
-    });
-
-    return res.status(200).json(updatedTicket);
-  } catch (error) {
-    console.error("Error updating ticket status:", error);
-    return res.status(500).json({
-      error: "Internal Server Error",
-      message: "An error occurred while updating ticket status.",
-    });
-  }
-});
+  });
+}
 
 // GET /api/staff/tickets/:id/notes (Get Internal Notes - requireRole("IT_STAFF", "ADMINISTRATOR"))
 app.get("/api/staff/tickets/:id/notes", requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: Request, res: Response) => {

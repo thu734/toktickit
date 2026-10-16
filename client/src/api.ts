@@ -77,7 +77,7 @@ export interface Ticket {
   description: string;
   requestedPriority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   itPriority: "UNASSIGNED" | "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-  currentStatus: "NEW" | "OPEN" | "PENDING" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+  currentStatus: "NEW" | "OPEN" | "PENDING" | "IN_PROGRESS" | "WAITING_FOR_REQUESTER" | "RESOLVED" | "CLOSED" | "REOPENED" | "CANCELLED";
   requesterId: number;
   categoryId: number;
   relatedSystemId: number;
@@ -600,7 +600,7 @@ export async function fetchStaffTicketDetail(ticketId: number): Promise<any> {
   return data;
 }
 
-export async function assignStaffTicket(ticketId: number, assignedStaffId: number | null): Promise<any> {
+export async function assignStaffTicket(ticketId: number, assignedStaffId: number | null, workflowRevision: number): Promise<any> {
   const res = await fetch(`${API_URL}/api/staff/tickets/${ticketId}/assign`, {
     method: "PATCH",
     headers: {
@@ -608,7 +608,7 @@ export async function assignStaffTicket(ticketId: number, assignedStaffId: numbe
       "X-Requested-With": "XMLHttpRequest",
     },
     credentials: "include",
-    body: JSON.stringify({ assignedStaffId }),
+    body: JSON.stringify({ assignedStaffId, workflowRevision }),
   });
 
   const data = await res.json();
@@ -622,7 +622,7 @@ export async function assignStaffTicket(ticketId: number, assignedStaffId: numbe
   return data;
 }
 
-export async function updateStaffTicketPriority(ticketId: number, itPriority: string): Promise<any> {
+export async function updateStaffTicketPriority(ticketId: number, itPriority: string, workflowRevision: number): Promise<any> {
   const res = await fetch(`${API_URL}/api/staff/tickets/${ticketId}/priority`, {
     method: "PATCH",
     headers: {
@@ -630,13 +630,15 @@ export async function updateStaffTicketPriority(ticketId: number, itPriority: st
       "X-Requested-With": "XMLHttpRequest",
     },
     credentials: "include",
-    body: JSON.stringify({ itPriority }),
+    body: JSON.stringify({ itPriority, workflowRevision }),
   });
 
   const data = await res.json();
   if (!res.ok) {
     const errorObj = new Error(data.message || "Failed to update IT priority");
     (errorObj as any).status = res.status;
+    (errorObj as any).code = data.code;
+    (errorObj as any).blockingWork = data.blockingWork;
     throw errorObj;
   }
 
@@ -646,7 +648,8 @@ export async function updateStaffTicketPriority(ticketId: number, itPriority: st
 export async function updateStaffTicketStatus(
   ticketId: number,
   status: string,
-  resolutionSummary?: string
+  resolutionSummary: string | undefined,
+  workflowRevision: number
 ): Promise<any> {
   const res = await fetch(`${API_URL}/api/staff/tickets/${ticketId}/status`, {
     method: "PATCH",
@@ -655,7 +658,7 @@ export async function updateStaffTicketStatus(
       "X-Requested-With": "XMLHttpRequest",
     },
     credentials: "include",
-    body: JSON.stringify({ status, resolutionSummary }),
+    body: JSON.stringify({ status, resolutionSummary, workflowRevision }),
   });
 
   const data = await res.json();
@@ -663,6 +666,7 @@ export async function updateStaffTicketStatus(
     const errorObj = new Error(data.message || "Failed to update ticket status");
     (errorObj as any).status = res.status;
     (errorObj as any).code = data.code;
+    (errorObj as any).blockingWork = data.blockingWork;
     throw errorObj;
   }
 
