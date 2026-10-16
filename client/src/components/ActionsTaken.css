@@ -1,0 +1,10 @@
+.actions-taken { min-width: 0; overflow-wrap: anywhere; }
+.actions-taken .action-list { list-style: none; padding: 0; margin: 0; }
+.actions-taken .action-item { border-top: 1px solid #d9e4dd; padding: 1rem 0; }
+.actions-taken dl { display: grid; grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr); gap: .35rem 1rem; }
+.actions-taken dd { margin: 0; white-space: pre-wrap; }
+.actions-taken .action-form { border-top: 1px solid #d9e4dd; margin-top: 1rem; padding-top: 1rem; }
+.actions-taken fieldset { min-width: 0; }
+.actions-taken textarea { min-height: 6rem; width: 100%; }
+.actions-taken button { white-space: normal; }
+@media (max-width: 575px) { .actions-taken dl { grid-template-columns: minmax(0, 1fr); } .actions-taken dd { margin-bottom: .65rem; } }
