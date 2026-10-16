@@ -561,7 +561,14 @@ export interface InternalNote {
   };
 }
 
-export interface FetchStaffTicketsParams {
+export interface StaffQueueFilters {
+  statusGroup?: "active";
+  currentStatus?: string;
+  itPriority?: string;
+  assignedStaffId?: string;
+}
+
+export interface FetchStaffTicketsParams extends StaffQueueFilters {
   search?: string;
   categoryId?: string;
   itPriority?: string;
@@ -579,6 +586,7 @@ export async function fetchStaffTickets(params: FetchStaffTicketsParams = {}): P
   if (params.categoryId) query.append("categoryId", params.categoryId);
   if (params.itPriority) query.append("itPriority", params.itPriority);
   if (params.currentStatus) query.append("currentStatus", params.currentStatus);
+  if (params.statusGroup) query.append("statusGroup", params.statusGroup);
   if (params.assignedStaffId) query.append("assignedStaffId", params.assignedStaffId);
   if (params.sortBy) query.append("sortBy", params.sortBy);
   if (params.sortOrder) query.append("sortOrder", params.sortOrder);

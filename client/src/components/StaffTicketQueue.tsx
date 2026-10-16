@@ -3,14 +3,16 @@ import {
   fetchStaffTickets,
   fetchCategories,
   Category,
+  StaffQueueFilters,
   PaginatedTicketsResponse,
 } from "../api.js";
 
 interface StaffTicketQueueProps {
+  initialFilters?: StaffQueueFilters;
   onOpenTicket?: (ticketId: number) => void;
 }
 
-export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket }) => {
+export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket, initialFilters }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [ticketsData, setTicketsData] = useState<PaginatedTicketsResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -19,10 +21,10 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
   const [searchInput, setSearchInput] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [itPriority, setItPriority] = useState("ALL");
-  const [currentStatus, setCurrentStatus] = useState("ALL");
-  const [assignedStaffFilter, setAssignedStaffFilter] = useState("ALL");
-  const [sortBy, setSortBy] = useState("createdAt");
+  const [itPriority, setItPriority] = useState(initialFilters?.itPriority || "ALL");
+  const [currentStatus, setCurrentStatus] = useState(initialFilters?.statusGroup === "active" ? "ACTIVE" : initialFilters?.currentStatus || "ALL");
+  const [assignedStaffFilter, setAssignedStaffFilter] = useState(initialFilters?.assignedStaffId || "ALL");
+  const [sortBy, setSortBy] = useState(initialFilters ? "updatedAt" : "createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
 
@@ -40,7 +42,8 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
         search: appliedSearch || undefined,
         categoryId: categoryId !== "" ? categoryId : undefined,
         itPriority: itPriority !== "ALL" ? itPriority : undefined,
-        currentStatus: currentStatus !== "ALL" ? currentStatus : undefined,
+        currentStatus: currentStatus !== "ALL" && currentStatus !== "ACTIVE" ? currentStatus : undefined,
+        statusGroup: currentStatus === "ACTIVE" ? "active" : undefined,
         assignedStaffId: assignedStaffFilter !== "ALL" ? assignedStaffFilter : undefined,
         sortBy,
         sortOrder,
@@ -221,6 +224,7 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
               }}
             >
               <option value="ALL">All Statuses</option>
+              <option value="ACTIVE">Active Tickets</option>
               <option value="NEW">New</option>
               <option value="OPEN">Open</option>
               <option value="IN_PROGRESS">In Progress</option>
@@ -233,9 +237,10 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
           </div>
 
           <div className="col-6 col-md-2">
-            <label className="form-label small fw-bold text-muted">Assignment</label>
+            <label htmlFor="staff-assignment-filter" className="form-label small fw-bold text-muted">Assignment</label>
             <select
               className="form-select"
+              id="staff-assignment-filter"
               value={assignedStaffFilter}
               onChange={(e) => {
                 setAssignedStaffFilter(e.target.value);
@@ -244,6 +249,7 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
             >
               <option value="ALL">All Tickets</option>
               <option value="unassigned">Unassigned Only</option>
+              <option value="me">My Tickets</option>
             </select>
           </div>
         </form>

@@ -179,6 +179,10 @@ No date-window cutoff or browser-authoritative count calculation. Forged identit
 Valid empty results return zero buckets/empty previews; failures return safe 500 without fabricated counts; 401/403/lock behavior is inherited.
 `drillDowns.unassignedActive/myActive` describe ticket-queue filters with statusGroup=active and assignedStaffId=unassigned/me.
 `drillDowns.byStatus/byPriority` describe matching currentStatus/itPriority filters for every bucket.
+The existing GET `/api/staff/tickets` accepts `statusGroup=active` and `assignedStaffId=me`;
+`me` resolves only from the authenticated session. Group and exact-status filters intersect before count/pagination.
+Unknown status groups return 400. Existing unassigned/numeric-owner filters remain supported.
+Dashboard destinations start at page one, updatedAt DESC/id DESC; clearing filters restores ordinary queue defaults.
 
 ## 6. Safe Error and Conflict Plan
 

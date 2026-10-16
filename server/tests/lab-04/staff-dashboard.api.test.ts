@@ -64,6 +64,35 @@ describe('STAFF-DASH-01 / handout 4.6 and 8.1',()=>{
       const a=await account('ADMINISTRATOR');await getPrisma().user.update({where:{id:a.user.id},data:change});await a.agent.get(path).expect('isActive'in change?401:403);
     }
   });
+  it.each(['IT_STAFF','ADMINISTRATOR'] as const)('matches every count destination and active pagination for %s',async role=>{
+    const {user,agent}=await account(role);
+    for(let i=0;i<15;i++){await ticket(user.id,active[i%5] as TicketStatus);await ticket(null,active[i%5] as TicketStatus);}
+    await ticket(user.id,'CLOSED');await ticket(null,'CANCELLED');
+    const dashboard=(await agent.get(path).expect(200)).body;
+    const destinations=[['unassignedActive',dashboard.drillDowns.unassignedActive],['myActive',dashboard.drillDowns.myActive],
+      ...Object.entries(dashboard.drillDowns.byStatus),...Object.entries(dashboard.drillDowns.byPriority)] as Array<[string,{filters:Record<string,string>}]>;
+    for(const [key,link]of destinations){
+      const wanted=key in dashboard.counts?dashboard.counts[key]:key in dashboard.counts.byStatus?dashboard.counts.byStatus[key]:dashboard.counts.byPriority[key];
+      const res=await agent.get('/api/staff/tickets').query({...link.filters,page:1,limit:3,sortBy:'updatedAt',sortOrder:'desc'}).expect(200);
+      expect(res.body.pagination.totalItems).toBe(wanted);
+      for(const row of res.body.data){
+        if(link.filters.statusGroup)expect(active).toContain(row.currentStatus);
+        if(link.filters.assignedStaffId==='me')expect(row.assignedStaffId).toBe(user.id);
+        if(link.filters.assignedStaffId==='unassigned')expect(row.assignedStaffId).toBeNull();
+        if(link.filters.currentStatus)expect(row.currentStatus).toBe(link.filters.currentStatus);
+        if(link.filters.itPriority)expect(row.itPriority).toBe(link.filters.itPriority);
+      }
+      if(key==='myActive'){
+        const ids=[];for(let page=1;page<=res.body.pagination.totalPages;page++){
+          const part=await agent.get('/api/staff/tickets').query({...link.filters,page,limit:3,sortBy:'updatedAt',sortOrder:'desc'}).expect(200);ids.push(...part.body.data.map((x:{id:number})=>x.id));
+        }
+        expect(ids).toHaveLength(15);expect(new Set(ids).size).toBe(15);
+      }
+    }
+    const t=dashboard.recentTickets[0];await agent.get(`/api/staff/tickets/${t.id}`).expect(200);await agent.get(`/api/tickets/${t.id}/actions-taken`).expect(200);
+    const intersection=await agent.get('/api/staff/tickets').query({statusGroup:'active',currentStatus:'CLOSED'}).expect(200);expect(intersection.body.pagination.totalItems).toBe(0);
+    await agent.get('/api/staff/tickets?statusGroup=unknown').expect(400);
+  });
   it('returns safe errors rather than zero metrics after query failure',async()=>{
     const {agent}=await account();const log=vi.spyOn(console,'error').mockImplementation(()=>{});
     const fault=vi.spyOn(getPrisma(),'$transaction').mockRejectedValueOnce(new Error('Sensitive SQL failure'));
