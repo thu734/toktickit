@@ -16,9 +16,9 @@ async function open(role:api.User['role']='IT_STAFF'){
   vi.mocked(api.fetchCurrentUser).mockResolvedValue({...user,role});render(<App/>);
   await screen.findByRole('heading',{name:role==='ADMINISTRATOR'?'User Management':'IT Support Ticket Queue'});
   expect(api.fetchStaffDashboard).not.toHaveBeenCalled();fireEvent.click(screen.getByRole('button',{name:'Dashboard'}));
-  await screen.findByRole('button',{name:'View My Tickets (3)'});expect(screen.getByRole('button',{name:'Dashboard'})).toHaveAttribute('aria-current','page');
+  await screen.findByRole('button',{name:'View My Assigned Tickets (3)'});expect(screen.getByRole('button',{name:'Dashboard'})).toHaveAttribute('aria-current','page');
 }
-const destinations=[{name:'View Unassigned Tickets (7)',filters:dashboard.drillDowns.unassignedActive.filters},{name:'View My Tickets (3)',filters:dashboard.drillDowns.myActive.filters},...statuses.map(s=>({name:`View ${statusLabels[s]} Tickets (${dashboard.counts.byStatus[s]})`,filters:dashboard.drillDowns.byStatus[s].filters})),...priorities.map(p=>({name:`View ${priorityLabels[p]} Priority Tickets (${dashboard.counts.byPriority[p]})`,filters:dashboard.drillDowns.byPriority[p].filters}))];
+const destinations=[{name:'View Unassigned Active Tickets (7)',filters:dashboard.drillDowns.unassignedActive.filters},{name:'View My Assigned Tickets (3)',filters:dashboard.drillDowns.myActive.filters},...statuses.map(s=>({name:`View ${statusLabels[s]} Tickets (${dashboard.counts.byStatus[s]})`,filters:dashboard.drillDowns.byStatus[s].filters})),...priorities.map(p=>({name:`View ${priorityLabels[p]} Priority Tickets (${dashboard.counts.byPriority[p]})`,filters:dashboard.drillDowns.byPriority[p].filters}))];
 it.each(destinations)('applies $name to the real queue and normal navigation clears it',async({name,filters})=>{
   await open();fireEvent.click(screen.getByRole('button',{name}));await waitFor(()=>expect(api.fetchStaffTickets).toHaveBeenLastCalledWith(expect.objectContaining({...filters,page:1,sortBy:'updatedAt',sortOrder:'desc'})));
   expect(screen.getByLabelText('Status')).toHaveValue(filters.statusGroup?'ACTIVE':filters.currentStatus||'ALL');
