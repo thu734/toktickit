@@ -29,7 +29,7 @@ describe('STAFF-DASH-01 / handout 4.6 and 8.1',()=>{
     for(const status of Object.values(TicketStatus)) {
       await ticket(null,status,'LOW');await ticket(user.id,status,'HIGH');await ticket(other.user.id,status,'URGENT');
     }
-    const response=await agent.get(path).expect(200);
+    const response=await agent.get(path).query({userId:other.user.id,limit:1000}).expect(200);
     expect(response.body.counts).toEqual(await expected(user.id));
     expect(Object.keys(response.body.counts.byStatus)).toHaveLength(8);expect(Object.keys(response.body.counts.byPriority)).toHaveLength(4);
     const rows=await getPrisma().ticket.findMany({orderBy:[{updatedAt:'desc'},{id:'desc'}],take:5});
@@ -44,12 +44,13 @@ describe('STAFF-DASH-01 / handout 4.6 and 8.1',()=>{
     for(let i=0;i<7;i++)included.push(await action(t.id,b.user.id,a.user.id));
     await action(t.id,a.user.id,null);await action(t.id,a.user.id,b.user.id);
     await action(t.id,a.user.id,a.user.id,'COMPLETED');await action(t.id,a.user.id,a.user.id,'CANCELLED');
-    const res=await a.agent.get(path).query({userId:b.user.id,assignedToId:b.user.id}).set('X-Development-Requester-Id',String(b.user.id)).expect(200);
+    const res=await a.agent.get(path).query({userId:b.user.id,assignedToId:b.user.id,limit:1000}).set('X-Development-Requester-Id',String(b.user.id)).expect(200);
     expect(res.body.myActions.map((x:{id:number})=>x.id)).toEqual(included.slice(0,5).map(x=>x.id));
     expect(res.body.counts.myActive).toBe(0);
     expect(Object.keys(res.body.myActions[0]).sort()).toEqual(['createdAt','description','id','status','ticket']);
     for(const item of res.body.myActions){expect(item.status).toBe('PLANNED');expect(item.ticket).toMatchObject({id:t.id,currentStatus:'CANCELLED'});}
     const admin=await b.agent.get(path).expect(200);expect(admin.body.myActions).toHaveLength(1);
+    await a.agent.get(`/api/staff/tickets/${t.id}`).expect(200);await a.agent.get(`/api/tickets/${t.id}/actions-taken`).expect(200);
   });
   it('ignores forged current-owner identity and returns only session-owner metrics',async()=>{
     const a=await account(),b=await account();await ticket(a.user.id);await ticket(b.user.id);await ticket(b.user.id);

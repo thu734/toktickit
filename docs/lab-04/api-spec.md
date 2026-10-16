@@ -172,7 +172,7 @@ Recent previews select id, ticketNumber, summary, currentStatus, itPriority, upd
 My Actions selects id, description, createdAt, status and parent Ticket id/number/status; limit five, createdAt ASC/id ASC.
 Its predicate is assignedToId = session user AND status = PLANNED, independent of Ticket Owner and performer.
 No extra terminal-parent filter is added. Previews open existing Ticket Detail; My Actions opens its Actions Taken area.
-No full notes, descriptions, audit collections, private account fields or attachment paths are returned.
+No Internal Notes, full Ticket descriptions, audit collections, private account fields or attachment paths are returned.
 
 One read-only PostgreSQL Repeatable Read transaction provides all counts/previews and transaction_timestamp() as asOf.
 No date-window cutoff or browser-authoritative count calculation. Forged identity/limit query parameters do not override scope/bounds.
