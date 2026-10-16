@@ -1,5 +1,58 @@
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
+export interface ActionFields {
+  description: string;
+  result?: string;
+  assignedToId?: number | null;
+  followUpRequired?: boolean;
+  followUpNote?: string;
+  attachmentNotes?: string;
+}
+export type ActionChanges = Partial<ActionFields> & { status?: "COMPLETED" | "CANCELLED" };
+export interface ActionTaken {
+  id: number;
+  ticketId: number;
+  performedById: number;
+  assignedToId: number | null;
+  status: "PLANNED" | "COMPLETED" | "CANCELLED";
+  description: string;
+  result: string | null;
+  followUpRequired: boolean;
+  followUpNote: string | null;
+  attachmentNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  performedBy: Pick<User, "id" | "name" | "email" | "role">;
+  assignedTo: (Pick<User, "id" | "name" | "email" | "role" | "isActive">) | null;
+}
+export interface ActionsResponse { actions: ActionTaken[]; workflowRevision: number }
+export interface ActionResponse { action: ActionTaken; workflowRevision: number }
+
+async function actionRequest<T>(path: string, method = "GET", payload?: unknown): Promise<T> {
+  const response = await fetch(`${API_URL}/api/tickets/${path}`, {
+    method, credentials: "include",
+    ...(payload === undefined ? {} : {
+      headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+      body: JSON.stringify(payload),
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw Object.assign(new Error(data.message || data.error || "Unable to process Actions request."), {
+    status: response.status, code: data.code,
+  });
+  return data as T;
+}
+
+export function fetchActions(ticketId: number): Promise<ActionsResponse> {
+  return actionRequest(`${ticketId}/actions-taken`);
+}
+export function createAction(ticketId: number, payload: ActionFields & { workflowRevision: number; requestKey: string }): Promise<ActionResponse> {
+  return actionRequest(`${ticketId}/actions-taken`, "POST", payload);
+}
+export function updateAction(ticketId: number, actionId: number, payload: ActionChanges & { workflowRevision: number }): Promise<ActionResponse> {
+  return actionRequest(`${ticketId}/actions-taken/${actionId}`, "PATCH", payload);
+}
+
 export interface Category {
   id: number;
   name: string;
@@ -458,7 +511,7 @@ export interface StaffUser {
   role: "IT_STAFF" | "ADMINISTRATOR";
 }
 
-export async function fetchStaffUsers(): Promise<StaffUser[]> {
+export async function fetchStaffUsers(options: { strict?: boolean } = {}): Promise<StaffUser[]> {
   const res = await fetch(`${API_URL}/api/staff/users`, {
     method: "GET",
     credentials: "include",
@@ -466,6 +519,9 @@ export async function fetchStaffUsers(): Promise<StaffUser[]> {
 
   const data = await res.json();
   if (!res.ok) {
+    if (options.strict) {
+      throw Object.assign(new Error(data.message || data.error || "Unable to load eligible assignees."), { status: res.status, code: data.code });
+    }
     return [];
   }
 
@@ -764,5 +820,3 @@ export async function resetAdminUserPassword(userId: number, initialPassword: st
 
   return data;
 }
-
-

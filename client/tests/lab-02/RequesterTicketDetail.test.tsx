@@ -15,6 +15,7 @@ const mockRequester = {
 describe("Lab 2 Requester Ticket Detail UI Tests (UI-05, AC-03, AC-22)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.spyOn(api, "fetchActions").mockResolvedValue({ actions: [], workflowRevision: 0 });
     vi.spyOn(api, "fetchTicketComments").mockResolvedValue([]);
   });
 

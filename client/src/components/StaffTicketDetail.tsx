@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { ActionsTaken } from "./ActionsTaken";
 import {
   fetchStaffTicketDetail,
   assignStaffTicket,
@@ -18,6 +19,7 @@ interface StaffTicketDetailProps {
   ticketId: number;
   currentUserRole?: "REQUESTER" | "IT_STAFF" | "ADMINISTRATOR";
   currentUserId?: number;
+  currentUserName?: string;
   onBack?: () => void;
 }
 
@@ -36,6 +38,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   ticketId,
   currentUserRole,
   currentUserId,
+  currentUserName,
   onBack,
 }) => {
   const [ticket, setTicket] = useState<any>(null);
@@ -275,6 +278,10 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
           <button type="button" className="btn-close" onClick={() => setError("")}></button>
         </div>
       )}
+
+      <ActionsTaken key={ticketId} ticketId={ticketId} ticketStatus={ticket.currentStatus}
+        viewer={{ role: currentUserRole || "REQUESTER", name: currentUserName || "Current signed-in user" }}
+        onRefreshTicket={async () => { setTicket(await fetchStaffTicketDetail(ticketId)); }} />
 
       {/* Main 2-column Dashboard Grid (desktop ≥ 992px) */}
       <div className="row g-4">
