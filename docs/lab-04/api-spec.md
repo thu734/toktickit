@@ -107,6 +107,24 @@ A/D-12/D-15 response envelope: asOf, documented counts, bounded Ticket/Action pr
 Calculate each response using a documented consistency policy and the approved common asOf. Approved calculations appear in [specification.md](specification.md#54-approved-dashboard-calculations).
 Zero results return zero counts/empty lists; failures return safe errors, not false zero totals (R). D-12 uses current-state counts, five most recent Tickets without a date-window cutoff and one current-user Action preview. My Actions is PLANNED Actions assigned to the authenticated Staff/Admin; historical performed Actions are excluded. Recent Ticket ordering is updatedAt DESC, id DESC, scoped to owned Requester or accessible operational Staff/Admin Tickets; drill-down filters match the documented query. No separate Action version or dual assigned/performed dashboard summary is planned.
 
+### 5.1 Issue 23 Requester Dashboard Representation
+
+GET `/api/dashboard/requester` is Requester-only and derives ownership exclusively from the session.
+Response: `asOf` (UTC ISO timestamp), `counts: { active, waitingForRequester, resolved }`,
+`recentTickets` (at most five `{ id, ticketNumber, summary, currentStatus, updatedAt }` objects),
+and `drillDowns` with `active`, `waitingForRequester`, and `resolved` entries.
+Each entry has `destination: "my-tickets"` and `filters`: respectively `{ statusGroup: "active" }`,
+`{ currentStatus: "WAITING_FOR_REQUESTER" }`, or `{ currentStatus: "RESOLVED" }`.
+Recent Ticket IDs navigate through existing owned Ticket Detail.
+
+All counts and previews share one read-only PostgreSQL Repeatable Read transaction.
+Its first SELECT establishes the snapshot and reads PostgreSQL `transaction_timestamp()` as `asOf`.
+This labels the read transaction; it is not a historical query cutoff or a resolution timestamp.
+Counts use specification §5.4; recent ordering is updatedAt DESC, id DESC with no date window.
+No full descriptions, Internal Notes, attachment paths, account secrets, or full Ticket collection are returned.
+The endpoint accepts no identity override or configurable preview limit.
+Session/account checks, first-password lock and 401/403 behavior are inherited; query failures return a safe 500 without counts.
+
 ## 6. Safe Error and Conflict Plan
 
 | Condition | Inherited / approved behavior | Basis |

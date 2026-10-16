@@ -11,6 +11,7 @@ import { csrfProtection } from "./middleware/csrf.js";
 import { mustChangePasswordLock } from "./middleware/mustChangePasswordLock.js";
 import { requireAuth, requireRole } from "./middleware/authorization.js";
 import { authRouter } from "./routes/auth.js";
+import { dashboardRouter } from "./routes/dashboard.js";
 import { actionsRouter } from "./routes/actions.js";
 import { mutateTicketWorkflow, WorkflowError } from "./services/ticketWorkflow.js";
 
@@ -51,6 +52,7 @@ app.use(csrfProtection);
 app.use("/api/auth", authRouter);
 app.use(mustChangePasswordLock);
 app.use("/api", actionsRouter);
+app.use("/api", dashboardRouter);
 
 
 // Helper function to extract and validate Requester identity strictly from authenticated session (BR-03, FR-08)
