@@ -40,6 +40,13 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
             {user.role === "REQUESTER" && (
               <>
                 <button
+                  className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "requester-dashboard" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
+                  aria-current={currentTab === "requester-dashboard" ? "page" : undefined}
+                  onClick={() => onTabChange("requester-dashboard")}
+                >
+                  Dashboard
+                </button>
+                <button
                   className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "my-tickets" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
                   onClick={() => onTabChange("my-tickets")}
                 >

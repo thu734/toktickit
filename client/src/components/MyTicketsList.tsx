@@ -3,11 +3,13 @@ import {
   fetchTickets,
   fetchCategories,
   Category,
+  RequesterTicketFilters,
   PaginatedTicketsResponse,
 } from "../api.js";
 import { useRequester } from "../context/RequesterContext.js";
 
 interface MyTicketsListProps {
+  initialFilters?: RequesterTicketFilters;
   onNavigateCreate?: () => void;
 
   // Issue #8 can connect this to Requester Ticket Detail.
@@ -20,6 +22,7 @@ const PAGE_LIMIT = 10;
 export const MyTicketsList: React.FC<MyTicketsListProps> = ({
   onNavigateCreate,
   onOpenTicket,
+  initialFilters,
 }) => {
   const { activeRequester } = useRequester();
 
@@ -39,13 +42,8 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
   const [categoryId, setCategoryId] = useState("");
   const [requestedPriority, setRequestedPriority] = useState("ALL");
 
-  /*
-   * Lab 2 tickets begin with NEW and lifecycle changes are explicitly
-   * out of scope. Keep the state so the API contract can support the
-   * documented Current Status filter, but do not introduce future
-   * lifecycle values into the UI.
-   */
-  const [currentStatus, setCurrentStatus] = useState("ALL");
+  // ACTIVE is a filter group, not an additional Ticket status.
+  const [currentStatus, setCurrentStatus] = useState(initialFilters?.statusGroup === "active" ? "ACTIVE" : initialFilters?.currentStatus || "ALL");
 
   const [sortBy, setSortBy] = useState("updatedAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -107,7 +105,8 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
           categoryId: categoryId || undefined,
           requestedPriority:
             requestedPriority !== "ALL" ? requestedPriority : undefined,
-          currentStatus: currentStatus !== "ALL" ? currentStatus : undefined,
+          currentStatus: currentStatus !== "ALL" && currentStatus !== "ACTIVE" ? currentStatus : undefined,
+          statusGroup: currentStatus === "ACTIVE" ? "active" : undefined,
           sortBy,
           sortOrder,
           page,
@@ -605,6 +604,7 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
                 }}
               >
                 <option value="ALL">All Statuses</option>
+                <option value="ACTIVE">Active Tickets</option>
                 <option value="NEW">New</option>
                 <option value="OPEN">Open</option>
                 <option value="IN_PROGRESS">In Progress</option>

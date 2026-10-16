@@ -121,7 +121,26 @@ export interface PaginatedTicketsResponse {
   };
 }
 
-export interface FetchTicketsParams {
+export interface RequesterTicketFilters {
+  statusGroup?: "active";
+  currentStatus?: string;
+}
+
+export interface RequesterDashboardResponse {
+  asOf: string;
+  counts: { active: number; new: number; open: number; inProgress: number; waitingForRequester: number; resolved: number; reopened: number };
+  recentTickets: Pick<Ticket, "id" | "ticketNumber" | "summary" | "currentStatus" | "updatedAt">[];
+  drillDowns: Record<"active" | "new" | "open" | "inProgress" | "waitingForRequester" | "resolved" | "reopened", { destination: "my-tickets"; filters: RequesterTicketFilters }>;
+}
+
+export async function fetchRequesterDashboard(signal?: AbortSignal): Promise<RequesterDashboardResponse> {
+  const response = await fetch(`${API_URL}/api/dashboard/requester`, { credentials: "include", signal });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw Object.assign(new Error(data.message || data.error || "Unable to retrieve your dashboard."), { status: response.status, code: data.code });
+  return data;
+}
+
+export interface FetchTicketsParams extends RequesterTicketFilters {
   search?: string;
   categoryId?: string;
   requestedPriority?: string;
@@ -222,6 +241,7 @@ export async function fetchTickets(
   if (params.categoryId) query.append("categoryId", params.categoryId);
   if (params.requestedPriority) query.append("requestedPriority", params.requestedPriority);
   if (params.currentStatus) query.append("currentStatus", params.currentStatus);
+  if ("statusGroup" in params && params.statusGroup) query.append("statusGroup", params.statusGroup);
   if (params.sortBy) query.append("sortBy", params.sortBy);
   if (params.sortOrder) query.append("sortOrder", params.sortOrder);
   if (params.page) query.append("page", String(params.page));

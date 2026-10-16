@@ -107,6 +107,59 @@ A/D-12/D-15 response envelope: asOf, documented counts, bounded Ticket/Action pr
 Calculate each response using a documented consistency policy and the approved common asOf. Approved calculations appear in [specification.md](specification.md#54-approved-dashboard-calculations).
 Zero results return zero counts/empty lists; failures return safe errors, not false zero totals (R). D-12 uses current-state counts, five most recent Tickets without a date-window cutoff and one current-user Action preview. My Actions is PLANNED Actions assigned to the authenticated Staff/Admin; historical performed Actions are excluded. Recent Ticket ordering is updatedAt DESC, id DESC, scoped to owned Requester or accessible operational Staff/Admin Tickets; drill-down filters match the documented query. No separate Action version or dual assigned/performed dashboard summary is planned.
 
+### 5.1 Initial Issue 23 Requester Dashboard Representation (history)
+
+The initial three-count design below was approved before implementation and is retained as history.
+The 2026-10-16 D-12-R1 approval extends it with the current seven-count representation in §5.3.
+
+GET `/api/dashboard/requester` is Requester-only and derives ownership exclusively from the session.
+Response: `asOf` (UTC ISO timestamp), `counts: { active, waitingForRequester, resolved }`,
+`recentTickets` (at most five `{ id, ticketNumber, summary, currentStatus, updatedAt }` objects),
+and `drillDowns` with `active`, `waitingForRequester`, and `resolved` entries.
+Each entry has `destination: "my-tickets"` and `filters`: respectively `{ statusGroup: "active" }`,
+`{ currentStatus: "WAITING_FOR_REQUESTER" }`, or `{ currentStatus: "RESOLVED" }`.
+Recent Ticket IDs navigate through existing owned Ticket Detail.
+
+All counts and previews share one read-only PostgreSQL Repeatable Read transaction.
+Its first SELECT establishes the snapshot and reads PostgreSQL `transaction_timestamp()` as `asOf`.
+This labels the read transaction; it is not a historical query cutoff or a resolution timestamp.
+Counts use specification §5.4; recent ordering is updatedAt DESC, id DESC with no date window.
+No full descriptions, Internal Notes, attachment paths, account secrets, or full Ticket collection are returned.
+The endpoint accepts no identity override or configurable preview limit.
+Session/account checks, first-password lock and 401/403 behavior are inherited; query failures return a safe 500 without counts.
+
+### 5.2 Requester Dashboard Drill-down Filters
+
+Existing GET `/api/tickets` additionally accepts `statusGroup=active`, applying the five approved active statuses
+in the database before both counting and pagination. It is a filter group, never a Ticket status.
+Omitted groups preserve existing behavior; unsupported/repeated groups return 400.
+When combined with `currentStatus`, the predicates intersect. Ownership is always session-derived.
+Waiting/resolved drill-downs use existing single-status filters. Dashboard navigation starts at page one,
+updatedAt DESC (with inherited ID DESC tie-break), clearing unrelated filters.
+
+### 5.3 D-12-R1 Current Requester Dashboard Representation (approved 2026-10-16)
+
+The user explicitly approved the status-specific revision separately from the initial D-12 layout.
+The same GET `/api/dashboard/requester` now returns `counts` and `drillDowns` entries for
+`active`, `new`, `open`, `inProgress`, `waitingForRequester`, `resolved`, and `reopened`.
+Existing `active`, `waitingForRequester` and `resolved` fields are retained; four exact-status fields are additive.
+
+| Key | Backend currentStatus predicate | Drill-down filters |
+| --- | --- | --- |
+| active | IN NEW, OPEN, IN_PROGRESS, WAITING_FOR_REQUESTER, REOPENED | `{ statusGroup: "active" }` |
+| new | NEW | `{ currentStatus: "NEW" }` |
+| open | OPEN only | `{ currentStatus: "OPEN" }` |
+| inProgress | IN_PROGRESS | `{ currentStatus: "IN_PROGRESS" }` |
+| waitingForRequester | WAITING_FOR_REQUESTER | `{ currentStatus: "WAITING_FOR_REQUESTER" }` |
+| resolved | RESOLVED | `{ currentStatus: "RESOLVED" }` |
+| reopened | REOPENED | `{ currentStatus: "REOPENED" }` |
+
+Every count query is owner-scoped on the backend; all seven counts use the same read-only Repeatable Read
+transaction as asOf and recentTickets. The backend Active count reconciles with the five active status counts.
+All drill-down entries retain `destination: "my-tickets"`. No new endpoint, status, migration or client-side
+count authority is introduced. Recent previews, five-item bound, fields, ordering, timestamp and error policy are unchanged.
+A valid empty account returns zero for every count; a query failure returns a safe error without counts.
+
 ## 6. Safe Error and Conflict Plan
 
 | Condition | Inherited / approved behavior | Basis |

@@ -11,6 +11,8 @@ import { csrfProtection } from "./middleware/csrf.js";
 import { mustChangePasswordLock } from "./middleware/mustChangePasswordLock.js";
 import { requireAuth, requireRole } from "./middleware/authorization.js";
 import { authRouter } from "./routes/auth.js";
+import { ACTIVE_TICKET_STATUSES } from "./services/requesterDashboard.js";
+import { dashboardRouter } from "./routes/dashboard.js";
 import { actionsRouter } from "./routes/actions.js";
 import { mutateTicketWorkflow, WorkflowError } from "./services/ticketWorkflow.js";
 
@@ -51,6 +53,7 @@ app.use(csrfProtection);
 app.use("/api/auth", authRouter);
 app.use(mustChangePasswordLock);
 app.use("/api", actionsRouter);
+app.use("/api", dashboardRouter);
 
 
 // Helper function to extract and validate Requester identity strictly from authenticated session (BR-03, FR-08)
@@ -230,6 +233,7 @@ app.get("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Resp
       categoryId,
       requestedPriority,
       currentStatus,
+      statusGroup,
       sortBy = "createdAt",
       sortOrder = "desc",
       page = "1",
@@ -273,6 +277,15 @@ app.get("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Resp
 
     if (typeof requestedPriority === "string" && requestedPriority !== "ALL") {
       whereClause.requestedPriority = requestedPriority as RequestedPriority;
+    }
+
+    if (statusGroup !== undefined) {
+      if (statusGroup !== "active") {
+        return res.status(400).json({ error: "Bad Request", message: "Invalid statusGroup. Only active is supported." });
+      }
+      // This predicate applies to both the count and findMany BEFORE skip/take.
+      // AND preserves intersection semantics with existing single-status filters.
+      whereClause.AND = [{ currentStatus: { in: ACTIVE_TICKET_STATUSES } }];
     }
 
     if (typeof currentStatus === "string" && currentStatus !== "ALL") {
