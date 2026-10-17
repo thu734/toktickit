@@ -54,7 +54,7 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
     ticket1Id = t1.id;
 
     // Create dummy sample test files
-    const testDir = path.resolve(process.cwd(), "scratch_test");
+    const testDir = path.join(process.env.TOKTICKIT_TEST_FILES!, "fixtures");
     if (!fs.existsSync(testDir)) fs.mkdirSync(testDir, { recursive: true });
 
     samplePdfPath = path.join(testDir, "sample.pdf");

@@ -2,8 +2,17 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { randomUUID } from "crypto";
+import { tmpdir } from "node:os";
 
-const uploadDir = path.resolve(process.cwd(), "uploads");
+function resolveUploadDirectory() {
+  if (process.env.NODE_ENV !== 'test') return path.resolve(process.cwd(), 'uploads');
+  const root = process.env.TOKTICKIT_TEST_FILES;
+  if (!root || path.dirname(root) !== path.resolve(tmpdir()) || !/^toktickit-lab4-[a-zA-Z0-9]+$/.test(path.basename(root))) {
+    throw new Error('SAFETY BLOCK: test uploads require a disposable harness directory.');
+  }
+  return path.join(root, 'uploads');
+}
+export const uploadDir = resolveUploadDirectory();
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }

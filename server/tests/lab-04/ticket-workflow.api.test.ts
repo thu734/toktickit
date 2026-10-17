@@ -50,6 +50,12 @@ describe('WF-API-01 / WF-SEC-01', () => {
       const t = await ticket(from), before = await state(t.id);
       const allowed = matrix[from].includes(to);
       const res = await status(role === 'Staff' ? staff : admin, t.id, to);
+      if (res.status !== (allowed ? 200 : 400)) {
+        const target = await db().$queryRaw`SELECT current_database() AS db, current_schema() AS schema`;
+        const actor = await db().user.findUnique({ where: { id: role === 'Staff' ? staffId : adminId }, select: { id: true, role: true, isActive: true, mustChangePassword: true } });
+        console.error('ISSUE25_WORKFLOW_DIAGNOSTIC', JSON.stringify({ target, actor, method: 'PATCH', path: `/api/staff/tickets/${t.id}/status`, status: res.status, body: res.body, text: res.text,
+          ticket: await db().ticket.findUnique({ where: { id: t.id } }) }));
+      }
       expect(res.status).toBe(allowed ? 200 : 400);
       if (allowed) {
         expect(res.body).toMatchObject({ currentStatus: to, workflowRevision: 1, assignedStaffId: null });

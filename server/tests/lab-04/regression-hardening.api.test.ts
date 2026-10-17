@@ -113,3 +113,29 @@ describe('Issue 25 input and safe-error boundaries', () => {
     expect(res.type).toBe('application/json'); expect(res.text).not.toMatch(/Prisma|stack|node_modules/);
   });
 });
+
+describe('Issue 25 session and file isolation', () => {
+  it('expires the established session after the inherited eight-hour lifetime', async () => {
+    const expiring = await loginAsUser(ownerId);
+    await expiring.get('/api/tickets').expect(200);
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(Date.now() + 8 * 60 * 60 * 1000 + 1000);
+      await expiring.get('/api/tickets').expect(401);
+      await expiring.get('/api/auth/me').expect(401);
+    } finally { vi.useRealTimers(); }
+  });
+  it('writes uploaded bytes only inside the disposable suite directory', async () => {
+    const { readFileSync, existsSync } = await import('node:fs');
+    const path = await import('node:path');
+    const { uploadDir } = await import('../../src/middleware/upload.js');
+    expect(uploadDir).toBe(path.join(process.env.TOKTICKIT_TEST_FILES!, 'uploads'));
+    expect(uploadDir.startsWith(path.resolve('uploads') + path.sep)).toBe(false);
+    const bytes = Buffer.from('%PDF isolated upload');
+    const res = await owner.post(`/api/tickets/${ticketId}/attachments`).set(csrf).attach('file', bytes, 'isolated.pdf').expect(201);
+    const stored = await getPrisma().attachment.findUniqueOrThrow({ where: { id: res.body.id } });
+    expect(path.dirname(stored.filePath)).toBe(uploadDir);
+    expect(readFileSync(stored.filePath)).toEqual(bytes);
+    expect(existsSync(path.resolve('uploads', stored.storedFilename))).toBe(false);
+  });
+});
