@@ -81,3 +81,35 @@ describe('Issue 25 protected resource boundaries', () => {
     } finally { db.user.findUnique = original; await db.user.update({ where: { id: ownerId }, data: { mustChangePassword: false } }); }
   });
 });
+
+describe('Issue 25 input and safe-error boundaries', () => {
+  it.each(['1junk', '1.5', '-1', '0', '2147483648', '1e2', 'NaN'])('rejects malformed resource ID %s on inherited read/write routes', async id => {
+    const before = await getPrisma().ticket.count();
+    await owner.get(`/api/tickets/${id}`).expect(400);
+    await owner.get(`/api/tickets/${id}/attachments`).expect(400);
+    await owner.get(`/api/attachments/${id}/download`).expect(400);
+    await owner.post(`/api/attachments/${id}/soft-remove`).set(csrf).send({ removalReason: 'Valid reason' }).expect(400);
+    await staff.get(`/api/staff/tickets/${id}`).expect(400);
+    await staff.post(`/api/staff/tickets/${id}/notes`).set(csrf).send({content:'Valid note'}).expect(400);
+    await admin.patch(`/api/admin/users/${id}`).set(csrf).send({ name: 'No change' }).expect(400);
+    expect(await getPrisma().ticket.count()).toBe(before);
+  });
+  it.each(['{bad-json', '[', 'null'])('returns safe JSON for malformed body %s', async body => {
+    const res = await owner.post('/api/tickets').set(csrf).set('Content-Type', 'application/json').send(body).expect(400);
+    expect(res.type).toBe('application/json'); expect(res.body).toEqual({ error: 'Bad Request', message: 'Invalid JSON request body.' });
+    expect(res.text).not.toMatch(/SyntaxError|stack|node_modules|<html/i);
+  });
+  it('returns safe JSON for an oversized body', async () => {
+    const res = await owner.post('/api/tickets').set(csrf).send({ summary: 'x'.repeat(110000) }).expect(413);
+    expect(res.type).toBe('application/json'); expect(res.body.message).toBe('Request body is too large.');
+  });
+  it.each([true, [1], 1.5, -1, 2147483648, '1junk'])('rejects malformed reference ID %j without creating a Ticket', async categoryId => {
+    const before = await getPrisma().ticket.count();
+    const res = await owner.post('/api/tickets').set(csrf).send({categoryId,relatedSystemId:1,requestedPriority:'LOW',summary:'Valid summary',description:'Valid description here'}).expect(400);
+    expect(res.body.details.categoryId).toBeDefined(); expect(await getPrisma().ticket.count()).toBe(before);
+  });
+  it.each(['categoryId=1junk', 'requestedPriority=INVALID', 'currentStatus=INVALID'])('rejects invalid Requester filter %s safely', async query => {
+    const res = await owner.get(`/api/tickets?${query}`).expect(400);
+    expect(res.type).toBe('application/json'); expect(res.text).not.toMatch(/Prisma|stack|node_modules/);
+  });
+});

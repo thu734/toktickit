@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import path from "path";
 import fs from "fs";
@@ -16,6 +16,8 @@ import { dashboardRouter } from "./routes/dashboard.js";
 import { actionsRouter } from "./routes/actions.js";
 import { mutateTicketWorkflow, WorkflowError } from "./services/ticketWorkflow.js";
 
+
+import { resourceId } from "./utils/resourceId.js";
 
 export const app = express();
 
@@ -162,8 +164,8 @@ app.post("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Res
       validationErrors.requestedPriority = "Requested Priority must be one of: LOW, MEDIUM, HIGH, URGENT.";
     }
 
-    const catIdNum = Number(categoryId);
-    if (!catIdNum || isNaN(catIdNum)) {
+    const catIdNum = resourceId(categoryId);
+    if (catIdNum === null) {
       validationErrors.categoryId = "Valid Category ID is required.";
     } else {
       const category = await getPrisma().category.findUnique({ where: { id: catIdNum } });
@@ -172,8 +174,8 @@ app.post("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Res
       }
     }
 
-    const sysIdNum = Number(relatedSystemId);
-    if (!sysIdNum || isNaN(sysIdNum)) {
+    const sysIdNum = resourceId(relatedSystemId);
+    if (sysIdNum === null) {
       validationErrors.relatedSystemId = "Valid Related System ID is required.";
     } else {
       const system = await getPrisma().relatedSystem.findUnique({ where: { id: sysIdNum } });
@@ -182,7 +184,7 @@ app.post("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Res
       }
     }
 
-    if (Object.keys(validationErrors).length > 0) {
+    if (catIdNum === null || sysIdNum === null || Object.keys(validationErrors).length > 0) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Validation failed for ticket creation.",
@@ -271,11 +273,13 @@ app.get("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Resp
     }
 
     if (categoryId) {
-      const catId = Number(categoryId);
-      if (!isNaN(catId)) whereClause.categoryId = catId;
+      const catId = resourceId(categoryId);
+      if (catId === null) return res.status(400).json({ error: "Bad Request", message: "Invalid category ID." });
+      whereClause.categoryId = catId;
     }
 
     if (typeof requestedPriority === "string" && requestedPriority !== "ALL") {
+      if (!["LOW", "MEDIUM", "HIGH", "URGENT"].includes(requestedPriority)) return res.status(400).json({ error: "Bad Request", message: "Invalid requested priority." });
       whereClause.requestedPriority = requestedPriority as RequestedPriority;
     }
 
@@ -289,6 +293,7 @@ app.get("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Resp
     }
 
     if (typeof currentStatus === "string" && currentStatus !== "ALL") {
+      if (!Object.values(TicketStatus).includes(currentStatus as TicketStatus)) return res.status(400).json({ error: "Bad Request", message: "Invalid current status." });
       whereClause.currentStatus = currentStatus as TicketStatus;
     }
 
@@ -336,8 +341,8 @@ app.get("/api/tickets/:id", requireRole("REQUESTER"), async (req: Request, res: 
     if (requesterId === null) return;
 
 
-    const ticketId = parseInt(req.params.id, 10);
-    if (isNaN(ticketId)) {
+    const ticketId = resourceId(req.params.id);
+    if (ticketId === null) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid ticket ID format.",
@@ -422,8 +427,8 @@ app.post("/api/tickets/:id/attachments", requireRole("REQUESTER"), (req: Request
         return;
       }
 
-      const ticketId = parseInt(req.params.id, 10);
-      if (isNaN(ticketId)) {
+      const ticketId = resourceId(req.params.id);
+      if (ticketId === null) {
         await cleanupFile();
         return res.status(400).json({
           error: "Bad Request",
@@ -493,8 +498,8 @@ app.get("/api/tickets/:id/attachments", requireAuth, async (req: Request, res: R
     if (requesterId === null) return;
 
 
-    const ticketId = parseInt(req.params.id, 10);
-    if (isNaN(ticketId)) {
+    const ticketId = resourceId(req.params.id);
+    if (ticketId === null) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid ticket ID format.",
@@ -551,8 +556,8 @@ app.get("/api/attachments/:id/download", requireAuth, async (req: Request, res: 
     if (requesterId === null) return;
 
 
-    const attachmentId = parseInt(req.params.id, 10);
-    if (isNaN(attachmentId)) {
+    const attachmentId = resourceId(req.params.id);
+    if (attachmentId === null) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid attachment ID format.",
@@ -615,8 +620,8 @@ app.post("/api/attachments/:id/soft-remove", requireRole("REQUESTER"), async (re
     if (requesterId === null) return;
 
 
-    const attachmentId = parseInt(req.params.id, 10);
-    if (isNaN(attachmentId)) {
+    const attachmentId = resourceId(req.params.id);
+    if (attachmentId === null) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid attachment ID format.",
@@ -675,8 +680,8 @@ app.post("/api/attachments/:id/soft-remove", requireRole("REQUESTER"), async (re
 // GET /api/tickets/:id/comments (Public Comments Feed - requireAuth)
 app.get("/api/tickets/:id/comments", requireAuth, async (req: Request, res: Response) => {
   try {
-    const ticketId = parseInt(req.params.id, 10);
-    if (isNaN(ticketId)) {
+    const ticketId = resourceId(req.params.id);
+    if (ticketId === null) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid ticket ID format.",
@@ -730,8 +735,8 @@ app.get("/api/tickets/:id/comments", requireAuth, async (req: Request, res: Resp
 // POST /api/tickets/:id/comments (Post Public Comment - requireAuth)
 app.post("/api/tickets/:id/comments", requireAuth, async (req: Request, res: Response) => {
   try {
-    const ticketId = parseInt(req.params.id, 10);
-    if (isNaN(ticketId)) {
+    const ticketId = resourceId(req.params.id);
+    if (ticketId === null) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid ticket ID format.",
@@ -799,8 +804,8 @@ app.post("/api/tickets/:id/comments", requireAuth, async (req: Request, res: Res
 // POST /api/tickets/:id/indicate-resolved (Indicate Problem Appears Resolved - requireRole("REQUESTER"))
 app.post("/api/tickets/:id/indicate-resolved", requireRole("REQUESTER"), async (req: Request, res: Response) => {
   try {
-    const ticketId = parseInt(req.params.id, 10);
-    if (isNaN(ticketId)) {
+    const ticketId = resourceId(req.params.id);
+    if (ticketId === null) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid ticket ID format.",
@@ -1021,8 +1026,8 @@ app.get("/api/staff/tickets", requireRole("IT_STAFF", "ADMINISTRATOR"), async (r
 // GET /api/staff/tickets/:id (Get Staff Ticket Detail - requireRole("IT_STAFF", "ADMINISTRATOR"))
 app.get("/api/staff/tickets/:id", requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: Request, res: Response) => {
   try {
-    const ticketId = parseInt(req.params.id, 10);
-    if (isNaN(ticketId)) {
+    const ticketId = resourceId(req.params.id);
+    if (ticketId === null) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid ticket ID format.",
@@ -1095,8 +1100,8 @@ for (const operation of ["assign", "priority", "status"] as const) {
 // GET /api/staff/tickets/:id/notes (Get Internal Notes - requireRole("IT_STAFF", "ADMINISTRATOR"))
 app.get("/api/staff/tickets/:id/notes", requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: Request, res: Response) => {
   try {
-    const ticketId = parseInt(req.params.id, 10);
-    if (isNaN(ticketId)) {
+    const ticketId = resourceId(req.params.id);
+    if (ticketId === null) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid ticket ID format.",
@@ -1142,8 +1147,8 @@ app.get("/api/staff/tickets/:id/notes", requireRole("IT_STAFF", "ADMINISTRATOR")
 // POST /api/staff/tickets/:id/notes (Post Internal Note - requireRole("IT_STAFF", "ADMINISTRATOR"))
 app.post("/api/staff/tickets/:id/notes", requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: Request, res: Response) => {
   try {
-    const ticketId = parseInt(req.params.id, 10);
-    if (isNaN(ticketId)) {
+    const ticketId = resourceId(req.params.id);
+    if (ticketId === null) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid ticket ID format.",
@@ -1332,8 +1337,8 @@ app.post("/api/admin/users", requireRole("ADMINISTRATOR"), async (req: Request, 
 // 7.3 PATCH /api/admin/users/:id (Edit user account)
 app.patch("/api/admin/users/:id", requireRole("ADMINISTRATOR"), async (req: Request, res: Response) => {
   try {
-    const userId = parseInt(req.params.id, 10);
-    if (isNaN(userId)) {
+    const userId = resourceId(req.params.id);
+    if (userId === null) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid user ID format.",
@@ -1468,8 +1473,8 @@ app.patch("/api/admin/users/:id", requireRole("ADMINISTRATOR"), async (req: Requ
 // 7.4 POST /api/admin/users/:id/reset-password (Reset initial password)
 app.post("/api/admin/users/:id/reset-password", requireRole("ADMINISTRATOR"), async (req: Request, res: Response) => {
   try {
-    const userId = parseInt(req.params.id, 10);
-    if (isNaN(userId)) {
+    const userId = resourceId(req.params.id);
+    if (userId === null) {
       return res.status(400).json({
         error: "Bad Request",
         message: "Invalid user ID format.",
@@ -1530,3 +1535,11 @@ app.post("/api/admin/users/:id/reset-password", requireRole("ADMINISTRATOR"), as
 });
 
 export default app;
+
+// Express/body-parser failures must use the same safe JSON boundary as route errors.
+app.use((error: { status?: number; type?: string }, _req: Request, res: Response, next: NextFunction) => {
+  if (res.headersSent) return next(error);
+  const status = error.type === "entity.too.large" ? 413 : error.type === "entity.parse.failed" ? 400 : 500;
+  res.status(status).json({ error: status === 500 ? "Internal Server Error" : "Bad Request",
+    message: status === 413 ? "Request body is too large." : status === 400 ? "Invalid JSON request body." : "An unexpected error occurred." });
+});
