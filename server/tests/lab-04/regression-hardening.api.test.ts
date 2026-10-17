@@ -139,3 +139,13 @@ describe('Issue 25 session and file isolation', () => {
     expect(existsSync(path.resolve('uploads', stored.storedFilename))).toBe(false);
   });
 });
+
+it('keeps inherited health independent of account lookups even with a session cookie', async () => {
+  const db = getPrisma();
+  const original = db.user.findUnique.bind(db.user);
+  db.user.findUnique = (() => { throw new Error('Health must not query account data'); }) as typeof db.user.findUnique;
+  try {
+    const res = await owner.get('/api/health').expect(200);
+    expect(res.body).toEqual({ status: 'ok', service: 'TokTickIT API' });
+  } finally { db.user.findUnique = original; }
+});
