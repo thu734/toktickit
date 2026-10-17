@@ -165,7 +165,7 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
     expect(res.body.error).toBe("Gone");
   });
 
-  it("Enforces cross-requester security (HTTP 403 Forbidden) on upload, download, and soft-remove (API-12, AC-21, BR-06)", async () => {
+  it("Enforces cross-requester security (HTTP 404 Not Found, effective Lab 3 BR-16) on upload, download, and soft-remove (API-12, AC-21, BR-06)", async () => {
     const prisma = getPrisma();
     const att = await prisma.attachment.create({
       data: {
@@ -178,23 +178,23 @@ describe("Lab 2 Attachments API - Upload, Metadata, Download, Soft-Remove & Owne
       },
     });
 
-    // Upload attempt by Requester 2 -> 403
+    // Upload attempt by Requester 2 -> 404
     const uploadRes = await requester2Agent
       .post(`/api/tickets/${ticket1Id}/attachments`)
       .set(CSRF_HEADER)
       .attach("file", samplePdfPath);
-    expect(uploadRes.status).toBe(403);
+    expect(uploadRes.status).toBe(404);
 
     // Download attempt by Requester 2 -> 404 (BR-16 / Lab 3 API Spec 4.6)
     const downloadRes = await requester2Agent
       .get(`/api/attachments/${att.id}/download`);
-    expect([403, 404]).toContain(downloadRes.status);
+    expect(downloadRes.status).toBe(404);
 
-    // Soft-remove attempt by Requester 2 -> 403
+    // Soft-remove attempt by Requester 2 -> 404
     const removeRes = await requester2Agent
       .post(`/api/attachments/${att.id}/soft-remove`)
       .set(CSRF_HEADER)
       .send({ removalReason: "Unauthorized removal attempt" });
-    expect(removeRes.status).toBe(403);
+    expect(removeRes.status).toBe(404);
   });
 });

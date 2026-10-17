@@ -48,6 +48,8 @@ export async function mustChangePasswordLock(req: Request, res: Response, next: 
     }
   } catch (error) {
     console.error("mustChangePasswordLock middleware error:", error);
+    res.status(500).json({ error: "Internal Server Error", code: "INTERNAL_ERROR", message: "Unable to verify account access. Please retry." });
+    return;
   }
 
   next();

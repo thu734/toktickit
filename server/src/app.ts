@@ -374,9 +374,9 @@ app.get("/api/tickets/:id", requireRole("REQUESTER"), async (req: Request, res: 
     }
 
     if (ticket.requesterId !== requesterId) {
-      return res.status(403).json({
-        error: "Forbidden",
-        message: "You do not have permission to access this ticket.",
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
       });
     }
 
@@ -445,9 +445,9 @@ app.post("/api/tickets/:id/attachments", requireRole("REQUESTER"), (req: Request
 
       if (ticket.requesterId !== requesterId) {
         await cleanupFile();
-        return res.status(403).json({
-          error: "Forbidden",
-          message: "You do not have permission to upload attachments to this ticket.",
+        return res.status(404).json({
+          error: "Not Found",
+          message: "Ticket not found.",
         });
       }
 
@@ -512,10 +512,10 @@ app.get("/api/tickets/:id/attachments", requireAuth, async (req: Request, res: R
       });
     }
 
-    if (ticket.requesterId !== requesterId) {
-      return res.status(403).json({
-        error: "Forbidden",
-        message: "You do not have permission to access attachments for this ticket.",
+    if (req.session.role === "REQUESTER" && ticket.requesterId !== requesterId) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Ticket not found.",
       });
     }
 
@@ -646,9 +646,9 @@ app.post("/api/attachments/:id/soft-remove", requireRole("REQUESTER"), async (re
     }
 
     if (attachment.ticket.requesterId !== requesterId) {
-      return res.status(403).json({
-        error: "Forbidden",
-        message: "You do not have permission to remove this attachment.",
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Attachment not found.",
       });
     }
 
