@@ -1,7 +1,7 @@
 # Lab 4 - Sprint 4 Engineering Specification
 
 **Issue:** Issue 18 [Lab 4] Engineering Contract and Baseline Gate
-**Status:** D-01 through D-16 approved; Issue 19 storage/migration/seed foundation implemented for review. Action APIs/UI, Ticket workflow enforcement and dashboards are not implemented by Issue 19.
+**Status:** Issues 19–24 implemented; Issue 25 hardening implemented with passing current checks, but NOT READY TO PUSH because the original intermittent 404/socket failures remain unexplained. See [current verification](issue-25-verification.md).
 **Source:** CPE 334 Lab 4 handout, SE+Lab+4.pdf, all 11 pages, reviewed 2026-10-15.
 
 **Provenance:** R = required by Lab 4; I = inherited from Labs 1-3; A = user-approved implementation choice, not a handout mandate.
@@ -342,3 +342,9 @@ Gate release prerequisites: review the updated contract and verify its approved 
 - [Lab 3 specification](../lab-03/specification.md), [tests](../lab-03/tests.md), [UI](../lab-03/ui-spec.md), [API](../lab-03/api-spec.md).
 
 Earlier artifacts/documents remain descriptions of their effective increments. Current regressions use the final application's authentication; historical selector/header evidence is not rewritten.
+
+## Issue 25 current hardening and completion boundary (2026-10-17)
+
+GitHub Issue #54 is the logical Issue 25. Its implementation preserves the approved D-01–D-16/D-12-R1 choices and corrects inherited ownership, password-lock, validation, safe-error, recovery and test-file isolation defects. Only the previously superseded ownership 403 expectations and raw upstream error-message expectations change. No migration, seed, lifecycle, transition, metric or authorization-model expansion is introduced.
+
+Current automated verification and the independent acceptance audit are in [issue-25-verification.md](issue-25-verification.md). Earlier unexpected workflow 404 and dashboard socket failures are not proven fixed by green reruns. They remain unresolved, so Issue 25 is NOT READY TO PUSH. Final accessibility, browser screenshot journeys and release evidence remain Issues 26–28; historical reports and artifacts are preserved.

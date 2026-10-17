@@ -8,7 +8,7 @@ An end-user facing IT support ticketing system built with a unified Zen Green de
 - **Backend**: Node.js, Express, TypeScript, Prisma ORM, PostgreSQL (with `bcrypt` password hashing & session management)
 - **Testing**: Vitest, Supertest, React Testing Library, Playwright E2E
 
-## Key Features (Lab 3 Increment)
+## Key Features (Labs 1–4)
 
 - **Authentication & Migration**:
   - Prisma database migration from legacy `DevelopmentRequester` to `User` model.
@@ -43,6 +43,14 @@ An end-user facing IT support ticketing system built with a unified Zen Green de
 
 ---
 
+## Lab 4 functionality and hardening status
+
+- Actions Taken: Staff/Admin create, assign, edit, complete/cancel and make approved completed corrections. Requesters read all current Actions on owned Tickets. Creator/time are immutable; minimal audit events are append-only.
+- Workflow: the approved eight Ticket statuses remain. One workflow revision protects competing writes; outstanding Actions gate resolution and closure. Creation request keys support safe Action retries.
+- Dashboards: backend-owned Requester counts/recent Tickets and shared Staff/Admin operational counts/My Planned Actions, with matching drill-downs. Existing role landing pages remain unchanged.
+- Issue 25: ownership-safe 404s, fail-closed password locks, safe invalid-input responses, recoverable feed/logout handling, configured download origins and disposable test files are implemented. **NOT READY TO PUSH:** earlier intermittent workflow 404 and dashboard socket failures still lack a verified cause despite passing subsequent runs. See [Issue 25 verification](docs/lab-04/issue-25-verification.md).
+- Final accessibility/visual verification, integrated browser screenshots and final release evidence remain Issues 26–28.
+
 ## Workspace Structure
 
 ```
@@ -75,23 +83,24 @@ cp server/.env.example server/.env
 cp client/.env.example client/.env
 ```
 
-*Secrets, database credentials, uploaded attachments, and `node_modules/` are strictly excluded via `.gitignore`.*
+*Secrets, database credentials, uploaded attachments, and `node_modules/` are excluded via `.gitignore`. Existing local cookie/generated files must not be staged.*
+
+Use Node 24 (verification used 24.14.0), npm 11, and PostgreSQL. For local development export a private `SESSION_SECRET` in the server process environment; do not commit or share it. Keep the existing development database URL separate from `TEST_DATABASE_URL`.
+
+Server tests require an existing dedicated `toktickit_test` database and a role able to create/drop schemas within it. The default test target is local `postgresql://toktickit:toktickit@localhost:5432/toktickit_test?schema=public`; optionally export `TEST_DATABASE_URL` for that database. The harness checks the database name before mutation and creates only random `lab4_test_*` schemas. It does not create, reset, migrate or reseed the development database.
 
 ### 2. Install Dependencies
 
 ```bash
-# Install server dependencies
-cd server
-npm install
-
-# Install client dependencies
-cd ../client
-npm install
+# Run these commands from the repository root, using the checked-in lockfiles.
+npm ci
+npm ci --prefix server
+npm ci --prefix client
 ```
 
 ### 3. Database Migration & Idempotent Seeding
 
-Issue 19 adds the Actions storage foundation only; Action APIs/UI, workflow enforcement and dashboards remain later issues.
+Issues 19–24 implement the Actions foundation, API/UI, workflow and dashboards. Issue 25 hardens the integrated application; it adds no migration or seed change.
 
 The historical chain creates `Category` but the schema maps `categories`. The forward prerequisite migration `20261015090000_reconcile_lab3_schema` renames that table, its index/sequence and aligns the existing `users.updatedAt` default without rewriting data. The separate `20261015090100_lab4_actions_foundation` adds Actions, minimal audit events, creation-retry records and a Ticket workflow revision.
 
@@ -134,7 +143,7 @@ The default seed includes Labs 1–4. Existing accounts, password hashes, activi
   npm test
   ```
 
-  This runs all existing server tests followed by `npm run test:data` (migration, seed and persistence integrity). Each file owns a randomly named schema in the dedicated `toktickit_test` database. The URL is validated before any mutation; actual migrations replace `db push` in the active test setup. No test may target the development database or drop `public`. PostgreSQL's `pg_dump` and `psql` must be on `PATH` for the disposable recovery rehearsal. Application role/transition/replay handlers remain later implementation work; passing storage tests does not claim those endpoints exist.
+  This runs all existing server tests followed by `npm run test:data` (migration, seed and persistence integrity). Each file owns a randomly named schema in the dedicated `toktickit_test` database. The URL is validated before any mutation; actual migrations replace `db push` in the active test setup. No test may target the development database or drop `public`. PostgreSQL's `pg_dump` and `psql` must be on `PATH` for the disposable recovery rehearsal. Action/workflow APIs are covered by the default suite; data tests separately prove persistence/migration behavior. Test uploads and attachment fixtures live inside each disposable harness directory and are removed with it; development uploads are not cleaned.
 
   `npm run test:data` runs only the new data suites. Migration tests replay the historical chain, separately verify the prerequisite repair, compare the migrated schema with Prisma and restore a disposable dump plus a referenced attachment-file copy. Normal database backups must include uploads separately; database dumps do not contain file bytes.
 
@@ -150,3 +159,23 @@ The default seed includes Labs 1–4. Existing accounts, password hashes, activi
   ```
 
   First verify that both application servers use isolated test data. The current Playwright config reuses existing servers, so setting a test URL alone is not sufficient. Issue 19 does not run or implement Lab 4 E2E; the root `npm run test:e2e` still selects only Lab 2.
+
+
+### 6. TypeScript and production builds
+
+From the repository root:
+
+```bash
+(cd server && npx tsc --noEmit)
+(cd client && npx tsc --noEmit)
+npm run build --prefix server
+npm run build --prefix client
+```
+
+Builds normally write ignored `dist/` directories. To preserve existing generated output, pass an unused temporary output path: `npm run build --prefix server -- --outDir /private/tmp/toktickit-server-review` and `npm run build --prefix client -- --outDir /private/tmp/toktickit-client-review`. Client compilation has `noEmit`; Vite resolves local TypeScript before sibling JavaScript. Do not delete existing generated source siblings or cookies as part of verification.
+
+### 7. Demonstrating current behavior
+
+Use deliberately prepared demonstration data, with permission before changing any existing database. Newly seeded demonstration accounts start with mandatory password change. Requesters land on My Tickets; Staff on Ticket Queue; Administrators on User Management. Each role can open its Dashboard. Staff/Admin can open Ticket Detail and Actions Taken; Requesters have owned read-only Actions. Test planned work, completed follow-up, resolution blocking, refreshed conflict review and identical Action-create replay through the documented APIs.
+
+Current Playwright configuration is not an isolated E2E harness. It can reuse development servers, mutate account passwords and replace earlier screenshots. Do not execute browser suites until service/data isolation and separate evidence destinations are verified under Issue 27. `npm run test:e2e` at the root still selects only Lab 2.

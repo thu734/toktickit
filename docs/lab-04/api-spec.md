@@ -1,7 +1,7 @@
 # Lab 4 - REST API Contract
 
 **Issue:** Issue 18 [Lab 4] Engineering Contract and Baseline Gate
-**Status:** D-01 through D-16 explicitly approved by the user on 2026-10-15; documentation review and baseline verification remain separate; no Lab 4 implementation.
+**Status:** Issues 19–24 implemented; Issue 25 hardening implemented with passing current checks, but NOT READY TO PUSH because the original intermittent 404/socket failures remain unexplained. See [current verification](issue-25-verification.md).
 **Source:** CPE 334 Lab 4 handout, SE+Lab+4.pdf, all 11 pages, reviewed 2026-10-15.
 
 **Provenance:** R = required by Lab 4; I = inherited from Labs 1-3; A = user-approved implementation choice, not a handout mandate.
@@ -10,7 +10,7 @@ Approval evidence: the user explicitly approved the final D-01 through D-16 choi
 
 ## 1. Contract Status and Inherited Conventions
 
-This is the user-approved future API contract, not an implemented API. D-01 through D-16 were explicitly approved on 2026-10-15; D-10/D-11 define required revision/request-key behavior.
+This is the approved API contract implemented by Issues 19–24 and hardened by Issue 25. Historical Issue 18 planning language below describes ownership at that time, not current feature availability. D-01 through D-16 were explicitly approved on 2026-10-15; D-10/D-11 define required revision/request-key behavior.
 
 I: retain session-cookie authentication, first-login password change lock, current account activity/role checks, CSRF treatment and existing Public Comment/Internal Note/Attachment rules. R: all writes are authorized by the backend; Admin receives IT Staff behavior in Lab 4. Do not change the authentication scheme or introduce external notification services.
 
@@ -203,3 +203,11 @@ Do not expose a private Internal Note, credential hash or another Requester's re
 ## 7. Planned Verification and Compatibility
 
 AC-01 through AC-22 map to API/security/workflow/migration/regression tests in [tests.md](tests.md). Existing Lab 3 Admin operational-denial expectations change only where Lab 4 explicitly grants the operation. Existing attachment, comment, note, login and user-management contracts remain inherited. Tests must cover mandatory expected revisions, new-revision responses, ownership-safe errors and inherited compatibility. For an authenticated, authorized identical creation replay, D-11 returns the original result without another mutation; a new mutation still requires the current revision and a writable Ticket. Changed-payload key reuse returns 409.
+
+## Issue 25 integrated hardening (2026-10-17)
+
+This implements inherited Lab 3 BR-16 and Lab 4 D-15; historical Lab 2 ownership 403 expectations are superseded only in current application tests. For Requesters, foreign and missing Ticket detail, attachment history/upload/removal/download, Comments, advisory indication and Actions reads have equivalent endpoint-specific 404 envelopes. Role violations remain 403. Staff/Admin may read attachment history/download; Requester-only upload/removal permissions are unchanged. Foreign removed attachments receive 404 before any 410 disclosure.
+
+Inherited resource IDs must be complete positive decimal PostgreSQL Int values (maximum 2147483647); malformed IDs are rejected with 400. Reference IDs do not coerce booleans/arrays/fractions. Invalid Requester category/status/priority filters receive safe 400 responses. Existing Staff query fallback remains unchanged. Malformed JSON returns 400 JSON; oversized JSON returns 413 JSON; neither includes parser text, stack traces or source paths.
+
+Failure to read account password-lock state returns safe 500 and denies protected operations. Existing health/authentication exceptions remain available without that lookup. Missing/expired/inactive sessions retain 401, password-locked accounts retain 403 MUST_CHANGE_PASSWORD, and current roles remain authoritative. No authentication model, Ticket transition, Action state, migration or workflow payload is changed.

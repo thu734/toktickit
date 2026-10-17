@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AuthProvider } from '../../src/context/AuthContext';
 import { RequesterProvider } from '../../src/context/RequesterContext';
@@ -9,6 +9,7 @@ import { RequesterDashboard } from '../../src/components/RequesterDashboard';
 import { ActionsTaken } from '../../src/components/ActionsTaken';
 import * as api from '../../src/api';
 vi.hoisted(() => { vi.stubEnv('VITE_API_URL', 'https://api.example.test'); });
+afterAll(() => vi.unstubAllEnvs());
 vi.mock('../../src/api', async importOriginal => ({
   ...await importOriginal<typeof api>(),
   fetchCurrentUser: vi.fn(), logoutApi: vi.fn(), fetchStaffTicketDetail: vi.fn(), fetchTicketDetail: vi.fn(),
