@@ -160,6 +160,30 @@ All drill-down entries retain `destination: "my-tickets"`. No new endpoint, stat
 count authority is introduced. Recent previews, five-item bound, fields, ordering, timestamp and error policy are unchanged.
 A valid empty account returns zero for every count; a query failure returns a safe error without counts.
 
+### 5.4 Issue 24 Staff/Admin Dashboard
+
+GET `/api/dashboard/staff` permits current active IT_STAFF/ADMINISTRATOR sessions and retains the first-password lock.
+Operational scope is the existing shared Staff/Admin Ticket Queue (all accessible Tickets, not owner-only).
+Response: `asOf`, `counts: { unassignedActive, myActive, byStatus, byPriority }`, `recentTickets`, `myActions`, `drillDowns`.
+Active means NEW/OPEN/IN_PROGRESS/WAITING_FOR_REQUESTER/REOPENED. Unassigned requires null owner; myActive requires
+owner = session user. Status/priority maps include all eight/four enum buckets, including zero, over all operational Tickets.
+
+Recent previews select id, ticketNumber, summary, currentStatus, itPriority, updatedAt; limit five, updatedAt DESC/id DESC.
+My Actions selects id, description, createdAt, status and parent Ticket id/number/status; limit five, createdAt ASC/id ASC.
+Its predicate is assignedToId = session user AND status = PLANNED, independent of Ticket Owner and performer.
+No extra terminal-parent filter is added. Previews open existing Ticket Detail; My Actions opens its Actions Taken area.
+No Internal Notes, full Ticket descriptions, audit collections, private account fields or attachment paths are returned.
+
+One read-only PostgreSQL Repeatable Read transaction provides all counts/previews and transaction_timestamp() as asOf.
+No date-window cutoff or browser-authoritative count calculation. Forged identity/limit query parameters do not override scope/bounds.
+Valid empty results return zero buckets/empty previews; failures return safe 500 without fabricated counts; 401/403/lock behavior is inherited.
+`drillDowns.unassignedActive/myActive` describe ticket-queue filters with statusGroup=active and assignedStaffId=unassigned/me.
+`drillDowns.byStatus/byPriority` describe matching currentStatus/itPriority filters for every bucket.
+The existing GET `/api/staff/tickets` accepts `statusGroup=active` and `assignedStaffId=me`;
+`me` resolves only from the authenticated session. Group and exact-status filters intersect before count/pagination.
+Unknown status groups return 400. Existing unassigned/numeric-owner filters remain supported.
+Dashboard destinations start at page one, updatedAt DESC/id DESC; clearing filters restores ordinary queue defaults.
+
 ## 6. Safe Error and Conflict Plan
 
 | Condition | Inherited / approved behavior | Basis |

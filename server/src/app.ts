@@ -895,6 +895,7 @@ app.get("/api/staff/tickets", requireRole("IT_STAFF", "ADMINISTRATOR"), async (r
       categoryId,
       itPriority,
       currentStatus,
+      statusGroup,
       assignedStaffId,
       sortBy,
       sortOrder,
@@ -951,10 +952,17 @@ app.get("/api/staff/tickets", requireRole("IT_STAFF", "ADMINISTRATOR"), async (r
       where.currentStatus = currentStatus as TicketStatus;
     }
 
+    if (statusGroup !== undefined) {
+      if (statusGroup !== "active") return res.status(400).json({ error: "Bad Request", message: "Invalid statusGroup. Only active is supported." });
+      where.AND = [{ currentStatus: { in: ACTIVE_TICKET_STATUSES } }];
+    }
+
     // Assigned Owner filter
     if (assignedStaffId) {
       if (assignedStaffId === "null" || assignedStaffId === "unassigned") {
         where.assignedStaffId = null;
+      } else if (assignedStaffId === "me") {
+        where.assignedStaffId = req.session.userId;
       } else {
         const parsedStaffId = parseInt(String(assignedStaffId), 10);
         if (!isNaN(parsedStaffId)) {
@@ -968,7 +976,7 @@ app.get("/api/staff/tickets", requireRole("IT_STAFF", "ADMINISTRATOR"), async (r
 
     const tickets = await getPrisma().ticket.findMany({
       where,
-      orderBy: { [validSortBy]: validSortOrder },
+      orderBy: [{ [validSortBy]: validSortOrder }, { id: "desc" }],
       skip: (parsedPage - 1) * parsedLimit,
       take: parsedLimit,
       include: {

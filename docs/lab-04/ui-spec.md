@@ -66,6 +66,47 @@ Existing ownership/session safety, retry behavior, Zen Green styles, status text
 R: concise operational starting point with approved metrics, recent/urgent Tickets and current-user Actions. A/D-12 uses unassigned active Tickets, current-owner active Tickets, status/priority groups and one My Actions preview: PLANNED Actions assigned to the authenticated Staff/Admin, excluding historical performed work.
 Each actionable item opens a matching queue, Ticket Detail or approved Action panel. D-12 fixes recent-five ordering and assigned-PLANNED My Actions; D-13 preserves landing pages and omits optional Admin counts. Admin retains user management (I/R). Do not build an advanced BI or SLA product.
 
+### Issue 24 final operational arrangement (D-12/D-13)
+
+The same **Staff Dashboard** is available to IT Staff and Administrators. Dashboard navigation indicates
+its active page. Staff still initially land on Ticket Queue; Administrators still land on User Management,
+which remains available. Optional Administrator account counts are deliberately omitted (D-13).
+
+- Two primary cards: **Unassigned Active Tickets** and **My Assigned Tickets**. Both count only NEW, OPEN, IN_PROGRESS,
+  WAITING_FOR_REQUESTER and REOPENED. Unassigned means no primary owner; My Assigned Tickets means the session
+  user is primary Ticket Owner: active Tickets where assignedStaffId equals the authenticated Staff/Admin user ID.
+  Tickets where the user is only an Action assignee are excluded from this card. The concise card labels replace the
+  explanatory paragraph; the predicates remain unchanged.
+- **Tickets by Status**: all eight statuses, with zeros; **Tickets by IT Priority**: LOW, MEDIUM, HIGH, URGENT,
+  with zeros. Both cover all operational Tickets, including terminal Tickets, without repetitive explanatory subtitles.
+- **Recently Updated Tickets**: at most five, updatedAt DESC/id DESC, showing number, summary, status,
+  priority and local updated time. Each number opens existing Staff Ticket Detail.
+- **My Planned Actions**: at most five PLANNED Actions assigned to the current user, createdAt ASC/id ASC.
+  Show description and parent number/status; the section heading identifies the planned scope.
+  No redundant assignment/limit subtitle is shown. Preserve the conditional empty state
+  “No planned Actions assigned to you.” Each preview opens/focuses the parent's existing
+  Actions Taken heading. A terminal parent remains listed and shows read-only guidance; workflow is unchanged.
+
+All fourteen counts are native keyboard-operable buttons, including zero counts. Two summary destinations
+use active + unassigned/me filters. Eight status and four priority buttons use their exact single predicates.
+The queue starts at page one, sorted by updatedAt DESC/id DESC, visibly selects those filters and applies them
+on the backend before pagination. Ordinary Ticket Queue navigation/clear restores existing defaults. A Ticket
+Queue shortcut opens the full list. Previews reuse existing detail permissions; no dashboard mutation controls.
+
+Desktop: two equal summary cards, status/priority sections at 8/4 columns, recent/My Planned Actions side by side.
+Tablet: two summary cards; breakdowns and previews stack below the large breakpoint. Mobile: all primary
+sections stack, status entries stack below the small breakpoint and priorities use two columns. Long preview
+text wraps; navigation wraps on narrow Staff/Admin screens. Use Bootstrap/Zen Green, semantic headings,
+explicit labels, native focus/activation and text status cues. Borderless cards and light-background
+status/priority buttons reduce repeated outlines; preview rows omit divider borders while retaining spacing.
+
+Session check and request loading are announced without zero cards. Successful empty responses retain all
+zero buckets and destinations, with separate no-Tickets/no-assigned-planned-Actions messages. Show snapshot
+asOf concisely in local date/time with an explicit timezone abbreviation or GMT offset and a Refresh control. Refresh clears old metrics while loading. Recoverable errors use
+safe feedback and Retry, without fabricated counts; distinguish expired session, forbidden role and password
+lock. Abort/ignore superseded requests and remount data on account change. Administrator reuse does not
+expose extra user-account information. Browser/accessibility final campaigns remain later-issue work.
+
 ## 5. Actions Taken on Ticket Detail
 
 ### 5.1 List / View Mode

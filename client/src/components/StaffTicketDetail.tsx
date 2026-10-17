@@ -21,6 +21,7 @@ interface StaffTicketDetailProps {
   currentUserId?: number;
   currentUserName?: string;
   onBack?: () => void;
+  focusActions?: boolean;
 }
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
@@ -36,6 +37,7 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
 
 export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   ticketId,
+  focusActions = false,
   currentUserRole,
   currentUserId,
   currentUserName,
@@ -131,6 +133,13 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   useEffect(() => {
     loadTicketData();
   }, [loadTicketData]);
+
+  useEffect(() => {
+    if (loading || !ticket || !focusActions) return;
+    const heading = document.getElementById(`actions-heading-${ticketId}`);
+    heading?.focus();
+    heading?.scrollIntoView?.({ block: 'start' });
+  }, [loading, ticket?.id, ticketId, focusActions]);
 
   // Load active staff users for assignment dropdown
   useEffect(() => {

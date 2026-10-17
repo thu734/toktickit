@@ -172,6 +172,18 @@ All seven counts, the database-supplied asOf and at most five recent previews sh
 Existing ownership, ordering/no-cutoff policy, safe failures, navigation, and Ticket/Action workflow rules remain in force.
 
 
+### Issue 24 operational metric precision
+
+This implements the existing Staff/Admin D-12 choice, without changing D-12-R1 Requester history.
+Operational scope is the existing shared Staff/Admin queue. Unassigned/my-owner summaries use the five
+active statuses above; all eight status and four IT Priority counts include all operational Tickets.
+Every count has a matching queue predicate. Recently updated previews are bounded at five. My Actions is
+bounded at five assigned PLANNED Actions (createdAt ASC/id ASC), with no additional parent-status exclusion.
+All metrics, previews and database transaction timestamp share one read-only Repeatable Read snapshot.
+The detailed final arrangement and feedback are in ui-spec.md; HTTP shape/filter extensions are in api-spec.md.
+Administrator reuse preserves User Management and omits optional account counts under D-13. No schema,
+workflow, Action lifecycle or Requester metric changes are required.
+
 ## 6. UI Specification Summary
 
 R fields: Action Date/Time, Action Description, Result, Performed by (auto), Follow-Up Required, conditional Follow-up Note and Attachment Notes. Assignment and lifecycle operations are required by submission Part 6. I preserves existing attachment storage/download/removal; Attachment Notes do not introduce a new upload system.

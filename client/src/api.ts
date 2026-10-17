@@ -140,6 +140,24 @@ export async function fetchRequesterDashboard(signal?: AbortSignal): Promise<Req
   return data;
 }
 
+export type OperationalStatus = 'NEW' | 'OPEN' | 'IN_PROGRESS' | 'WAITING_FOR_REQUESTER' | 'RESOLVED' | 'CLOSED' | 'REOPENED' | 'CANCELLED';
+export type OperationalPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+export interface StaffDashboardResponse {
+  asOf: string;
+  counts: { unassignedActive: number; myActive: number; byStatus: Record<OperationalStatus, number>; byPriority: Record<OperationalPriority, number> };
+  recentTickets: (Pick<Ticket, 'id' | 'ticketNumber' | 'summary' | 'updatedAt'> & { currentStatus: OperationalStatus; itPriority: OperationalPriority })[];
+  myActions: { id: number; description: string; createdAt: string; status: 'PLANNED'; ticket: { id: number; ticketNumber: string; currentStatus: OperationalStatus } }[];
+  drillDowns: { unassignedActive: StaffDashboardDestination; myActive: StaffDashboardDestination;
+    byStatus: Record<OperationalStatus, StaffDashboardDestination>; byPriority: Record<OperationalPriority, StaffDashboardDestination> };
+}
+interface StaffDashboardDestination { destination: 'ticket-queue'; filters: StaffQueueFilters }
+export async function fetchStaffDashboard(signal?: AbortSignal): Promise<StaffDashboardResponse> {
+  const response = await fetch(`${API_URL}/api/dashboard/staff`, { credentials: 'include', signal });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw Object.assign(new Error(data.message || data.error || 'Unable to retrieve the operational dashboard.'), { status: response.status, code: data.code });
+  return data;
+}
+
 export interface FetchTicketsParams extends RequesterTicketFilters {
   search?: string;
   categoryId?: string;
@@ -561,7 +579,14 @@ export interface InternalNote {
   };
 }
 
-export interface FetchStaffTicketsParams {
+export interface StaffQueueFilters {
+  statusGroup?: "active";
+  currentStatus?: string;
+  itPriority?: string;
+  assignedStaffId?: string;
+}
+
+export interface FetchStaffTicketsParams extends StaffQueueFilters {
   search?: string;
   categoryId?: string;
   itPriority?: string;
@@ -579,6 +604,7 @@ export async function fetchStaffTickets(params: FetchStaffTicketsParams = {}): P
   if (params.categoryId) query.append("categoryId", params.categoryId);
   if (params.itPriority) query.append("itPriority", params.itPriority);
   if (params.currentStatus) query.append("currentStatus", params.currentStatus);
+  if (params.statusGroup) query.append("statusGroup", params.statusGroup);
   if (params.assignedStaffId) query.append("assignedStaffId", params.assignedStaffId);
   if (params.sortBy) query.append("sortBy", params.sortBy);
   if (params.sortOrder) query.append("sortOrder", params.sortOrder);

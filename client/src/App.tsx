@@ -10,16 +10,19 @@ import { RequesterTicketDetail } from "./components/RequesterTicketDetail.js";
 import { StaffTicketQueue } from "./components/StaffTicketQueue.js";
 import { StaffTicketDetail } from "./components/StaffTicketDetail.js";
 import { RequesterDashboard } from "./components/RequesterDashboard.js";
-import type { RequesterTicketFilters } from "./api.js";
+import { StaffDashboard } from "./components/StaffDashboard.js";
+import type { RequesterTicketFilters, StaffQueueFilters } from "./api.js";
 import { UserManagement } from "./components/UserManagement.js";
 
-type TabView = "requester-dashboard" | "create-ticket" | "my-tickets" | "ticket-detail" | "ticket-queue" | "staff-ticket-detail" | "user-management";
+type TabView = "staff-dashboard" | "requester-dashboard" | "create-ticket" | "my-tickets" | "ticket-detail" | "ticket-queue" | "staff-ticket-detail" | "user-management";
 
 function MainContent() {
   const { user, loading, refreshUser } = useAuth();
   const { activeRequester, setActiveRequester } = useRequester();
   const [activeTab, setActiveTab] = useState<TabView>("my-tickets");
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const [staffFilters, setStaffFilters] = useState<StaffQueueFilters>();
+  const [focusActions, setFocusActions] = useState(false);
   const [requesterFilters, setRequesterFilters] = useState<RequesterTicketFilters>({});
 
   useEffect(() => {
@@ -33,6 +36,11 @@ function MainContent() {
         });
       }
 
+    }
+  }, [user, activeRequester?.id, setActiveRequester]);
+
+  useEffect(() => {
+    if (user) {
       if (user.role === "IT_STAFF") {
         setActiveTab("ticket-queue");
       } else if (user.role === "ADMINISTRATOR") {
@@ -41,7 +49,7 @@ function MainContent() {
         setActiveTab("my-tickets");
       }
     }
-  }, [user, activeRequester?.id, setActiveRequester]);
+  }, [user]);
 
   if (loading) {
     return (
@@ -69,7 +77,8 @@ function MainContent() {
     setActiveTab("ticket-detail");
   };
 
-  const handleOpenStaffTicket = (ticketId: number) => {
+  const handleOpenStaffTicket = (ticketId: number, actions = false) => {
+    setFocusActions(actions);
     setSelectedTicketId(ticketId);
     setActiveTab("staff-ticket-detail");
   };
@@ -77,6 +86,7 @@ function MainContent() {
   return (
     <AppShell currentTab={activeTab} onTabChange={(tab) => {
       if (tab === "my-tickets") setRequesterFilters({});
+      if (tab === "ticket-queue") setStaffFilters(undefined);
       setActiveTab(tab as TabView);
     }}>
       <div className="container-fluid px-3 px-md-4 px-xl-5 py-4" style={{ maxWidth: 1440 }}>
@@ -111,13 +121,17 @@ function MainContent() {
 
         {(user.role === "IT_STAFF" || user.role === "ADMINISTRATOR") && (
           <>
+            {activeTab === "staff-dashboard" && <StaffDashboard
+              onNavigateTickets={(filters) => { setStaffFilters(filters); setActiveTab("ticket-queue"); }}
+              onOpenTicket={handleOpenStaffTicket} />}
             {activeTab === "ticket-queue" && (
-              <StaffTicketQueue onOpenTicket={handleOpenStaffTicket} />
+              <StaffTicketQueue key={`${user.id}-${JSON.stringify(staffFilters)}`} initialFilters={staffFilters} onOpenTicket={handleOpenStaffTicket} />
             )}
 
             {activeTab === "staff-ticket-detail" && selectedTicketId !== null && (
               <StaffTicketDetail
                 ticketId={selectedTicketId}
+                focusActions={focusActions}
                 currentUserRole={user.role}
                 currentUserId={user.id}
                 currentUserName={user.name}

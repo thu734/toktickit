@@ -39,6 +39,6 @@ describe('Requester dashboard application integration',()=>{
   });
   it.each([{role:'IT_STAFF' as const,heading:'IT Support Ticket Queue'},{role:'ADMINISTRATOR' as const,heading:'User Management'}])('preserves $role landing without Requester Dashboard access',async({role,heading})=>{
     vi.mocked(api.fetchCurrentUser).mockResolvedValue({...owner,role});render(<App/>);
-    await screen.findByRole('heading',{name:heading});expect(screen.queryByRole('button',{name:'Dashboard'})).not.toBeInTheDocument();expect(api.fetchRequesterDashboard).not.toHaveBeenCalled();
+    await screen.findByRole('heading',{name:heading});expect(screen.getByRole('button',{name:'Dashboard'})).toBeInTheDocument();expect(screen.queryByRole('heading',{name:'Requester Dashboard'})).not.toBeInTheDocument();expect(api.fetchRequesterDashboard).not.toHaveBeenCalled();
   });
 });
