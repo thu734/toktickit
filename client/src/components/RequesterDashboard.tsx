@@ -1,3 +1,4 @@
+import { safeFailure } from "../utils/safeFailure";
 import { useEffect, useState } from 'react';
 import { fetchRequesterDashboard } from '../api';
 import type { RequesterDashboardResponse, RequesterTicketFilters } from '../api';
@@ -14,7 +15,7 @@ function failureMessage(error: unknown) {
   if (failure.status === 401) return 'Your session has expired. Sign in again to view your dashboard.';
   if (failure.code === 'MUST_CHANGE_PASSWORD') return 'Change your initial password before viewing your dashboard.';
   if (failure.status === 403) return 'You do not have permission to view the Requester Dashboard.';
-  return failure.message || 'Unable to retrieve your dashboard. Please retry.';
+  return safeFailure(error, 'Unable to retrieve your dashboard. Please retry.');
 }
 
 export function RequesterDashboard(props: Props) {

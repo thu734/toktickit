@@ -73,7 +73,7 @@ describe('WF-UI-01', () => {
   it('fails closed while Actions load or fail and offers retry', async () => {
     vi.mocked(api.fetchActions).mockRejectedValueOnce(new Error('Actions unavailable'));
     render(<StaffTicketDetail ticketId={7} currentUserRole="IT_STAFF" />);
-    await screen.findByText('Actions unavailable'); expect(screen.getByRole('option',{name:'RESOLVED'})).toBeDisabled();
+    await screen.findByText(/Unable to load or save Actions/); expect(screen.getByRole('option',{name:'RESOLVED'})).toBeDisabled();
     fireEvent.click(screen.getByRole('button',{name:'Retry loading Actions'}));
     await waitFor(() => expect(screen.getByRole('option',{name:'RESOLVED'})).toBeEnabled());
   });

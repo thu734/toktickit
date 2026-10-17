@@ -1,3 +1,4 @@
+import { safeFailure } from "../utils/safeFailure";
 import { useEffect, useRef, useState } from 'react';
 import { createAction, fetchActions, updateAction } from '../api';
 import type { ActionChanges, ActionFields, ActionTaken, ActionsResponse } from '../api';
@@ -21,7 +22,7 @@ function failureMessage(error: unknown): string {
   if (failure?.code === 'MUST_CHANGE_PASSWORD') return 'Change your password before accessing Actions.';
   if (failure?.status === 403) return 'You do not have permission to access or change these Actions.';
   if (failure?.status === 404) return 'This Ticket or Action is unavailable.';
-  return failure?.message || 'Unable to load or save Actions. Please retry.';
+  return safeFailure(error, 'Unable to load or save Actions. Please retry.');
 }
 
 export default function ActionsTaken(props: ActionsTakenProps) {

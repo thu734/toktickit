@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+import { API_URL } from "./apiOrigin";
 
 export interface ActionFields {
   description: string;
@@ -450,9 +450,8 @@ export async function logoutApi(): Promise<void> {
     credentials: "include",
   });
 
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || "Failed to logout.");
+  if (!res.ok && res.status !== 401) {
+    throw new Error("Unable to sign out. Please retry.");
   }
 }
 
