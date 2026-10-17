@@ -33,7 +33,7 @@ describe("Actions client contract", () => {
     response(200, []);
     await expect(fetchStaffUsers({ strict: true })).resolves.toEqual([]);
     response(500, { message: "Directory unavailable" });
-    await expect(fetchStaffUsers({ strict: true })).rejects.toMatchObject({ status: 500, message: "Directory unavailable" });
+    await expect(fetchStaffUsers({ strict: true })).rejects.toMatchObject({ status: 500, message: "Unable to load eligible assignees." });
     await expect(fetchStaffUsers()).resolves.toEqual([]);
   });
   it("does not disguise a network failure as an empty directory", async () => {
