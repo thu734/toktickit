@@ -68,6 +68,10 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (appliedSearch === searchInput && page === 1) {
+      void loadQueue();
+      return;
+    }
     setAppliedSearch(searchInput);
     setPage(1);
   };
@@ -298,7 +302,7 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
             <span className="visually-hidden">Loading ticket queue...</span>
           </div>
         </div>
-      ) : !ticketsData || ticketsData.items.length === 0 ? (
+      ) : error ? null : !ticketsData || ticketsData.items.length === 0 ? (
         <div className="text-center py-5 card p-4 surface-card" style={{ borderColor: "#E2E8F0" }}>
           {isFilterActive ? (
             <>

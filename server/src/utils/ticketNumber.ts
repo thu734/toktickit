@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { getPrisma } from "../prisma.js";
 
 /**
@@ -12,12 +13,12 @@ export function formatTicketNumber(year: number, sequence: number): string {
 /**
  * Generate the next unique Ticket Number for the current year.
  */
-export async function generateNextTicketNumber(year?: number): Promise<string> {
+export async function generateNextTicketNumber(year?: number, client: Pick<Prisma.TransactionClient, "ticket"> = getPrisma()): Promise<string> {
   const currentYear = year ?? new Date().getFullYear();
   const yearPrefix = `TKT-${currentYear}-`;
 
   // Find the latest ticket created in the current year
-  const latestTicket = await getPrisma().ticket.findFirst({
+  const latestTicket = await client.ticket.findFirst({
     where: {
       ticketNumber: {
         startsWith: yearPrefix,

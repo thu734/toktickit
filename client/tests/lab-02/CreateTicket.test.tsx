@@ -260,7 +260,8 @@ describe("Lab 2 Create Ticket Form Validation & Submission UI (UI-02, UI-08, UI-
     await waitFor(() => {
       expect(api.createTicket).toHaveBeenCalledWith(
         expect.objectContaining({ summary: "Summary for Attachment Ticket" }),
-        mockRequester.id
+        mockRequester.id,
+        expect.stringMatching(/^[a-f0-9-]{36}$/)
       );
       expect(uploadSpy).toHaveBeenCalledTimes(2);
       expect(uploadSpy).toHaveBeenNthCalledWith(1, 99, validFile1, mockRequester.id);

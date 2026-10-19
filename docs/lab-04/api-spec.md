@@ -14,6 +14,12 @@ This is the approved API contract implemented by Issues 19–24 and hardened by 
 
 I: retain session-cookie authentication, first-login password change lock, current account activity/role checks, CSRF treatment and existing Public Comment/Internal Note/Attachment rules. R: all writes are authorized by the backend; Admin receives IT Staff behavior in Lab 4. Do not change the authentication scheme or introduce external notification services.
 
+### 1.1 Inherited correctness boundaries hardened by Issue 25 (I/A)
+
+User Management preserves BR-09/BR-10: self-deactivation remains forbidden, and removing the last active Administrator returns 400. The active-Administrator check and account update are serialized in one transaction, with current actor/target state rechecked after waiting.
+
+Requester `POST /api/tickets` accepts an optional UUID `Idempotency-Key` header for one logical submission. The form retains the key across recoverable failures and changes it only for an intentional new submission/reset. A matching key and normalized creation payload, scoped to the authenticated Requester, returns 201 with the same Ticket ID without another insert. Reusing a committed key with different details returns 409 `CREATION_REQUEST_CONFLICT`; malformed keys return 400 `INVALID_CREATION_REQUEST_KEY`. Keys are saved atomically with Tickets, so replay survives process/session changes. Legacy unkeyed creation and distinct keyed submissions retain their existing behavior, including official Ticket numbering. This is limited to Ticket creation; no application-wide retry framework or automatic write retry is introduced.
+
 ## 2. Authorization Matrix
 
 | Operation | Requester | IT Staff | Administrator | Basis / condition |

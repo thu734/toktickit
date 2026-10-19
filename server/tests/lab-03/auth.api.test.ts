@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
 import { app } from "../../src/app.js";
@@ -32,7 +33,7 @@ describe("Lab 3 Authentication & Session API Tests (AUTH-API-01 to AUTH-API-08)"
   });
 
   it("AUTH-API-01: Valid login sets session cookie and returns user profile", async () => {
-    const res = await request(app)
+    const res = await request(await startTestServer(app))
       .post("/api/auth/login")
       .set(CSRF_HEADER)
       .send({
@@ -53,7 +54,7 @@ describe("Lab 3 Authentication & Session API Tests (AUTH-API-01 to AUTH-API-08)"
 
   it("AUTH-API-02: Invalid credentials or inactive user login rejection", async () => {
     // Non-existent user
-    const res1 = await request(app)
+    const res1 = await request(await startTestServer(app))
       .post("/api/auth/login")
       .set(CSRF_HEADER)
       .send({
@@ -64,7 +65,7 @@ describe("Lab 3 Authentication & Session API Tests (AUTH-API-01 to AUTH-API-08)"
     expect(res1.body.error).toBe("Invalid email or password.");
 
     // Wrong password
-    const res2 = await request(app)
+    const res2 = await request(await startTestServer(app))
       .post("/api/auth/login")
       .set(CSRF_HEADER)
       .send({
@@ -75,7 +76,7 @@ describe("Lab 3 Authentication & Session API Tests (AUTH-API-01 to AUTH-API-08)"
     expect(res2.body.error).toBe("Invalid email or password.");
 
     // Inactive user account (BR-01, AC-02)
-    const res3 = await request(app)
+    const res3 = await request(await startTestServer(app))
       .post("/api/auth/login")
       .set(CSRF_HEADER)
       .send({
@@ -87,7 +88,7 @@ describe("Lab 3 Authentication & Session API Tests (AUTH-API-01 to AUTH-API-08)"
   });
 
   it("AUTH-API-07: Current user retrieval (GET /api/auth/me)", async () => {
-    const agent = request.agent(app);
+    const agent = request.agent(await startTestServer(app));
 
     // Login first
     await agent
@@ -107,7 +108,7 @@ describe("Lab 3 Authentication & Session API Tests (AUTH-API-01 to AUTH-API-08)"
   });
 
   it("AUTH-API-05 & AUTH-API-08: Logout invalidates session and blocks post-logout me retrieval", async () => {
-    const agent = request.agent(app);
+    const agent = request.agent(await startTestServer(app));
 
     // Login
     await agent
@@ -133,7 +134,7 @@ describe("Lab 3 Authentication & Session API Tests (AUTH-API-01 to AUTH-API-08)"
   });
 
   it("CSRF Protection: Mutating POST request without X-Requested-With header fails", async () => {
-    const res = await request(app)
+    const res = await request(await startTestServer(app))
       .post("/api/auth/login")
       .send({
         email: "jennifer.a@toktickit.local",
@@ -145,7 +146,7 @@ describe("Lab 3 Authentication & Session API Tests (AUTH-API-01 to AUTH-API-08)"
   });
 
   it("AUTH-API-03: Mandatory first-login password change lock (mustChangePassword = true)", async () => {
-    const agent = request.agent(app);
+    const agent = request.agent(await startTestServer(app));
 
     // Login as user with mustChangePassword = true
     await agent
@@ -169,7 +170,7 @@ describe("Lab 3 Authentication & Session API Tests (AUTH-API-01 to AUTH-API-08)"
   });
 
   it("AUTH-API-04: Password change execution (POST /api/auth/change-password)", async () => {
-    const agent = request.agent(app);
+    const agent = request.agent(await startTestServer(app));
 
     // Login as Sarah Johnson
     await agent
@@ -204,7 +205,7 @@ describe("Lab 3 Authentication & Session API Tests (AUTH-API-01 to AUTH-API-08)"
   });
 
   it("AUTH-API-06: Password complexity boundary validation and error handling", async () => {
-    const agent = request.agent(app);
+    const agent = request.agent(await startTestServer(app));
 
     await agent
       .post("/api/auth/login")

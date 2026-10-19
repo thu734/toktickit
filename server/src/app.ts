@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import session from "express-session";
 import { getPrisma } from "./prisma.js";
-import { generateNextTicketNumber } from "./utils/ticketNumber.js";
+import { createTicketOnce, TicketCreationError } from "./services/ticketCreation.js";
 import { RequestedPriority, TicketStatus, Prisma } from "@prisma/client";
 import { upload } from "./middleware/upload.js";
 import { csrfProtection } from "./middleware/csrf.js";
@@ -17,6 +17,7 @@ import { actionsRouter } from "./routes/actions.js";
 import { mutateTicketWorkflow, WorkflowError } from "./services/ticketWorkflow.js";
 
 
+import { ticketFields } from "./utils/ticketFields.js";
 import { resourceId } from "./utils/resourceId.js";
 
 export const app = express();
@@ -167,21 +168,11 @@ app.post("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Res
     const catIdNum = resourceId(categoryId);
     if (catIdNum === null) {
       validationErrors.categoryId = "Valid Category ID is required.";
-    } else {
-      const category = await getPrisma().category.findUnique({ where: { id: catIdNum } });
-      if (!category || !category.isActive) {
-        validationErrors.categoryId = "Selected Category does not exist or is inactive.";
-      }
     }
 
     const sysIdNum = resourceId(relatedSystemId);
     if (sysIdNum === null) {
       validationErrors.relatedSystemId = "Valid Related System ID is required.";
-    } else {
-      const system = await getPrisma().relatedSystem.findUnique({ where: { id: sysIdNum } });
-      if (!system || !system.isActive) {
-        validationErrors.relatedSystemId = "Selected Related System does not exist or is inactive.";
-      }
     }
 
     if (catIdNum === null || sysIdNum === null || Object.keys(validationErrors).length > 0) {
@@ -192,29 +183,21 @@ app.post("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Res
       });
     }
 
-    const ticketNumber = await generateNextTicketNumber();
-
-    const newTicket = await getPrisma().ticket.create({
-      data: {
-        ticketNumber,
-        summary,
-        description,
-        requestedPriority: requestedPriority as RequestedPriority,
-        itPriority: (requestedPriority as any) || "MEDIUM",
-        currentStatus: "NEW",
-        requesterId,
-        categoryId: catIdNum,
-        relatedSystemId: sysIdNum,
-      },
-      include: {
-        requester: { select: { id: true, name: true, email: true } },
-        category: { select: { id: true, name: true } },
-        relatedSystem: { select: { id: true, name: true } },
-      },
-    });
+    const rawKey = req.get("Idempotency-Key");
+    if (rawKey !== undefined && !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(rawKey)) {
+      return res.status(400).json({ error: "Bad Request", code: "INVALID_CREATION_REQUEST_KEY", message: "Ticket creation key must be a UUID." });
+    }
+    const newTicket = await createTicketOnce(requesterId, {
+      categoryId: catIdNum, relatedSystemId: sysIdNum, requestedPriority: requestedPriority as RequestedPriority,
+      summary, description,
+    }, rawKey?.toLowerCase());
 
     return res.status(201).json(newTicket);
   } catch (error) {
+    if (error instanceof TicketCreationError) {
+      return res.status(error.status).json({ error: error.status === 409 ? "Conflict" : "Bad Request",
+        message: error.message, ...(error.code ? { code: error.code } : {}), ...(error.details ? { details: error.details } : {}) });
+    }
     console.error("Error creating ticket:", error);
     return res.status(500).json({
       error: "Internal Server Error",
@@ -310,7 +293,8 @@ app.get("/api/tickets", requireRole("REQUESTER"), async (req: Request, res: Resp
       orderBy,
       skip: (pageNum - 1) * limitNum,
       take: limitNum,
-      include: {
+      select: {
+        ...ticketFields,
         category: { select: { id: true, name: true } },
         relatedSystem: { select: { id: true, name: true } },
       },
@@ -351,7 +335,8 @@ app.get("/api/tickets/:id", requireRole("REQUESTER"), async (req: Request, res: 
 
     const ticket = await getPrisma().ticket.findUnique({
       where: { id: ticketId },
-      include: {
+      select: {
+        ...ticketFields,
         category: { select: { id: true, name: true } },
         relatedSystem: { select: { id: true, name: true } },
         requester: { select: { id: true, name: true, email: true } },
@@ -438,6 +423,7 @@ app.post("/api/tickets/:id/attachments", requireRole("REQUESTER"), (req: Request
 
       const ticket = await getPrisma().ticket.findUnique({
         where: { id: ticketId },
+        select: ticketFields,
       });
 
       if (!ticket) {
@@ -508,6 +494,7 @@ app.get("/api/tickets/:id/attachments", requireAuth, async (req: Request, res: R
 
     const ticket = await getPrisma().ticket.findUnique({
       where: { id: ticketId },
+      select: ticketFields,
     });
 
     if (!ticket) {
@@ -566,7 +553,7 @@ app.get("/api/attachments/:id/download", requireAuth, async (req: Request, res: 
 
     const attachment = await getPrisma().attachment.findUnique({
       where: { id: attachmentId },
-      include: { ticket: true },
+      include: { ticket: { select: ticketFields } },
     });
 
     if (!attachment) {
@@ -640,7 +627,7 @@ app.post("/api/attachments/:id/soft-remove", requireRole("REQUESTER"), async (re
 
     const attachment = await getPrisma().attachment.findUnique({
       where: { id: attachmentId },
-      include: { ticket: true },
+      include: { ticket: { select: ticketFields } },
     });
 
     if (!attachment) {
@@ -690,6 +677,7 @@ app.get("/api/tickets/:id/comments", requireAuth, async (req: Request, res: Resp
 
     const ticket = await getPrisma().ticket.findUnique({
       where: { id: ticketId },
+      select: ticketFields,
     });
 
     if (!ticket) {
@@ -755,6 +743,7 @@ app.post("/api/tickets/:id/comments", requireAuth, async (req: Request, res: Res
 
     const ticket = await getPrisma().ticket.findUnique({
       where: { id: ticketId },
+      select: ticketFields,
     });
 
     if (!ticket) {
@@ -824,6 +813,7 @@ app.post("/api/tickets/:id/indicate-resolved", requireRole("REQUESTER"), async (
 
     const ticket = await getPrisma().ticket.findUnique({
       where: { id: ticketId },
+      select: ticketFields,
     });
 
     if (!ticket || ticket.requesterId !== req.session!.userId) {
@@ -984,7 +974,8 @@ app.get("/api/staff/tickets", requireRole("IT_STAFF", "ADMINISTRATOR"), async (r
       orderBy: [{ [validSortBy]: validSortOrder }, { id: "desc" }],
       skip: (parsedPage - 1) * parsedLimit,
       take: parsedLimit,
-      include: {
+      select: {
+        ...ticketFields,
         requester: {
           select: {
             id: true,
@@ -1036,7 +1027,8 @@ app.get("/api/staff/tickets/:id", requireRole("IT_STAFF", "ADMINISTRATOR"), asyn
 
     const ticket = await getPrisma().ticket.findUnique({
       where: { id: ticketId },
-      include: {
+      select: {
+        ...ticketFields,
         requester: {
           select: {
             id: true,
@@ -1110,6 +1102,7 @@ app.get("/api/staff/tickets/:id/notes", requireRole("IT_STAFF", "ADMINISTRATOR")
 
     const ticket = await getPrisma().ticket.findUnique({
       where: { id: ticketId },
+      select: ticketFields,
     });
 
     if (!ticket) {
@@ -1157,6 +1150,7 @@ app.post("/api/staff/tickets/:id/notes", requireRole("IT_STAFF", "ADMINISTRATOR"
 
     const ticket = await getPrisma().ticket.findUnique({
       where: { id: ticketId },
+      select: ticketFields,
     });
 
     if (!ticket) {
@@ -1424,43 +1418,31 @@ app.patch("/api/admin/users/:id", requireRole("ADMINISTRATOR"), async (req: Requ
       });
     }
 
-    // Safety Rule 2: Last Active Administrator protection (BR-10)
-    const targetIsActiveAdmin = targetUser.role === "ADMINISTRATOR" && targetUser.isActive === true;
-    const updateRemovesActiveAdmin =
-      isActive === false || (role !== undefined && role.toUpperCase() !== "ADMINISTRATOR");
-
-    if (targetIsActiveAdmin && updateRemovesActiveAdmin) {
-      const activeAdminCount = await getPrisma().user.count({
-        where: {
-          role: "ADMINISTRATOR",
-          isActive: true,
+    // BR-10: serialize account mutations so counting and removing an active
+    // Administrator use the same current state, including after a lock wait.
+    const result = await getPrisma().$transaction(async tx => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(334, 25)::text`;
+      const actor = await tx.user.findUnique({ where: { id: req.session.userId! } });
+      if (!actor?.isActive) return { status: 401, body: { error: "User session is invalid or inactive.", code: "UNAUTHENTICATED" } };
+      if (actor.role !== "ADMINISTRATOR") return { status: 403, body: { error: "Access denied: Insufficient permissions for this role.", code: "FORBIDDEN" } };
+      const currentTarget = await tx.user.findUnique({ where: { id: userId } });
+      if (!currentTarget) return { status: 404, body: { error: "Not Found", message: "User account not found." } };
+      const removesActiveAdmin = isActive === false || (role !== undefined && role.toUpperCase() !== "ADMINISTRATOR");
+      if (currentTarget.role === "ADMINISTRATOR" && currentTarget.isActive && removesActiveAdmin) {
+        const count = await tx.user.count({ where: { role: "ADMINISTRATOR", isActive: true } });
+        if (count <= 1) return { status: 400, body: { error: "Bad Request", message: "Cannot deactivate the only active Administrator account." } };
+      }
+      const updatedUser = await tx.user.update({
+        where: { id: userId }, data: updateData,
+        select: {
+          id: true, name: true, email: true, role: true, mustChangePassword: true,
+          isActive: true, createdAt: true, updatedAt: true,
         },
       });
+      return { status: 200, body: updatedUser };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted });
 
-      if (activeAdminCount <= 1) {
-        return res.status(400).json({
-          error: "Bad Request",
-          message: "Cannot deactivate the only active Administrator account.",
-        });
-      }
-    }
-
-    const updatedUser = await getPrisma().user.update({
-      where: { id: userId },
-      data: updateData,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        mustChangePassword: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    return res.status(200).json(updatedUser);
+    return res.status(result.status).json(result.body);
   } catch (error) {
     console.error("Error updating user account:", error);
     return res.status(500).json({

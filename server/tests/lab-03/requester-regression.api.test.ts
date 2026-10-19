@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
 import app from "../../src/app.js";
@@ -33,7 +34,7 @@ describe("Lab 3 Requester Regression Tests (REG-API-01, REG-API-02)", () => {
     await prisma.ticket.deleteMany({});
 
     // Authenticate Requester (Jennifer Anderson) and complete mandatory password change
-    requesterAgent = request.agent(app);
+    requesterAgent = request.agent(await startTestServer(app));
     const loginRes = await requesterAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)

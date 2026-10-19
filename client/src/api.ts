@@ -237,13 +237,15 @@ export async function fetchRelatedSystems(): Promise<RelatedSystem[]> {
 
 export async function createTicket(
   payload: CreateTicketPayload,
-  _requesterId?: number
+  _requesterId?: number,
+  requestKey?: string
 ): Promise<Ticket> {
   const res = await fetch(`${API_URL}/api/tickets`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-Requested-With": "XMLHttpRequest",
+      ...(requestKey ? { "Idempotency-Key": requestKey } : {}),
     },
     credentials: "include",
     body: JSON.stringify(payload),

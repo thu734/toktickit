@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { loginAsUser } from "../helpers/login.js";
 import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import request from "supertest";
@@ -27,7 +28,7 @@ afterAll(async () => {
 
 describe("Lab 2 Reference Data APIs & Requester Exclusion (API-11)", () => {
   it("GET /api/requesters returns 200 with only active requesters (excludes inactive)", async () => {
-    const res = await request(app).get("/api/requesters");
+    const res = await request(await startTestServer(app)).get("/api/requesters");
 
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -44,7 +45,7 @@ describe("Lab 2 Reference Data APIs & Requester Exclusion (API-11)", () => {
   });
 
   it("GET /api/related-systems returns 200 with active related systems", async () => {
-    const res = await request(app).get("/api/related-systems");
+    const res = await request(await startTestServer(app)).get("/api/related-systems");
 
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -95,7 +96,7 @@ describe("POST /api/tickets Creation & Validation (API-01, API-02)", () => {
 
   it("POST /api/tickets rejects invalid payload and missing headers (API-02, AC-23)", async () => {
     // 1. Missing header -> 400 Bad Request
-    const resNoHeader = await request(app)
+    const resNoHeader = await request(await startTestServer(app))
       .post("/api/tickets")
       .send({
         categoryId: 1,

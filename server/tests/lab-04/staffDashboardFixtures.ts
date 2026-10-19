@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { ActionStatus, ITPriority, TicketStatus, UserRole } from '@prisma/client';
@@ -13,7 +14,7 @@ export async function assertIsolated() {
 export async function account(role: UserRole = 'IT_STAFF', locked = false) {
   const user = await getPrisma().user.create({data:{name:'Dashboard actor',email:`${randomUUID()}@test.local`,role,
     passwordHash:await bcrypt.hash('TestPassword123!',4),mustChangePassword:locked}});
-  const agent=request.agent(app);
+  const agent=request.agent(await startTestServer(app));
   await agent.post('/api/auth/login').set(csrf).send({email:user.email,password:'TestPassword123!'}).expect(200);
   return {user,agent};
 }

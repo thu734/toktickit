@@ -1,4 +1,6 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { observeAgent } from './regressionDiagnostics.js';
+import { startTestServer } from "../testHttpServer.js";
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
 import request from "supertest";
 import type { ActionStatus } from "@prisma/client";
@@ -67,7 +69,8 @@ describe("Lab 4 focused Actions API contract (AC-01 through AC-11, AC-16)", () =
   let relatedSystemId: number;
 
   async function login(email: string, password = changedPassword) {
-    const agent = request.agent(app);
+    const agent = request.agent(await startTestServer(app));
+    observeAgent(agent);
     await agent.post("/api/auth/login").set(csrf).send({ email, password }).expect(200);
     return agent;
   }
@@ -101,6 +104,16 @@ describe("Lab 4 focused Actions API contract (AC-01 through AC-11, AC-16)", () =
     admin = await unlock("admin@toktickit.local");
     requester = await unlock("jennifer.a@toktickit.local");
     await unlock("kevin.p@toktickit.local");
+  });
+
+  afterEach(async context => {
+    if (context.task.result?.state !== 'fail') return;
+    const evidence = await Promise.allSettled([
+      getPrisma().$queryRaw`SELECT current_database() AS db, current_schema() AS schema`,
+      getPrisma().user.findMany({ where: { id: { in: [staffId, adminId, requesterId, otherRequesterId, otherStaffId] } },
+        select: { id: true, role: true, isActive: true, mustChangePassword: true } }),
+    ]);
+    console.error('ACTIONS_ACCOUNT_DIAGNOSTIC', JSON.stringify({ test: context.task.name, evidence }));
   });
 
   async function ticket(owner = requesterId) {
@@ -414,9 +427,9 @@ describe("Lab 4 focused Actions API contract (AC-01 through AC-11, AC-16)", () =
     const f = await fixture();
     const before = await snapshot(f.ticketId);
     for (const operation of [
-      request(app).get(path(f.ticketId)),
-      request(app).post(path(f.ticketId)).set(csrf).send(createBody({ workflowRevision: 1 })),
-      request(app).patch(path(f.ticketId, f.action.id)).set(csrf).send({ workflowRevision: 1, result: "No session" }),
+      request(await startTestServer(app)).get(path(f.ticketId)),
+      request(await startTestServer(app)).post(path(f.ticketId)).set(csrf).send(createBody({ workflowRevision: 1 })),
+      request(await startTestServer(app)).patch(path(f.ticketId, f.action.id)).set(csrf).send({ workflowRevision: 1, result: "No session" }),
     ]) {
       if (withHeader) operation.set("X-Development-Requester-Id", String(adminId));
       const response = await operation.expect(401);

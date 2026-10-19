@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { beforeAll, describe, expect, it } from "vitest";
 import request from "supertest";
 import bcrypt from "bcryptjs";
@@ -18,7 +19,7 @@ describe("Lab 4 Actions Taken API", () => {
   let inactiveStaffId: number;
 
   async function login(email: string) {
-    const agent = request.agent(app);
+    const agent = request.agent(await startTestServer(app));
     await agent.post("/api/auth/login").set(csrf).send({ email, password: "Initial123!" }).expect(200);
     await agent.post("/api/auth/change-password").set(csrf).send({ currentPassword: "Initial123!", newPassword: password, confirmPassword: password }).expect(200);
     return agent;
@@ -68,7 +69,7 @@ describe("Lab 4 Actions Taken API", () => {
     await requester.get(`/api/tickets/${ticketId}/actions-taken`).expect(200);
     await requester.post(`/api/tickets/${ticketId}/actions-taken`).set(csrf).send({ workflowRevision: 0, requestKey: "requester", description: "forbidden" }).expect(403);
     await requester.patch(`/api/tickets/${ticketId}/actions-taken/1`).set(csrf).send({ workflowRevision: 0, result: "forbidden" }).expect(403);
-    await request(app).get(`/api/tickets/${ticketId}/actions-taken`).expect(401).then((response) => expect(response.body).toMatchObject({ error: "Authentication required. Please log in.", code: "UNAUTHENTICATED" }));
+    await request(await startTestServer(app)).get(`/api/tickets/${ticketId}/actions-taken`).expect(401).then((response) => expect(response.body).toMatchObject({ error: "Authentication required. Please log in.", code: "UNAUTHENTICATED" }));
     const otherTicket = await getPrisma().ticket.findFirstOrThrow({ where: { requesterId: { not: requesterId } } });
     await requester.get(`/api/tickets/${otherTicket.id}/actions-taken`).expect(404);
   });
