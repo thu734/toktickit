@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { ChangePassword } from "./ChangePassword";
 
@@ -12,6 +12,17 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
   const { user, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+
+  const [logoutError, setLogoutError] = useState('');
+  const [loggingOut, setLoggingOut] = useState(false);
+  const logoutPending = useRef(false);
+  const handleLogout = async () => {
+    if (logoutPending.current) return;
+    logoutPending.current = true; setLoggingOut(true); setLogoutError(''); setShowProfileMenu(false);
+    try { await logout(); }
+    catch { setLogoutError('Unable to sign out. Your session may still be active. Please retry.'); }
+    finally { logoutPending.current = false; setLoggingOut(false); }
+  };
 
   if (!user) return <>{children}</>;
 
@@ -128,10 +139,8 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
                 <div className="dropdown-divider my-1"></div>
                 <button
                   className="dropdown-item px-3 py-2 text-danger border-0 bg-transparent w-100 text-start fw-semibold"
-                  onClick={() => {
-                    setShowProfileMenu(false);
-                    logout();
-                  }}
+                  disabled={loggingOut}
+                  onClick={() => { void handleLogout(); }}
                 >
                   🚪 Logout
                 </button>
@@ -140,6 +149,9 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
           </div>
         </div>
       </header>
+      {logoutError && <div role="alert" className="alert alert-danger mx-3 mt-3">
+        {logoutError} <button className="btn btn-outline-danger" disabled={loggingOut} onClick={() => void handleLogout()}>Retry sign out</button>
+      </div>}
 
       <main className="flex-grow-1">
         {showChangePasswordModal ? (

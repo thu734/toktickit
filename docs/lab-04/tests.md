@@ -1,7 +1,7 @@
 # Lab 4 - Planned Tests and AC Traceability
 
 **Issue:** Issue 18 [Lab 4] Engineering Contract and Baseline Gate
-**Status:** Issue 18 contract plus executed Issue 19 data/migration/seed evidence; API/UI/workflow/E2E implementation remains planned.
+**Status:** Issues 19–24 implemented; Issue 25 hardening implemented with passing current checks, but NOT READY TO PUSH because the original intermittent 404/socket failures remain unexplained. See [current verification](issue-25-verification.md).
 **Provenance:** R = Lab 4 requirement; I = inherited; A = user-approved implementation choice, not a handout mandate.
 **Contract:** [specification.md](specification.md), [api-spec.md](api-spec.md), [ui-spec.md](ui-spec.md).
 
@@ -11,11 +11,11 @@ R: cover unit, API/integration, component, UI style, responsive, authorization, 
 I: preserve complete current Labs 1-3 regression; use sessions for current application tests while leaving accurate historical identity-header documentation intact.
 A: D-01 through D-16 are explicitly approved by the user. Test fixtures and assertions must implement those choices; performance measurements are recorded on isolated data, without adding a new product timing promise.
 
-PLANNED means no execution evidence; BLOCKED means a design/baseline prerequisite is unresolved; PASS requires an actual executed result and code revision. Only the completed Issue 19 data scenarios below have PASS evidence. The incomplete sample E2E row in the handout is an example, not supplied passing evidence.
+PLANNED means no execution evidence; BLOCKED means a design/baseline prerequisite is unresolved; PASS requires an actual executed result and code revision. Original Issue 18 matrix statuses are historical; later execution sections and the Issue 25 report identify actual current coverage and remaining gaps. The incomplete sample E2E row in the handout is an example, not supplied passing evidence.
 
-## 2. Planned Test Matrix
+## 2. Original Issue 18 Planned Test Matrix (history)
 
-All automated paths below are planned future files, except the explicitly inherited suite group; manual evidence is labelled separately. Issue 19 now supplies migration, seed and data-integrity tests; endpoint/UI tests still belong to later issues. The Requirement / AC column retains FR, BR and AC links; Expected Result is distinct from the test scenario. Final changes only after actual execution, and expected results use the approved decision register.
+At Issue 18, automated paths below were planned future files, except the explicitly inherited suite group; manual evidence is labelled separately. Issue 19 now supplies migration, seed and data-integrity tests; endpoint/UI tests still belong to later issues. The Requirement / AC column retains FR, BR and AC links; Expected Result is distinct from the test scenario. Final changes only after actual execution, and expected results use the approved decision register.
 
 | Test ID | Type | Requirement / AC | What It Tests | Expected Result | Automated Test File | Final |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -225,3 +225,24 @@ PLANNED in their existing later-issue rows; Issue 24 does not claim those entire
 
 This completes Issue 24's API/component/basic responsive portions of AC-18/19/20/22/23. Existing later-issue
 E2E, screenshot and final accessibility rows remain PLANNED; their overall acceptance status is not overridden.
+
+## Issue 25 current regression coverage (2026-10-17)
+
+Current execution, exact commands, failures, scope and acceptance verdict: [issue-25-verification.md](issue-25-verification.md). The original Issue 18 PLANNED matrix remains historical; actual paths below and earlier implementation verification sections supersede claims that these files do not exist.
+
+| Requirement | Actual current coverage | Current result |
+| --- | --- | --- |
+| All Labs 1–3 regressions / AC-22 | Existing server tests/lab-01..03 and client tests/lab-01..03; only approved effective-contract expectations changed | Passing current automated runs; original intermittent causes unresolved |
+| Ownership/non-disclosure and Staff/Admin history | server/tests/lab-04/regression-hardening.api.test.ts plus lab-02 detail/attachment suites | Matching missing/foreign 404 bodies; role writes remain denied |
+| Password lock, session expiry, health independence | regression-hardening.api.test.ts plus lab-03/auth.api.test.ts and authorization.api.test.ts | Lookup fault denies reads/writes; eight-hour expiry; health preserved |
+| Invalid IDs/references/filters and parser errors | regression-hardening.api.test.ts | Strict invalid-input rejection, safe JSON, no protected mutation |
+| Actions lifecycle/attribution/audit/replay / AC-01–11,16 | Existing lab-04 Actions contract/API/concurrency/unit suites; ActionsTaken.test.tsx and actions-api.test.tsx | Passing; no weakened lifecycle/retry assertions |
+| Workflow/gates/concurrency / AC-10,12–16 | ticket-workflow.api.test.ts, ticket-transition.unit.test.ts, TicketWorkflow.test.tsx, workflow-api.test.tsx | Passing current runs; earlier unexpected 404 root cause NOT VERIFIED |
+| Dashboard calculations/ownership/drill-down / AC-17–20 | Existing requester/staff dashboard API, performance, component, navigation and drill-down files | Passing current runs; earlier dashboard socket cause NOT VERIFIED |
+| Safe errors/recoverable drafts/logout/origin / AC-20,22 | client/tests/lab-04/recoverable-failures.test.tsx and api-error-safety.test.tsx | New negative cases reproduced failures before correction; current pass |
+| Migration/seed/preservation/recovery / AC-21 | Existing three lab-04 data suites | Passing on disposable schemas; no development database changes |
+| File isolation and warning-free synchronization | Harness-owned temporary upload/fixture paths; real upload assertion; Login.test.tsx awaited initialization | Passing; original uploads/artifacts retained |
+| Final accessibility / AC-23 | Issue 26 browser/manual checklist | DEFERRED |
+| Integrated E2E/screenshots / AC-24 | Issue 27; existing reusable-server config remains unsafe for development data | DEFERRED, not executed |
+
+Do not enable retries, broaden accepted statuses or add arbitrary delays to address unexplained failures. Workflow matrix failures now record response body/path, current account state, Ticket record and database/schema. Future reproduction must distinguish HTTP/session transport, fixture state and application behavior before proposing a correction.

@@ -19,6 +19,20 @@ export async function mustChangePasswordLock(req: Request, res: Response, next: 
     return;
   }
 
+  // Health and permitted authentication paths do not depend on the lock lookup.
+  const allowedPaths = [
+    "/api/auth/change-password",
+    "/api/auth/logout",
+    "/api/auth/me",
+    "/api/auth/login",
+    "/api/health",
+  ];
+
+  const currentPath = req.path.toLowerCase();
+  const isAllowed = allowedPaths.some((allowed) => currentPath === allowed || currentPath === `${allowed}/`);
+
+  if (isAllowed) { next(); return; }
+
   try {
     const prisma = getPrisma();
     const user = await prisma.user.findUnique({
@@ -27,27 +41,16 @@ export async function mustChangePasswordLock(req: Request, res: Response, next: 
     });
 
     if (user && user.isActive && user.mustChangePassword) {
-      const allowedPaths = [
-        "/api/auth/change-password",
-        "/api/auth/logout",
-        "/api/auth/me",
-        "/api/auth/login",
-        "/api/health",
-      ];
-
-      const currentPath = req.path.toLowerCase();
-      const isAllowed = allowedPaths.some((allowed) => currentPath === allowed || currentPath === `${allowed}/`);
-
-      if (!isAllowed) {
-        res.status(403).json({
-          error: "Password change required. You must change your initial password before accessing other endpoints.",
-          code: "MUST_CHANGE_PASSWORD",
-        });
-        return;
-      }
+      res.status(403).json({
+        error: "Password change required. You must change your initial password before accessing other endpoints.",
+        code: "MUST_CHANGE_PASSWORD",
+      });
+      return;
     }
   } catch (error) {
     console.error("mustChangePasswordLock middleware error:", error);
+    res.status(500).json({ error: "Internal Server Error", code: "INTERNAL_ERROR", message: "Unable to verify account access. Please retry." });
+    return;
   }
 
   next();

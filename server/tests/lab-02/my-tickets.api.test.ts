@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { loginAsUser } from "../helpers/login.js";
 import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import request from "supertest";
@@ -153,7 +154,7 @@ describe("Lab 2 My Tickets API - Paginated Listing, Search, Filter, Sort & Owner
 
   it("GET /api/tickets rejects unauthenticated requests and invalid query params", async () => {
     // No authenticated session -> 401 Unauthorized
-    const resNoHeader = await request(app).get("/api/tickets");
+    const resNoHeader = await request(await startTestServer(app)).get("/api/tickets");
     expect(resNoHeader.status).toBe(401);
 
 

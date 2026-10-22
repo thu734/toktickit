@@ -67,12 +67,12 @@ describe("Lab 2 Ticket Detail API - Owned Retrieval & Cross-Requester Security (
     expect(res.body.relatedSystem.name).toBeDefined();
   });
 
-  it("GET /api/tickets/:id returns HTTP 403 Forbidden for cross-requester detail access (API-05, AC-03, BR-06)", async () => {
+  it("GET /api/tickets/:id returns HTTP 404 Not Found for cross-requester detail access (effective Lab 3 BR-16) (API-05, AC-03, BR-06)", async () => {
     const res = await requester2Agent
       .get(`/api/tickets/${ticket1Id}`);
 
-    expect(res.status).toBe(403);
-    expect(res.body.error).toBe("Forbidden");
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe("Not Found");
   });
 
   it("GET /api/tickets/:id returns HTTP 404 Not Found for non-existent ticket ID", async () => {

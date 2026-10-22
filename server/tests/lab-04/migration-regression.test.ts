@@ -11,7 +11,7 @@ const snapshot = async (db: TestDatabase, category = "categories") => {
   const result: Record<string, unknown> = {};
   for (const table of [category, "related_systems", "users", "tickets", "attachments", "comments", "internal_notes"]) {
     const rows = await db.client.$queryRawUnsafe<Array<Record<string, unknown>>>(`SELECT * FROM "${table}" ORDER BY id`);
-    result[table === "Category" ? "categories" : table] = rows.map(({ workflowRevision: _revision, ...row }) => row);
+    result[table === "Category" ? "categories" : table] = rows.map(({ workflowRevision: _revision, creationRequestKey: _key, creationPayloadHash: _hash, ...row }) => row);
   }
   return result;
 };
@@ -42,13 +42,14 @@ describe("Actual SQL migration replay and preservation", () => {
       // Reconnect after DDL: earlier SELECT * plans have the pre-upgrade row type.
       await db.client.$disconnect();
       expect(await snapshot(db)).toEqual(before);
-      expect((await db.client.ticket.findUniqueOrThrow({ where: { id: 101 } })).workflowRevision).toBe(0);
+      expect(await db.client.ticket.findUniqueOrThrow({ where: { id: 101 } })).toMatchObject({ workflowRevision: 0, creationRequestKey: null, creationPayloadHash: null });
       expect(await db.client.actionTaken.count()).toBe(0);
       expect(await db.client.actionAuditEvent.count()).toBe(0);
       expect(await db.client.actionCreationRequest.count()).toBe(0);
       expect(db.schemaDiff(readFileSync("prisma/schema.prisma", "utf8"))).toContain("This is an empty migration");
       const applied = await db.client.$queryRawUnsafe<Array<{ migration_name: string }>>(`SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL`);
-      expect(applied).toHaveLength(7);
+      expect(applied).toHaveLength(8);
+      expect(applied.map(row => row.migration_name)).toContain("20261019090000_ticket_creation_retry");
       expect(db.deployThrough()).toContain("No pending migrations");
       expect(await snapshot(db)).toEqual(before);
     } finally { await db.dispose(); }

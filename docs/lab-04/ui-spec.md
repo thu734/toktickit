@@ -1,7 +1,7 @@
 # Lab 4 - Zen Green UI Specification
 
 **Issue:** Issue 18 [Lab 4] Engineering Contract and Baseline Gate
-**Status:** D-01 through D-16 explicitly approved by the user on 2026-10-15; documentation review and baseline verification remain separate; no Lab 4 implementation.
+**Status:** Issues 19–24 implemented; Issue 25 hardening implemented with passing current checks, but NOT READY TO PUSH because the original intermittent 404/socket failures remain unexplained. See [current verification](issue-25-verification.md).
 **Source:** CPE 334 Lab 4 handout, SE+Lab+4.pdf, all 11 pages, reviewed 2026-10-15.
 
 **Provenance:** R = required by Lab 4; I = inherited from Labs 1-3; A = user-approved implementation choice, not a handout mandate.
@@ -11,7 +11,7 @@ Approval evidence: the user explicitly approved the final D-01 through D-16 choi
 ## 1. Inherited Design and Scope
 
 I: reuse Lab 2/3 color tokens, cards, badges, buttons, fields, tabs, feedback, form conventions and responsive layouts from [Lab 2 UI](../lab-02/ui-spec.md) and [Lab 3 UI](../lab-03/ui-spec.md). R: final screens must form one coherent product and remain usable by keyboard on desktop/tablet/mobile.
-This file specifies future screens only. It does not implement components, images, CSS or test code.
+This file specifies the implemented screens. Original planning/approval history is retained; current hardening behavior is recorded below.
 
 ## 2. Application Shell
 
@@ -158,3 +158,11 @@ A capture policy: deterministic scenarios; assert state before capture; no visib
 ## 10. Traceability and Approval
 
 FR-01..FR-18 and FR-21 are exercised by AC-01..AC-20 and AC-23..AC-24. [tests.md](tests.md) lists planned UI/style/responsive/E2E paths. D-01 through D-16 are explicitly user-approved; implementation and visual verification remain unexecuted.
+
+## Issue 25 recoverable failures (2026-10-17)
+
+Public Comments and Internal Notes distinguish loading, successful empty data and failed reads. Failed reads offer explicit per-feed retry without reinitializing Ticket or form drafts. Posting failures retain input and show safe feedback. Requester Comments have the same read-failure/empty distinction.
+
+Logout awaits the server result. Failure keeps the current session view with a safe uncertainty message and explicit Retry sign out; concurrent submissions are guarded. A 401 logout response means the session is already unavailable and permits local sign-out. Successful logout still clears identity.
+
+HTTP 5xx diagnostics are removed at the client response boundary; non-JSON failure bodies retain HTTP status and use local fallback messages. Action/Requester Dashboard read failures also reject arbitrary network/server messages from display. Validation/conflict explanations remain available. Staff attachment downloads use the configured VITE_API_URL. Existing Action retry keys, stale-workflow review, input retention, role landings and dashboard metrics remain unchanged. Final browser accessibility/visual verification remains Issue 26.

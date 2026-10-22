@@ -1,3 +1,5 @@
+import { attachmentDownloadUrl } from "../apiOrigin";
+import { safeFailure } from "../utils/safeFailure";
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { ActionsTaken } from "./ActionsTaken";
 import {
@@ -98,6 +100,18 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const [noteSubmitting, setNoteSubmitting] = useState(false);
   const [tabError, setTabError] = useState("");
+  const [feedLoading, setFeedLoading] = useState({ comments: true, notes: true });
+  const [feedErrors, setFeedErrors] = useState({ comments: '', notes: '' });
+  const loadFeed = useCallback(async (feed: 'comments' | 'notes') => {
+    setFeedLoading(previous => ({ ...previous, [feed]: true }));
+    setFeedErrors(previous => ({ ...previous, [feed]: '' }));
+    try {
+      if (feed === 'comments') setComments(await fetchTicketComments(ticketId));
+      else setInternalNotes(await fetchInternalNotes(ticketId));
+    } catch {
+      setFeedErrors(previous => ({ ...previous, [feed]: feed === 'comments' ? 'Unable to load public comments.' : 'Unable to load internal notes.' }));
+    } finally { setFeedLoading(previous => ({ ...previous, [feed]: false })); }
+  }, [ticketId]);
 
   // Staff users for assignment dropdown
   const [staffUsers, setStaffUsers] = useState<any[]>([]);
@@ -113,12 +127,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
       setResolutionSummaryInput(data.resolutionSummary || "");
 
       // Load comments & notes
-      const [fetchedComments, fetchedNotes] = await Promise.all([
-        fetchTicketComments(ticketId).catch(() => []),
-        fetchInternalNotes(ticketId).catch(() => []),
-      ]);
-      setComments(fetchedComments);
-      setInternalNotes(fetchedNotes);
+      await Promise.all([loadFeed('comments'), loadFeed('notes')]);
     } catch (err: any) {
       if (err?.status === 403) {
         setError("Access Denied: IT Staff or Administrator authorization required.");
@@ -128,7 +137,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [ticketId]);
+  }, [ticketId, loadFeed]);
 
   useEffect(() => {
     loadTicketData();
@@ -261,7 +270,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
       setComments((prev) => [...prev, newComment]);
       setNewCommentInput("");
     } catch (err: any) {
-      setTabError(err.message || "Failed to post public comment.");
+      setTabError(safeFailure(err, "Failed to post public comment. Please retry."));
     } finally {
       setCommentSubmitting(false);
     }
@@ -278,7 +287,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
       setInternalNotes((prev) => [...prev, newNote]);
       setNewNoteInput("");
     } catch (err: any) {
-      setTabError(err.message || "Failed to post internal note.");
+      setTabError(safeFailure(err, "Failed to post internal note. Please retry."));
     } finally {
       setNoteSubmitting(false);
     }
@@ -420,7 +429,8 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
               {activeTab === "comments" && (
                 <div>
                   <div className="comments-feed mb-3" style={{ maxHeight: "350px", overflowY: "auto" }}>
-                    {comments.length === 0 ? (
+                    {feedLoading.comments ? <p role="status">Loading public comments…</p> : feedErrors.comments ?
+                      <div role="alert">{feedErrors.comments} <button className="btn btn-outline-secondary" onClick={() => void loadFeed('comments')}>Retry public comments</button></div> : comments.length === 0 ? (
                       <p className="text-muted small italic mb-0">No public comments yet.</p>
                     ) : (
                       comments.map((c) => (
@@ -464,7 +474,8 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
               {activeTab === "notes" && (
                 <div className="p-3 rounded" style={{ backgroundColor: "#FEF3C7" }}>
                   <div className="notes-feed mb-3" style={{ maxHeight: "350px", overflowY: "auto" }}>
-                    {internalNotes.length === 0 ? (
+                    {feedLoading.notes ? <p role="status">Loading internal notes…</p> : feedErrors.notes ?
+                      <div role="alert">{feedErrors.notes} <button className="btn btn-outline-secondary" onClick={() => void loadFeed('notes')}>Retry internal notes</button></div> : internalNotes.length === 0 ? (
                       <p className="text-muted small italic mb-0">No private internal notes recorded yet.</p>
                     ) : (
                       internalNotes.map((n) => (
@@ -526,7 +537,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                           </div>
                           {!att.isRemoved ? (
                             <a
-                              href={`http://localhost:3000/api/attachments/${att.id}/download`}
+                              href={attachmentDownloadUrl(att.id)}
                               target="_blank"
                               rel="noreferrer"
                               className="btn btn-sm btn-outline-primary"

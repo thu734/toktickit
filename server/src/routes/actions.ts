@@ -1,3 +1,4 @@
+import { ticketFields } from '../utils/ticketFields.js';
 import { lockTicket } from "../services/ticketWorkflow.js";
 import { Router, Request, Response } from "express";
 import { ActionEventType, ActionStatus, Prisma, TicketStatus, UserRole } from "@prisma/client";
@@ -37,7 +38,7 @@ async function currentUser(req: Request) {
 async function canAccessTicket(req: Request, ticketId: number) {
   const user = await currentUser(req);
   if (!user || !user.isActive) return { kind: "unauthenticated" as const };
-  const ticket = await getPrisma().ticket.findUnique({ where: { id: ticketId } });
+  const ticket = await getPrisma().ticket.findUnique({ where: { id: ticketId }, select: ticketFields });
   if (!ticket) return { kind: "missing" as const };
   if (user.role === "REQUESTER" && ticket.requesterId !== user.id) return { kind: "missing" as const };
   return { kind: "ok" as const, user, ticket };

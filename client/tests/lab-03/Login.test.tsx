@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import React from "react";
 import { Login } from "../../src/components/Login";
 import { AuthProvider } from "../../src/context/AuthContext";
@@ -16,13 +16,10 @@ describe("UI-01: Login Screen Component Tests", () => {
     vi.clearAllMocks();
   });
 
-  it("renders login form with TokTickIT header and inputs", () => {
-    render(
-      <AuthProvider>
-        <Login />
-      </AuthProvider>
-    );
-
+  it("renders login form with TokTickIT header and inputs", async () => {
+    await act(async () => {
+      render(<AuthProvider><Login /></AuthProvider>);
+    });
     expect(screen.getByText("Sign in to your account")).toBeInTheDocument();
     expect(screen.getByLabelText(/Email address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Password/i)).toBeInTheDocument();

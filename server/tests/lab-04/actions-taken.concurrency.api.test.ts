@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { randomUUID } from "node:crypto";
 import request from "supertest";
@@ -22,7 +23,7 @@ beforeAll(async () => {
   ({ requesterId, categoryId, relatedSystemId } = template);
   const agents = [];
   for (const email of ["alex.t@toktickit.local", "admin@toktickit.local"]) {
-    const agent = request.agent(app);
+    const agent = request.agent(await startTestServer(app));
     const login = await agent.post("/api/auth/login").set(csrf).send({ email, password: "Initial123!" }).expect(200);
     await agent.post("/api/auth/change-password").set(csrf).send({ currentPassword: "Initial123!", newPassword: "TestPassword123!", confirmPassword: "TestPassword123!" }).expect(200);
     agents.push({ agent, id: login.body.user.id as number });

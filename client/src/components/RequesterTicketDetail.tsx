@@ -1,3 +1,4 @@
+import { safeFailure } from "../utils/safeFailure";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActionsTaken } from "./ActionsTaken";
 import {
@@ -29,6 +30,7 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
   // Public Comments state
   const [comments, setComments] = useState<Comment[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
+  const [commentsReadError, setCommentsReadError] = useState("");
   const [newCommentText, setNewCommentText] = useState("");
   const [postingComment, setPostingComment] = useState(false);
   const [commentError, setCommentError] = useState("");
@@ -60,11 +62,12 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
 
   const loadComments = useCallback(async () => {
     setLoadingComments(true);
+    setCommentsReadError("");
     try {
       const data = await fetchTicketComments(ticketId);
       setComments(data);
     } catch (err: any) {
-      console.error("Failed to load comments:", err);
+      setCommentsReadError("Unable to load public comments.");
     } finally {
       setLoadingComments(false);
     }
@@ -91,7 +94,7 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
       setComments((prev) => [...prev, created]);
       setNewCommentText("");
     } catch (err: any) {
-      setCommentError(err.message || "Failed to post comment.");
+      setCommentError(safeFailure(err, "Failed to post comment. Please retry."));
     } finally {
       setPostingComment(false);
     }
@@ -116,7 +119,7 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
       setShowResolveModal(false);
       setResolveSuccess("Problem resolution indication submitted to IT Staff.");
     } catch (err: any) {
-      setResolveError(err.message || "Failed to submit resolution indication.");
+      setResolveError(safeFailure(err, "Failed to submit resolution indication. Please retry."));
     } finally {
       setSubmittingResolve(false);
     }
@@ -400,7 +403,8 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
 
         {loadingComments ? (
           <div className="text-center py-3 text-muted small">Loading comments...</div>
-        ) : comments.length === 0 ? (
+        ) : commentsReadError ? <div role="alert" className="alert alert-danger">{commentsReadError}
+          <button className="btn btn-outline-danger" onClick={() => void loadComments()}>Retry public comments</button></div> : comments.length === 0 ? (
           <div className="p-3 text-center text-muted small bg-light rounded mb-4">
             No public comments posted yet.
           </div>

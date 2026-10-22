@@ -1,3 +1,5 @@
+import type { Server } from 'node:http';
+import { startTestServer } from '../testHttpServer.js';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcryptjs';
@@ -6,13 +8,17 @@ import request from 'supertest';
 import app from '../../src/app.js';
 import { getPrisma } from '../../src/prisma.js';
 
+import { diagnosedRequest, observeAgent } from './regressionDiagnostics.js';
+
+let server: Server;
 const csrf = { 'X-Requested-With': 'XMLHttpRequest' };
 const path = '/api/dashboard/requester';
 let categoryId: number, relatedSystemId: number;
 async function account(role: UserRole = 'REQUESTER', locked = false) {
   const user = await getPrisma().user.create({ data: { name: 'Dashboard fixture', email: `${randomUUID()}@test.local`, role,
     passwordHash: await bcrypt.hash('TestPassword123!',4), mustChangePassword: locked } });
-  const agent = request.agent(app);
+  const agent = request.agent(server);
+  observeAgent(agent);
   await agent.post('/api/auth/login').set(csrf).send({email:user.email,password:'TestPassword123!'}).expect(200);
   return {user,agent};
 }
@@ -24,6 +30,7 @@ beforeAll(async()=>{
   const [target]=await getPrisma().$queryRaw<Array<{db:string;schema:string}>>`SELECT current_database() AS db, current_schema() AS schema`;
   expect(target.db).toBe('toktickit_test');expect(target.schema).toMatch(/^lab4_test_[a-f0-9]{32}$/);
   ({categoryId,relatedSystemId}=await getPrisma().ticket.findFirstOrThrow());
+  server = await startTestServer(app);
 });
 
 describe('REQ-DASH-01 authoritative owned metrics and access',()=>{
@@ -56,7 +63,7 @@ describe('REQ-DASH-01 authoritative owned metrics and access',()=>{
     expect((await b.agent.get(path).expect(200)).body.counts).toEqual({active:5,new:1,open:1,inProgress:1,waitingForRequester:1,resolved:1,reopened:1});
   });
   it.each([false,true])('requires authentication even with a legacy header (%s)',async header=>{
-    const req=request(app).get(path);if(header)req.set('X-Development-Requester-Id','1');
+    const req=request(server).get(path);if(header)req.set('X-Development-Requester-Id','1');
     expect((await req.expect(401)).body.code).toBe('UNAUTHENTICATED');
   });
   it.each(['IT_STAFF','ADMINISTRATOR'] as UserRole[])('forbids %s',async role=>{
@@ -92,7 +99,10 @@ describe('REQ-TIME-01 bounded ordering and consistent PostgreSQL snapshot',()=>{
   it.each([1,4,5,9])('returns the newest five of %i owned Tickets with deterministic ID ties and no cutoff',async size=>{
     const {user,agent}=await account();const rows=[];
     for(let i=0;i<size;i++) rows.push(await ticket(user.id,i%2?'CANCELLED':'CLOSED',new Date(i<2?'1990-01-01T00:00:00Z':'2000-01-01T00:00:00Z')));
-    const res=await agent.get(path).query({limit:1000,since:'2026-01-01'}).expect(200);
+    const res=await diagnosedRequest({ method:'GET', path:`${path}?limit=1000&since=2026-01-01`,
+      expectedStatus:200, actorId:user.id, fixture:{ size, rows, categoryId, relatedSystemId } },
+      () => agent.get(path).query({limit:1000,since:'2026-01-01'}));
+    expect(res.status).toBe(200);
     const expected=[...rows].sort((a,b)=>b.updatedAt.getTime()-a.updatedAt.getTime()||b.id-a.id).slice(0,5);
     expect(res.body.recentTickets.map((t:{id:number})=>t.id)).toEqual(expected.map(t=>t.id));
     expect(res.body.counts).toEqual({active:0,new:0,open:0,inProgress:0,waitingForRequester:0,resolved:0,reopened:0});

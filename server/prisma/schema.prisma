@@ -107,6 +107,8 @@ model Ticket {
   itPriority        ITPriority        @default(MEDIUM)
   currentStatus     TicketStatus      @default(NEW)
   resolutionSummary String?
+  creationRequestKey String?
+  creationPayloadHash String?
   workflowRevision  Int               @default(0)
 
   requesterId     Int
@@ -129,6 +131,7 @@ model Ticket {
   internalNotes   InternalNote[]
   actions         ActionTaken[]
 
+  @@unique([requesterId, creationRequestKey])
   @@index([requesterId])
   @@index([assignedStaffId])
   @@index([currentStatus])

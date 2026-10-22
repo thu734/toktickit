@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   fetchCategories,
   fetchRelatedSystems,
@@ -36,6 +36,8 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
   const [uploadWarning, setUploadWarning] = useState<string>("");
 
   // Submission & Validation States
+  const creationKey = useRef<string | null>(null);
+  const inFlight = useRef(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState<string>("");
@@ -136,7 +138,7 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (submitting) return; // BR-13 double submit lock
+    if (inFlight.current) return; // BR-13 double submit lock
 
     setApiError("");
     setFormErrors({});
@@ -147,10 +149,12 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
       return;
     }
 
+    inFlight.current = true;
     setSubmitting(true);
     setUploadWarning("");
 
     try {
+      creationKey.current ??= crypto.randomUUID();
       const ticket = await createTicket(
         {
           categoryId: Number(categoryId),
@@ -159,7 +163,8 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
           summary: summary.trim(),
           description: description.trim(),
         },
-        activeRequester.id
+        activeRequester.id,
+        creationKey.current
       );
 
       // BR-22: Sequential upload of initial attachments after ticket creation
@@ -188,11 +193,13 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
         setApiError(err.message || "An unexpected error occurred while submitting the ticket.");
       }
     } finally {
+      inFlight.current = false;
       setSubmitting(false);
     }
   };
 
   const resetForm = () => {
+    creationKey.current = null;
     setCreatedTicket(null);
     setSummary("");
     setDescription("");

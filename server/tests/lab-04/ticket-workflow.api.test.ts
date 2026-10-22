@@ -1,3 +1,5 @@
+import type { Server } from 'node:http';
+import { startTestServer } from '../testHttpServer.js';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { TicketStatus, UserRole } from '@prisma/client';
@@ -5,8 +7,10 @@ import bcrypt from 'bcryptjs';
 import request from 'supertest';
 import app from '../../src/app.js';
 import { getPrisma } from '../../src/prisma.js';
+import { diagnosedRequest, observeAgent } from './regressionDiagnostics.js';
 import { overlap } from './workflowConcurrency.js';
 
+let server: Server;
 const csrf = { 'X-Requested-With': 'XMLHttpRequest' };
 const db = getPrisma;
 type Agent = ReturnType<typeof request.agent>;
@@ -20,7 +24,8 @@ const matrix: Record<TicketStatus, TicketStatus[]> = {
 async function account(role: UserRole, options: { locked?: boolean } = {}) {
   const user = await db().user.create({ data: { name: 'Workflow actor', email: `${randomUUID()}@test.local`, role,
     passwordHash: await bcrypt.hash('TestPassword123!', 4), mustChangePassword: !!options.locked } });
-  const agent = request.agent(app);
+  const agent = request.agent(server);
+  observeAgent(agent);
   await agent.post('/api/auth/login').set(csrf).send({ email: user.email, password: 'TestPassword123!' }).expect(200);
   return { user, agent };
 }
@@ -28,6 +33,7 @@ beforeAll(async () => {
   const [target] = await db().$queryRaw<Array<{ db: string; schema: string }>>`SELECT current_database() AS db, current_schema() AS schema`;
   expect(target.db).toBe('toktickit_test'); expect(target.schema).toMatch(/^lab4_test_[a-f0-9]{32}$/);
   ({ categoryId, relatedSystemId } = await db().ticket.findFirstOrThrow());
+  server = await startTestServer(app);
   const s = await account('IT_STAFF'), a = await account('ADMINISTRATOR'), r = await account('REQUESTER');
   staff = s.agent; staffId = s.user.id; admin = a.agent; adminId = a.user.id; requester = r.agent; requesterId = r.user.id;
 });
@@ -49,7 +55,10 @@ describe('WF-API-01 / WF-SEC-01', () => {
     it(`${role}: ${from} -> ${to} (zero Actions)`, async () => {
       const t = await ticket(from), before = await state(t.id);
       const allowed = matrix[from].includes(to);
-      const res = await status(role === 'Staff' ? staff : admin, t.id, to);
+      const res = await diagnosedRequest({ method: 'PATCH', path: `/api/staff/tickets/${t.id}/status`,
+        expectedStatus: allowed ? 200 : 400, actorId: role === 'Staff' ? staffId : adminId,
+        ticketId: t.id, fixture: { from, to, before, categoryId, relatedSystemId, requesterId } },
+        () => status(role === 'Staff' ? staff : admin, t.id, to));
       expect(res.status).toBe(allowed ? 200 : 400);
       if (allowed) {
         expect(res.body).toMatchObject({ currentStatus: to, workflowRevision: 1, assignedStaffId: null });
@@ -131,7 +140,7 @@ describe('WF-API-01 / WF-SEC-01', () => {
     const t = await ticket(); const before = await state(t.id);
     for (const op of ['assign','priority','status']) {
       const body = { workflowRevision: 0, status: 'RESOLVED', assignedStaffId: adminId, itPriority: 'HIGH' };
-      await mutate(request.agent(app), t.id, op, body).set('X-Development-Requester-Id', String(adminId)).expect(401);
+      await mutate(request.agent(server), t.id, op, body).set('X-Development-Requester-Id', String(adminId)).expect(401);
       await mutate(requester, t.id, op, body).expect(403);
       await mutate(admin, 2147483647, op, body).expect(404);
       await admin.patch(`/api/staff/tickets/${t.id}/${op}`).send(body).expect(400);

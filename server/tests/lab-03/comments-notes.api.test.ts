@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
 import app from "../../src/app.js";
@@ -36,7 +37,7 @@ describe("Lab 3 Public Comments & Resolution Indication Tests (COMM-API-01 - COM
     await prisma.ticket.deleteMany({});
 
     // Authenticate Requester 1 (Jennifer Anderson) and complete mandatory password change
-    requesterAgent = request.agent(app);
+    requesterAgent = request.agent(await startTestServer(app));
     const loginRes1 = await requesterAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)
@@ -55,7 +56,7 @@ describe("Lab 3 Public Comments & Resolution Indication Tests (COMM-API-01 - COM
     expect(changePw1.status).toBe(200);
 
     // Authenticate Requester 2 (Michael Brown) and complete mandatory password change
-    otherRequesterAgent = request.agent(app);
+    otherRequesterAgent = request.agent(await startTestServer(app));
     const loginRes2 = await otherRequesterAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)
@@ -182,7 +183,7 @@ describe("Lab 3 Public Comments & Resolution Indication Tests (COMM-API-01 - COM
   // STAFF-API-05 / SEC-API-03: Internal Notes creation and retrieval for IT Staff & Admin (Requester blocked with 403)
   it("STAFF-API-05 & SEC-API-03: IT Staff and Admin can view/post Internal Notes; Requester is blocked with HTTP 403 Forbidden", async () => {
     // Authenticate IT Staff
-    const staffAgent = request.agent(app);
+    const staffAgent = request.agent(await startTestServer(app));
     await staffAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)

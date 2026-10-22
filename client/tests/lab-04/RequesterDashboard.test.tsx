@@ -57,9 +57,9 @@ describe('REQ-UI-01 Requester Dashboard',()=>{
     expect(screen.getByRole('button',{name:'View Reopened (0)'})).toHaveTextContent('Reopened: 0');
     expect(screen.getByRole('button',{name:'Create Ticket'})).toBeEnabled();
   });
-  it.each([{status:500,message:'Dashboard unavailable',expected:'Dashboard unavailable'},{status:401,expected:'Your session has expired'},
+  it.each([{status:500,message:'Dashboard unavailable',expected:'Unable to retrieve your dashboard'},{status:401,expected:'Your session has expired'},
     {status:403,expected:'You do not have permission'},{status:403,code:'MUST_CHANGE_PASSWORD',expected:'Change your initial password'},
-    {message:'Network unavailable',expected:'Network unavailable'}])('distinguishes failure %j from zeros and supports retry',async failure=>{
+    {message:'Network unavailable',expected:'Unable to retrieve your dashboard'}])('distinguishes failure %j from zeros and supports retry',async failure=>{
     vi.mocked(api.fetchRequesterDashboard).mockRejectedValueOnce(failure);render(<RequesterDashboard {...props()}/>);
     expect(await screen.findByRole('alert')).toHaveTextContent(failure.expected);expect(screen.queryByRole('article')).not.toBeInTheDocument();
     expect(screen.queryByText(/No Tickets Yet/)).not.toBeInTheDocument();fireEvent.click(screen.getByRole('button',{name:'Retry dashboard'}));
@@ -68,7 +68,7 @@ describe('REQ-UI-01 Requester Dashboard',()=>{
   it('does not show stale counts as success after refresh fails',async()=>{
     render(<RequesterDashboard {...props()}/>);await screen.findByRole('button',{name:'View All Active (7)'});
     vi.mocked(api.fetchRequesterDashboard).mockRejectedValueOnce(new Error('Refresh failed'));fireEvent.click(screen.getByRole('button',{name:'Refresh dashboard'}));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Refresh failed');expect(screen.queryByRole('article')).not.toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Unable to retrieve your dashboard');expect(screen.queryByRole('article')).not.toBeInTheDocument();
   });
   it.each(['IT_STAFF','ADMINISTRATOR']as const)('blocks %s without fetching',async role=>{
     auth.user={...owner,role};render(<RequesterDashboard {...props()}/>);expect(screen.getByRole('alert')).toHaveTextContent('do not have permission');expect(api.fetchRequesterDashboard).not.toHaveBeenCalled();

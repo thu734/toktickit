@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { ITPriority, TicketStatus } from '@prisma/client';
 import request from 'supertest';
@@ -58,7 +59,7 @@ describe('STAFF-DASH-01 / handout 4.6 and 8.1',()=>{
     expect(res.body.counts).toEqual(await expected(a.user.id));expect(res.body.counts.myActive).toBe(1);
   });
   it('rejects unauthenticated/header-only/requester/locked/inactive/changed-role access',async()=>{
-    await request(app).get(path).expect(401);await request(app).get(path).set('X-Development-Requester-Id','1').expect(401);
+    await request(await startTestServer(app)).get(path).expect(401);await request(await startTestServer(app)).get(path).set('X-Development-Requester-Id','1').expect(401);
     const r=await account('REQUESTER');await r.agent.get(path).expect(403);
     const locked=await account('IT_STAFF',true);expect((await locked.agent.get(path).expect(403)).body.code).toBe('MUST_CHANGE_PASSWORD');
     for(const change of [{isActive:false},{role:'REQUESTER' as const}]){

@@ -1,4 +1,5 @@
 import { ITPriority, Prisma, TicketStatus } from '@prisma/client';
+import { ticketFields } from '../utils/ticketFields.js';
 import { getPrisma } from '../prisma.js';
 import { workflowRevision, actionId } from '../utils/actionValidation.js';
 import { isValidStatusTransition } from '../utils/statusTransition.js';
@@ -13,18 +14,19 @@ export async function lockTicket(tx: Prisma.TransactionClient, ticketId: number)
   if (!rows.length) throw new WorkflowError(404, 'RESOURCE_NOT_FOUND', 'Ticket not found.');
 }
 
-const include = {
+const select = {
+  ...ticketFields,
   requester: { select: { id: true, name: true, email: true } },
   assignedStaff: { select: { id: true, name: true, email: true, role: true } },
   category: true, relatedSystem: true,
-} satisfies Prisma.TicketInclude;
+} satisfies Prisma.TicketSelect;
 
 export async function mutateTicketWorkflow(ticketId: number, operation: 'assign' | 'priority' | 'status', body: Record<string, unknown>) {
   const revision = workflowRevision(body.workflowRevision);
   if (revision === null) throw new WorkflowError(400, 'INVALID_WORKFLOW_REVISION', 'A nonnegative integer workflowRevision is required.');
   return getPrisma().$transaction(async tx => {
     await lockTicket(tx, ticketId);
-    const ticket = await tx.ticket.findUniqueOrThrow({ where: { id: ticketId } });
+    const ticket = await tx.ticket.findUniqueOrThrow({ where: { id: ticketId }, select: ticketFields });
     if (ticket.workflowRevision !== revision) throw new WorkflowError(409, 'STALE_REVISION', 'Ticket changed; refresh before retrying.');
     const data: Prisma.TicketUncheckedUpdateInput = { workflowRevision: { increment: 1 } };
     if (operation === 'assign') {
@@ -54,6 +56,6 @@ export async function mutateTicketWorkflow(ticketId: number, operation: 'assign'
       }
       data.currentStatus = status;
     }
-    return tx.ticket.update({ where: { id: ticketId }, data, include });
+    return tx.ticket.update({ where: { id: ticketId }, data, select });
   });
 }

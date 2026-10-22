@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { describe, it, expect } from "vitest";
 import request from "supertest";
 import { app } from "../../src/app.js";
@@ -10,7 +11,7 @@ void request; void app;
 describe("GET /api/categories", () => {
   it("returns the four seeded categories in id order", async () => {
     // TODO(Issue 4): implement this assertion.
-    const res = await request(app).get("/api/categories");
+    const res = await request(await startTestServer(app)).get("/api/categories");
     expect(res.status).toBe(200);
     expect(res.body).toEqual([
       { id: 1, name: "Account and Access" },
