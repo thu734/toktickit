@@ -1,0 +1,65 @@
+
+> toktickit-client@1.0.0 test
+> vitest run --reporter=dot
+
+
+ RUN  v2.1.9 /Users/thuthuwai/Documents/toktickit/client
+
+ ✓ tests/lab-02/AttachmentSection.test.tsx (6 tests) 462ms
+ ✓ tests/lab-04/recoverable-failures.test.tsx (9 tests) 522ms
+ ✓ tests/lab-02/CreateTicket.test.tsx (8 tests) 533ms
+ ✓ tests/lab-04/RequesterDashboard.test.tsx (18 tests) 772ms
+ ✓ tests/lab-04/StaffDashboard.test.tsx (15 tests) 762ms
+ ✓ tests/lab-04/ActionsTaken.test.tsx (32 tests) 1134ms
+ ✓ tests/lab-03/CommentsAndNotes.test.tsx (3 tests) 304ms
+stderr | tests/lab-04/ZenGreenStyle.test.tsx > STYLE-01 component presentation semantics (rendered CSS verified in Playwright) > announces saving and disables mutation controls
+Warning: An update to ActionForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ActionForm (/Users/thuthuwai/Documents/toktickit/client/src/components/ActionForm.tsx:38:23)
+Warning: An update to ActionForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ActionForm (/Users/thuthuwai/Documents/toktickit/client/src/components/ActionForm.tsx:38:23)
+
+ ✓ tests/lab-04/ZenGreenStyle.test.tsx (6 tests) 527ms
+   ✓ STYLE-01 component presentation semantics (rendered CSS verified in Playwright) > associates conditional validation and moves focus without saving invalid input 337ms
+ ✓ tests/lab-03/UserManagement.test.tsx (5 tests) 687ms
+ ✓ tests/lab-03/StaffTicketQueue.test.tsx (4 tests) 532ms
+ ✓ tests/lab-02/RequesterTicketDetail.test.tsx (3 tests) 303ms
+ ✓ tests/lab-04/TicketWorkflow.test.tsx (37 tests) 2664ms
+ ✓ tests/lab-02/MyTickets.test.tsx (4 tests) 288ms
+ ✓ tests/lab-04/requester-dashboard-navigation.test.tsx (11 tests) 1226ms
+ ✓ tests/lab-03/StaffTicketDetail.test.tsx (4 tests) 317ms
+ ✓ tests/lab-04/ticket-creation-retry.test.tsx (3 tests) 287ms
+ ✓ tests/lab-04/staff-queue-transport.test.tsx (2 tests) 263ms
+ ✓ tests/lab-04/actions-api.test.tsx (6 tests) 7ms
+ ✓ tests/lab-03/AppShell.test.tsx (4 tests) 260ms
+ ✓ tests/lab-03/ChangePassword.test.tsx (4 tests) 242ms
+ ✓ tests/lab-04/api-error-safety.test.tsx (26 tests) 5ms
+ ✓ tests/lab-03/Login.test.tsx (3 tests) 168ms
+ ✓ tests/lab-04/requester-drilldown.test.tsx (5 tests) 228ms
+ ✓ tests/lab-04/staff-drilldown.test.tsx (6 tests) 108ms
+ ✓ tests/lab-04/workflow-api.test.tsx (4 tests) 5ms
+ ✓ tests/lab-04/requester-dashboard-api.test.tsx (3 tests) 3ms
+ ✓ tests/lab-01/App.test.tsx (2 tests) 94ms
+ ✓ tests/lab-04/staff-dashboard-navigation.test.tsx (16 tests) 1482ms
+
+ Test Files  28 passed (28)
+      Tests  249 passed (249)
+   Start at  02:23:02
+   Duration  5.98s (transform 1.01s, setup 1.91s, collect 4.59s, tests 14.19s, environment 14.01s, prepare 1.78s)

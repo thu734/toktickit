@@ -107,9 +107,9 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
       case "URGENT":
         return <span className="badge text-white" style={{ ...style, backgroundColor: "#7F1D1D" }}>URGENT</span>;
       case "HIGH":
-        return <span className="badge" style={{ ...style, backgroundColor: "#FEE2E2", color: "#DC2626", border: "1px solid #FCA5A5" }}>HIGH</span>;
+        return <span className="badge" style={{ ...style, backgroundColor: "#FEE2E2", color: "#B42318", border: "1px solid #FCA5A5" }}>HIGH</span>;
       case "MEDIUM":
-        return <span className="badge" style={{ ...style, backgroundColor: "#FEF3C7", color: "#D97706", border: "1px solid #FDE68A" }}>MEDIUM</span>;
+        return <span className="badge" style={{ ...style, backgroundColor: "#FEF3C7", color: "#92400E", border: "1px solid #FDE68A" }}>MEDIUM</span>;
       case "LOW":
         return <span className="badge" style={{ ...style, backgroundColor: "#EAF6EF", color: "#006B3C", border: "1px solid #C6E7D2" }}>LOW</span>;
       default:
@@ -133,14 +133,14 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
       case "IN_PROGRESS":
         return <span className="badge" style={{ ...style, backgroundColor: "#EAF6EF", color: "#006B3C", border: "1px solid #C6E7D2" }}>IN PROGRESS</span>;
       case "WAITING_FOR_REQUESTER":
-        return <span className="badge" style={{ ...style, backgroundColor: "#FEF3C7", color: "#D97706", border: "1px solid #FDE68A" }}>WAITING FOR REQUESTER</span>;
+        return <span className="badge" style={{ ...style, backgroundColor: "#FEF3C7", color: "#92400E", border: "1px solid #FDE68A" }}>WAITING FOR REQUESTER</span>;
       case "RESOLVED":
         return <span className="badge" style={{ ...style, backgroundColor: "#EAF6EF", color: "#006B3C", border: "1px solid #C6E7D2" }}>RESOLVED</span>;
       case "CANCELLED":
       case "CLOSED":
         return <span className="badge" style={{ ...style, backgroundColor: "#F1F5F9", color: "#475569", border: "1px solid #CBD5E1" }}>{status.replace(/_/g, " ")}</span>;
       case "REOPENED":
-        return <span className="badge" style={{ ...style, backgroundColor: "#FEE2E2", color: "#DC2626", border: "1px solid #FCA5A5" }}>REOPENED</span>;
+        return <span className="badge" style={{ ...style, backgroundColor: "#FEE2E2", color: "#B42318", border: "1px solid #FCA5A5" }}>REOPENED</span>;
       default:
         return <span className="badge" style={{ ...style, backgroundColor: "#F1F5F9", color: "#475569" }}>{status}</span>;
     }
@@ -150,7 +150,7 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
     <div className="container py-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
-          <h2 className="mb-1" style={{ color: "#006B3C" }}>IT Support Ticket Queue</h2>
+          <h1 className="h2 mb-1" style={{ color: "#006B3C" }}>IT Support Ticket Queue</h1>
           <p className="text-muted small mb-0">Shared operational queue for IT Staff & Administrators</p>
         </div>
       </div>
@@ -165,9 +165,9 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
       <div className="card p-3 mb-4 surface-card" style={{ borderColor: "#E2E8F0" }}>
         <form onSubmit={handleSearchSubmit} className="row g-2 align-items-end">
           <div className="col-12 col-md-4">
-            <label className="form-label small fw-bold text-muted">Search Queue</label>
+            <label htmlFor="queue-search" className="form-label small fw-bold text-muted">Search Queue</label>
             <div className="input-group">
-              <input
+              <input id="queue-search"
                 type="text"
                 className="form-control"
                 placeholder="Ticket #, summary, or description..."
@@ -181,8 +181,8 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
           </div>
 
           <div className="col-6 col-md-2">
-            <label className="form-label small fw-bold text-muted">Category</label>
-            <select
+            <label htmlFor="queue-category" className="form-label small fw-bold text-muted">Category</label>
+            <select id="queue-category"
               className="form-select"
               value={categoryId}
               onChange={(e) => {
@@ -200,8 +200,8 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
           </div>
 
           <div className="col-6 col-md-2">
-            <label className="form-label small fw-bold text-muted">IT Priority</label>
-            <select
+            <label htmlFor="queue-priority" className="form-label small fw-bold text-muted">IT Priority</label>
+            <select id="queue-priority"
               className="form-select"
               value={itPriority}
               onChange={(e) => {
@@ -261,8 +261,8 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
 
         <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
           <div className="d-flex align-items-center gap-2">
-            <span className="small text-muted fw-bold">Sort by:</span>
-            <select
+            <label htmlFor="queue-sort" className="small text-muted fw-bold">Sort by:</label>
+            <select id="queue-sort"
               className="form-select form-select-sm"
               style={{ width: "auto" }}
               value={sortBy}

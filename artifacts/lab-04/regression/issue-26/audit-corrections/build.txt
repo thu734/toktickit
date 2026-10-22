@@ -1,0 +1,17 @@
+
+> toktickit-client@1.0.0 build
+> tsc && vite build --outDir /private/tmp/issue26-fixes-build
+
+vite v6.4.3 building for production...
+
+(!) outDir /private/tmp/issue26-fixes-build is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+transforming...
+✓ 49 modules transformed.
+rendering chunks...
+computing gzip size...
+../../../../../private/tmp/issue26-fixes-build/index.html                   0.39 kB │ gzip:  0.27 kB
+../../../../../private/tmp/issue26-fixes-build/assets/index-DaLdg_jb.css  235.20 kB │ gzip: 31.98 kB
+../../../../../private/tmp/issue26-fixes-build/assets/index-xqF4yGIz.js   297.03 kB │ gzip: 79.21 kB
+✓ built in 418ms

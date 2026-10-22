@@ -23,3 +23,79 @@ textarea:focus-visible,
     justify-content: center;
   }
 }
+
+/* Inherited Zen Green tokens. Bootstrap utilities and custom buttons use the
+   same palette; darker amber retains the warning surface with readable text. */
+:root {
+  --bs-body-color: #1E2923;
+  --bs-body-bg: #F5F7F6;
+  --bs-success-rgb: 0, 107, 60;
+  --bs-danger-rgb: 217, 45, 32;
+  --bs-secondary-color: #5F6F85;
+  --bs-light-rgb: 245, 247, 246;
+  --bs-link-color: #006B3C;
+  --bs-link-hover-color: #0B7A46;
+}
+.card, .modal-content { --bs-card-bg: #fff; background-color: #fff; }
+.btn-zen-primary, .btn-success {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #006B3C;
+  --bs-btn-border-color: #006B3C;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #0B7A46;
+  --bs-btn-hover-border-color: #0B7A46;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #006B3C;
+  --bs-btn-active-border-color: #006B3C;
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: #006B3C;
+  --bs-btn-disabled-border-color: #006B3C;
+}
+.btn-outline-success { --bs-btn-color: #006B3C; --bs-btn-border-color: #006B3C; --bs-btn-hover-bg: #006B3C; --bs-btn-hover-border-color: #006B3C; --bs-btn-active-bg: #006B3C; --bs-btn-active-border-color: #006B3C; }
+.btn-link { --bs-btn-color: #006B3C; --bs-btn-hover-color: #0B7A46; }
+.form-control, .form-select, .form-control:focus, .form-select:focus { background-color: #fff; }
+.form-control[readonly] { background-color: #F1F5F3; color: #475569; }
+.form-control:disabled, .form-select:disabled { background-color: #F1F5F9; }
+
+/* Wrap the existing shell/content instead of hiding page overflow. */
+.app-shell header > .container-fluid { gap: .75rem; }
+.app-shell .navbar-nav { flex-wrap: wrap; gap: .25rem; margin-left: 0 !important; min-width: 0; }
+.app-shell .profile-container { min-width: 0; max-width: 100%; }
+.app-shell .profile-trigger { max-width: 100%; flex-wrap: wrap; text-align: left; white-space: normal; overflow-wrap: anywhere; }
+.app-shell .profile-trigger > span:first-child { min-width: 0; }
+.app-shell .profile-disclosure { width: min(22rem, calc(100vw - 3rem)); overflow-wrap: anywhere; }
+.app-shell header :focus-visible { outline-color: #0B7A46 !important; box-shadow: 0 0 0 4px #fff !important; }
+.app-shell main { min-width: 0; overflow-wrap: anywhere; }
+.app-shell main :is(.card, [class*="col-"], .input-group, .d-flex) { min-width: 0; }
+.app-shell main .btn { white-space: normal; overflow-wrap: anywhere; }
+.app-shell main .badge { white-space: normal; }
+.modal { overflow-y: auto; }
+.modal-content { overflow-wrap: anywhere; }
+.modal-header, .modal-footer { flex-wrap: wrap; gap: .5rem; }
+.modal-header .btn-close { flex-shrink: 0; }
+@media (max-width: 767.98px) {
+  .app-shell header > .container-fluid { align-items: flex-start; }
+  .app-shell .navbar-nav { flex-basis: 100%; }
+  .app-shell .input-group { flex-wrap: wrap; gap: .5rem; }
+  .app-shell .input-group > .form-control { flex-basis: 100%; width: 100%; }
+  .form-control, .form-select { display: block; }
+}
+
+.text-warning { color: #92400E !important; }
+/* Restore inherited custom badges that Bootstrap does not define. */
+.badge-pale { background-color: #EAF6EF; color: #006B3C; }
+.badge-secondary { background-color: #F1F5F9; color: #475569; }
+.btn-outline-secondary { --bs-btn-color: #475569; }
+.app-shell main .card { overflow-wrap: anywhere; }
+.app-shell main .card .d-flex > * { min-width: 0; }
+@media (max-width: 767.98px) {
+  .btn-close { min-width: 44px; min-height: 44px; padding: 0; background-size: 1em; }
+  .dropdown-item { min-height: 44px; }
+}
+.form-control[aria-invalid="true"], .form-select[aria-invalid="true"] { border-color: #D92D20; }
+/* Cap pill corners when a long profile wraps; normal single-line pills keep
+   their capsule shape without text crossing the curved border. */
+.app-shell .profile-trigger { border-radius: 2rem !important; }
+@media (max-width: 767.98px) {
+  .btn-link.text-start { justify-content: flex-start; }
+}

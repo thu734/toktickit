@@ -1,3 +1,4 @@
+import { useDialogAccessibility } from "../hooks/useDialogAccessibility";
 import React, { useEffect, useState, useCallback } from "react";
 import {
   fetchAdminUsers,
@@ -42,6 +43,9 @@ export const UserManagement: React.FC = () => {
   const [editBusy, setEditBusy] = useState(false);
 
   const [resetUser, setResetUser] = useState<AdminUser | null>(null);
+  const createDialog = useDialogAccessibility(showCreateModal, () => { if (!createBusy) setShowCreateModal(false); });
+  const editDialog = useDialogAccessibility(!!editingUser, () => { if (!editBusy) setEditingUser(null); });
+  const resetDialog = useDialogAccessibility(!!resetUser, () => { if (!resetBusy) setResetUser(null); });
   const [resetPasswordInput, setResetPasswordInput] = useState("");
   const [resetError, setResetError] = useState("");
   const [resetBusy, setResetBusy] = useState(false);
@@ -199,7 +203,7 @@ export const UserManagement: React.FC = () => {
       {/* Header Toolbar */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
-          <h2 className="h4 fw-bold mb-1" style={{ color: "#006B3C" }}>User Management</h2>
+          <h1 className="h4 fw-bold mb-1" style={{ color: "#006B3C" }}>User Management</h1>
           <p className="text-muted small mb-0">View, create, edit user accounts and reset initial passwords.</p>
         </div>
         <button
@@ -224,7 +228,7 @@ export const UserManagement: React.FC = () => {
 
       {/* Global Error Banner */}
       {error && (
-        <div className="alert alert-danger small shadow-sm mb-4">
+        <div role="alert" className="alert alert-danger small shadow-sm mb-4">
           🚨 {error}
         </div>
       )}
@@ -236,6 +240,7 @@ export const UserManagement: React.FC = () => {
             <input
               type="text"
               className="form-control form-control-sm"
+              aria-label="Search users by name or email"
               placeholder="Search by name or email..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -245,6 +250,7 @@ export const UserManagement: React.FC = () => {
           <div className="col-12 col-md-4">
             <select
               className="form-select form-select-sm"
+              aria-label="Filter users by role"
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
             >
@@ -397,16 +403,16 @@ export const UserManagement: React.FC = () => {
 
       {/* CREATE USER MODAL */}
       {showCreateModal && (
-        <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div ref={createDialog} role="dialog" aria-modal="true" aria-labelledby="create-user-title" className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content shadow">
               <div className="modal-header">
-                <h5 className="modal-title fw-bold">Create New User Account</h5>
-                <button type="button" className="btn-close" onClick={() => setShowCreateModal(false)}></button>
+                <h2 id="create-user-title" className="modal-title h5 fw-bold">Create New User Account</h2>
+                <button type="button" className="btn-close" aria-label="Close dialog" disabled={createBusy} onClick={() => setShowCreateModal(false)}></button>
               </div>
               <form onSubmit={handleCreateSubmit}>
                 <div className="modal-body">
-                  {createError && <div className="alert alert-danger small p-2 mb-3">{createError}</div>}
+                  {createError && <div role="alert" className="alert alert-danger small p-2 mb-3">{createError}</div>}
 
                   <div className="mb-3">
                     <label htmlFor="createName" className="form-label small fw-bold text-muted">Full Name *</label>
@@ -474,7 +480,7 @@ export const UserManagement: React.FC = () => {
                 </div>
 
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowCreateModal(false)}>
+                  <button type="button" className="btn btn-secondary btn-sm" disabled={createBusy} onClick={() => setShowCreateModal(false)}>
                     Cancel
                   </button>
                   <button type="submit" className="btn btn-zen-primary btn-sm" disabled={createBusy}>
@@ -489,16 +495,16 @@ export const UserManagement: React.FC = () => {
 
       {/* EDIT USER MODAL */}
       {editingUser && (
-        <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div ref={editDialog} role="dialog" aria-modal="true" aria-labelledby="edit-user-title" className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content shadow">
               <div className="modal-header">
-                <h5 className="modal-title fw-bold">Edit User Account</h5>
-                <button type="button" className="btn-close" onClick={() => setEditingUser(null)}></button>
+                <h2 id="edit-user-title" className="modal-title h5 fw-bold">Edit User Account</h2>
+                <button type="button" className="btn-close" aria-label="Close dialog" disabled={editBusy} onClick={() => setEditingUser(null)}></button>
               </div>
               <form onSubmit={handleEditSubmit}>
                 <div className="modal-body">
-                  {editError && <div className="alert alert-danger small p-2 mb-3">{editError}</div>}
+                  {editError && <div role="alert" className="alert alert-danger small p-2 mb-3">{editError}</div>}
 
                   <div className="mb-3">
                     <label htmlFor="editName" className="form-label small fw-bold text-muted">Full Name *</label>
@@ -553,7 +559,7 @@ export const UserManagement: React.FC = () => {
                 </div>
 
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => setEditingUser(null)}>
+                  <button type="button" className="btn btn-secondary btn-sm" disabled={editBusy} onClick={() => setEditingUser(null)}>
                     Cancel
                   </button>
                   <button type="submit" className="btn btn-zen-primary btn-sm" disabled={editBusy}>
@@ -568,12 +574,12 @@ export const UserManagement: React.FC = () => {
 
       {/* RESET PASSWORD MODAL */}
       {resetUser && (
-        <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div ref={resetDialog} role="dialog" aria-modal="true" aria-labelledby="reset-user-title" className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content shadow">
               <div className="modal-header">
-                <h5 className="modal-title fw-bold">Reset Initial Password</h5>
-                <button type="button" className="btn-close" onClick={() => setResetUser(null)}></button>
+                <h2 id="reset-user-title" className="modal-title h5 fw-bold">Reset Initial Password</h2>
+                <button type="button" className="btn-close" aria-label="Close dialog" disabled={resetBusy} onClick={() => setResetUser(null)}></button>
               </div>
               <form onSubmit={handleResetSubmit}>
                 <div className="modal-body">
@@ -581,7 +587,7 @@ export const UserManagement: React.FC = () => {
                     Assign a new initial password for <strong>{resetUser.name}</strong>. The user will be required to change it upon next login.
                   </div>
 
-                  {resetError && <div className="alert alert-danger small p-2 mb-3">{resetError}</div>}
+                  {resetError && <div role="alert" className="alert alert-danger small p-2 mb-3">{resetError}</div>}
 
                   <div className="mb-3">
                     <label htmlFor="resetPassword" className="form-label small fw-bold text-muted">New Initial Password *</label>
@@ -598,7 +604,7 @@ export const UserManagement: React.FC = () => {
                 </div>
 
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => setResetUser(null)}>
+                  <button type="button" className="btn btn-secondary btn-sm" disabled={resetBusy} onClick={() => setResetUser(null)}>
                     Cancel
                   </button>
                   <button type="submit" className="btn btn-zen-primary btn-sm" disabled={resetBusy}>

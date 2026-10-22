@@ -1,3 +1,4 @@
+import { useDialogAccessibility } from "../hooks/useDialogAccessibility";
 import { safeFailure } from "../utils/safeFailure";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActionsTaken } from "./ActionsTaken";
@@ -40,6 +41,7 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
   const [resolveCommentText, setResolveCommentText] = useState("");
   const [submittingResolve, setSubmittingResolve] = useState(false);
   const [resolveError, setResolveError] = useState("");
+  const resolutionDialog = useDialogAccessibility(showResolveModal, () => { if (!submittingResolve) setShowResolveModal(false); });
   const [resolveSuccess, setResolveSuccess] = useState("");
 
   const loadTicket = useCallback(async (isInitial = false) => {
@@ -170,7 +172,7 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
       case "WAITING_FOR_REQUESTER":
       case "PENDING":
         return (
-          <span className="badge rounded-pill" style={{ ...commonStyle, backgroundColor: "#FEF3C7", color: "#D97706" }}>
+          <span className="badge rounded-pill" style={{ ...commonStyle, backgroundColor: "#FEF3C7", color: "#92400E" }}>
             WAITING FOR REQUESTER
           </span>
         );
@@ -207,13 +209,13 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
         );
       case "HIGH":
         return (
-          <span className="badge rounded-pill" style={{ ...commonStyle, backgroundColor: "#FEE2E2", color: "#DC2626", border: "1px solid #FCA5A5" }}>
+          <span className="badge rounded-pill" style={{ ...commonStyle, backgroundColor: "#FEE2E2", color: "#B42318", border: "1px solid #FCA5A5" }}>
             HIGH
           </span>
         );
       case "MEDIUM":
         return (
-          <span className="badge rounded-pill" style={{ ...commonStyle, backgroundColor: "#FEF3C7", color: "#D97706", border: "1px solid #FDE68A" }}>
+          <span className="badge rounded-pill" style={{ ...commonStyle, backgroundColor: "#FEF3C7", color: "#92400E", border: "1px solid #FDE68A" }}>
             MEDIUM
           </span>
         );
@@ -433,11 +435,9 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
             Add Public Comment <span className="text-muted font-normal">(3–1000 characters)</span>
           </label>
 
-          {commentError && <div className="alert alert-danger p-2 small mb-2">{commentError}</div>}
-
           <div className="mb-2">
             <textarea
-              id="newComment"
+              id="newComment" aria-invalid={!!commentError} aria-describedby={commentError ? "public-comment-error" : undefined}
               className="form-control form-control-sm"
               rows={3}
               placeholder="Type your comment here..."
@@ -446,6 +446,7 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
               disabled={postingComment}
               maxLength={1000}
             ></textarea>
+            {commentError && <p id="public-comment-error" role="alert" className="text-danger small">{commentError}</p>}
             <div className="d-flex justify-content-between text-muted small mt-1">
               <span>Publicly visible to IT Staff and Administrators</span>
               <span>{newCommentText.length}/1000</span>
@@ -465,12 +466,12 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
 
       {/* Problem Appears Resolved Modal */}
       {showResolveModal && (
-        <div className="modal d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }} role="dialog">
+        <div ref={resolutionDialog} aria-modal="true" aria-labelledby="resolution-dialog-title" className="modal d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }} role="dialog">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow">
               <div className="modal-header text-white" style={{ backgroundColor: "#006B3C" }}>
-                <h5 className="modal-title h6 fw-bold">Indicate Problem Appears Resolved</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowResolveModal(false)}></button>
+                <h2 id="resolution-dialog-title" className="modal-title h6 fw-bold">Indicate Problem Appears Resolved</h2>
+                <button type="button" className="btn-close btn-close-white" aria-label="Close dialog" disabled={submittingResolve} onClick={() => setShowResolveModal(false)}></button>
               </div>
               <form onSubmit={handleIndicateResolved}>
                 <div className="modal-body">
@@ -478,14 +479,12 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
                     Please provide details explaining how the issue appears resolved. This resolution comment will be sent to IT Staff for review.
                   </p>
 
-                  {resolveError && <div className="alert alert-danger p-2 small mb-2">{resolveError}</div>}
-
                   <div className="mb-3">
                     <label htmlFor="resolveComment" className="form-label fw-semibold small">
                       Resolution Comment <span className="text-danger">*</span>
                     </label>
                     <textarea
-                      id="resolveComment"
+                      id="resolveComment" aria-required="true" aria-invalid={!!resolveError} aria-describedby={resolveError ? "resolve-comment-error" : undefined}
                       className="form-control"
                       rows={4}
                       placeholder="Describe what resolved the issue..."
@@ -496,6 +495,7 @@ export const RequesterTicketDetail: React.FC<RequesterTicketDetailProps> = ({
                       minLength={3}
                       maxLength={1000}
                     ></textarea>
+                    {resolveError && <p id="resolve-comment-error" role="alert" className="text-danger small">{resolveError}</p>}
                     <div className="text-end text-muted small mt-1">{resolveCommentText.length}/1000</div>
                   </div>
                 </div>

@@ -246,3 +246,25 @@ Current execution, exact commands, failures, scope and acceptance verdict: [issu
 | Integrated E2E/screenshots / AC-24 | Issue 27; existing reusable-server config remains unsafe for development data | DEFERRED, not executed |
 
 Do not enable retries, broaden accepted statuses or add arbitrary delays to address unexplained failures. Workflow matrix failures now record response body/path, current account state, Ticket record and database/schema. Future reproduction must distinguish HTTP/session transport, fixture state and application behavior before proposing a correction.
+
+## Issue 26 initial frontend verification (2026-10-23; before independent-audit corrections)
+
+The original Issue 18 matrix remains historical. The initial STYLE-01 and RESP-A11Y-01 frontend checks passed but missed the later independent-audit findings; [issue-26-verification.md](issue-26-verification.md) provides exact commands, source/run fingerprints, logs, completed visual inspection and the Issue 27 handoff.
+
+| Test ID / acceptance | Actual coverage | Executed result |
+| --- | --- | --- |
+| STYLE-01 / FR-18, BR-25, AC-23 | New `client/tests/lab-04/ZenGreenStyle.test.tsx` (6 semantic/state cases); real computed tokens, contrast, editable/read-only and focus styles in new `e2e/lab-04/accessibility-responsive.spec.ts` | PASS; JSDOM is not used as layout/computed-browser proof |
+| RESP-A11Y-01 / AC-20, AC-23 | New browser spec and `fixtures/accessibility.ts`; isolated `playwright.accessibility.config.ts`; role/viewports, all 21 metric keyboard controls, dialog behavior, feedback/retry, long content, overflow/breakpoints, accessible names, mobile targets and measured real 200%/400% browser zoom | 78 PASS, no skips or retries; final vertical-dialog/capture checks 3 PASS |
+| Current inherited/Lab 4 client regression / AC-22 frontend support | Complete existing client suite plus the new style file | 28 files / 249 PASS; existing assertions retained |
+| Type/build gate | Client `tsc --noEmit`, browser/config typing with existing Node types, production build into temporary output | PASS |
+| Manual visual checklist / AC-23 | Actual desktop/tablet/mobile dashboard/Action, validation/read-only, focused-dialog and zoom capture inspection by Codex | Completed; not a human reviewer or spoken-screen-reader certification |
+| ART-01 / AC-24 and E2E-ACT/WF/DASH | Canonical Lab 4 screenshots, manifest and backend-integrated journeys | Still Issue 27; not completed by intercepted UI tests |
+
+Raw successful logs and a run/source record are stored in `artifacts/lab-04/regression/issue-26/`. Asserted screenshots remain in per-run `test-results/lab-04-accessibility/` output. Earlier-lab screenshots remain unchanged. `npm run test:a11y` starts only its own frontend and blocks unexpected API calls; it does not use development services or replace the still-unsafe historical integrated E2E command. No server, migration, seed or real-account operation was performed for Issue 26.
+
+
+## Issue 26 independent-audit correction gate (2026-10-23)
+
+The original 78-case browser result above is historical. Six new scenarios in `e2e/lab-04/accessibility-responsive.spec.ts`, repeated at all three configured viewports, cover successful-removal focus; header contrast with element/ancestor-opacity negative controls; each Admin create/edit/reset pending-dismissal policy; and Create Ticket accessible names plus form/success/reset heading focus. The `ZenGreenStyle.test.tsx` saving-state test awaits the asynchronous assignee update; its six-case scope is unchanged.
+
+The expanded contrast helper scans the rendered shell/header and content instead of only main. These remain targeted, intercepted frontend checks, not general WCAG certification or backend/DB integration. Current commands, results and source fingerprints are recorded in `issue-26-verification.md`: **96 browser cases PASS** (zero skips/retries), **249 client tests PASS** (zero act warnings), client/browser typing and production build PASS, diff check PASS. Initial evidence is retained; current logs/source identity are under `artifacts/lab-04/regression/issue-26/audit-corrections/`. AC-20/23 receive the focused corrections; AC-22 receives client-only support; AC-24, real integrated journeys and final-main release verification remain Issues 27–28.
