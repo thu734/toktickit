@@ -41,7 +41,7 @@ Commands:
 
 - `npm test --prefix client -- --reporter=dot`
 - `./client/node_modules/.bin/tsc --noEmit -p client/tsconfig.json`
-- `npm run build --prefix client -- --outDir /tmp/issue26-client-build`
+- `npm run build --prefix client -- --outDir /private/tmp/issue26-fixes-build`
 - `npm run test:a11y`
 - `git diff --check`
 
@@ -74,38 +74,19 @@ The historical Playwright suites still use reusable servers and historical scree
 | Handout §10 and submission Part 3 traceability | Concrete test files, commands, results and source/run identity |
 | AC-24 / screenshot submission completion | Issue 27 remains responsible; not claimed complete here |
 
-## Initial executed results and source identity (before independent audit)
+## Verification history
 
-All results below were executed on 2026-10-23, on uncommitted Issue 26 work based on `3e6b3b185c1da7bcd1c74fb171d23b542dd83896`. Branch: `feature/26-lab4-accessibility-responsive`. No commit, push or PR was created.
+The initial 78-case browser suite passed but missed five findings identified by independent review. The corrected 96-case complete run below supersedes those earlier results as the current Issue 26 evidence. Superseded raw logs and metadata are not part of the retained branch evidence; local copies may remain for reference.
 
-| Check | Result |
-| --- | --- |
-| Complete current client suite | **28 files / 249 tests PASS** |
-| Client TypeScript `--noEmit` | **PASS** |
-| Browser/config TypeScript check | **PASS**, using the already-installed server Node type definitions; no dependency added |
-| Production client build | **PASS**, output isolated under `/tmp/issue26-client-build` |
-| Complete Issue 26 browser matrix | **78 PASS**, zero skips, zero retries; run `1792696981542-72571` |
-| Final dialog vertical bounds / viewport captures | **3 PASS**; run `1792697138574-73235` |
-| Diff whitespace check | **PASS** |
-| Historical Lab 1–3 artifacts | **No changes** |
+Only the four final corrected evidence files linked below are retained. Screenshots remain run-local verification output, not canonical AC-24 submission evidence. Historical Lab 1–3 screenshots were neither regenerated nor edited. Server suites were not rerun for this frontend-only work; prior server results remain dated Issue 25 evidence.
 
-The final three checks added vertical containment assertions and replaced locator-clipped fixed-dialog screenshots with actual viewport captures after inspection found misleading crops. Product code did not change after the complete 78-case passing run. Final screenshot/test-source changes were verified across desktop/tablet/mobile.
-
-Durable logs and run metadata are in [`artifacts/lab-04/regression/issue-26/`](../../artifacts/lab-04/regression/issue-26/): `client.txt`, `browser.txt`, `build.txt`, `dialog-viewport.txt`, and `verification-run.json`. The JSON records the base revision, dirty-worktree status, run IDs, fingerprint rule and per-source-file hashes. Complete-run source fingerprint: `d24acf2b1cc2c356c3a450844963d5a37ec1df621f2ecbe72f4d5221a6814fa3`; final fingerprint after the dialog evidence correction: `80bb3cfa857733f87dd08127d521203bfafd7d312a74123b3460df7291f0efac`.
-
-Screenshots remain under `test-results/lab-04-accessibility/<run>/`. They are deliberately excluded from canonical submission folders. Original screenshots were neither regenerated nor edited. Server suites were not rerun for this frontend-only change; prior server results remain the dated Issue 25 record, not fresh Issue 26 evidence.
-
-## Initial visual/accessibility checklist (subsequently qualified by independent audit)
+## Visual inspection checklist
 
 Visual inspection was performed by Codex on actual asserted browser captures; this is not a fabricated human reviewer approval or a screen-reader certification. The automated keyboard/focus/geometry/style checks above provide separate evidence.
 
 - [x] **Hierarchy, density and layout:** Requester four/two/one-card arrangement, Staff operational summaries/breakdowns/previews and Actions list remain coherent at desktop/tablet/mobile. Long content wraps and essential fields remain readable. Ordinary profile pills retain their capsule shape; wrapped profiles cap the corner radius so text stays inside the border. Mobile ticket links retain left alignment.
 - [x] **Focus, validation, zoom and obstruction:** visible green focus rings, invalid-field feedback directly below controls, dialog controls/footer inside the viewport, long forms and 200% zoom captures inspected. Fixed-overlay screenshots use viewport coordinates. No obvious clipping or overlapping controls observed in these scenarios.
 - [x] **State clarity:** read-only shading versus editable white fields, automatic attribution, Action status/follow-up text, shared Actions and private-note cues remain distinguishable without color alone. Retained conflict forms preserve entered values and explain recovery.
-
-The original assertions for these scenarios passed, but independent review found missing successful-removal, pending-dismissal, header-contrast and Create Ticket coverage. The correction results below supersede the original completion claim. Actual spoken screen-reader announcements and full integrated backend journeys are not claimed by these checks.
-
-The initial passing suite did not close all frontend acceptance findings: independent review subsequently identified the five gaps recorded below. The correction run supplies the current result. AC-24, canonical screenshot publication, integrated journeys and final-main release verification remain Issues 27–28.
 
 
 ## Independent-audit corrections (2026-10-23)
@@ -144,4 +125,4 @@ Six new scenarios produce eighteen additional browser cases. During test authori
 
 Fresh desktop Requester/tablet Admin captures and the mobile focused-dialog capture were inspected by Codex for preserved layout, active navigation treatment and focus visibility. This is not human reviewer sign-off. Final human judgment of ordinary-content density/readability and any claimed spoken screen-reader behavior remains separate.
 
-Logs and current source identity are in [`audit-corrections/`](../../artifacts/lab-04/regression/issue-26/audit-corrections/): `client.txt`, `browser.txt`, `build.txt`, and `verification-run.json`. Initial logs/metadata remain unchanged as historical evidence. The correction fingerprint is `c8c8ba2a8cc3ff683c2786904f913b772cc37c2106459d70aba4cedbcdfff95b`. Screenshots remain run-local under `test-results/lab-04-accessibility/1792701222453-79383/`, not canonical AC-24 submission evidence. These results support only the stated frontend acceptance scope; integrated authorization, persistence, database workflows, canonical screenshots and final release remain later verification.
+Final retained evidence: [client.txt](../../artifacts/lab-04/regression/issue-26/audit-corrections/client.txt), [browser.txt](../../artifacts/lab-04/regression/issue-26/audit-corrections/browser.txt), [build.txt](../../artifacts/lab-04/regression/issue-26/audit-corrections/build.txt), and [verification-run.json](../../artifacts/lab-04/regression/issue-26/audit-corrections/verification-run.json). These are the corrected complete-run logs and source/run record; superseded intermediate artifacts are excluded. The correction fingerprint is `c8c8ba2a8cc3ff683c2786904f913b772cc37c2106459d70aba4cedbcdfff95b`. Screenshots remain run-local under `test-results/lab-04-accessibility/1792701222453-79383/`, not canonical AC-24 submission evidence. These results support only the stated frontend acceptance scope; integrated authorization, persistence, database workflows, canonical screenshots and final release remain later verification.
