@@ -123,6 +123,7 @@ function ActionsPanel({ ticketId, ticketStatus, onRefreshTicket, workflowRevisio
 
   return <section className="actions-taken card p-3 mt-3" aria-labelledby={`actions-heading-${ticketId}`}>
     <h2 id={`actions-heading-${ticketId}`} ref={heading} tabIndex={-1} className="h4">Actions Taken</h2>
+    {!canWrite && <p>Actions are read-only for Requesters.</p>}
     {canWrite && <p className="text-muted small">Actions Taken are shared with the Requester. Private information belongs in Internal Notes.</p>}
     {terminal && <p>{ticketStatus === 'CANCELLED' ? 'This Ticket is cancelled. Actions are read-only.' : 'Reopen this Ticket before adding or correcting Actions.'}</p>}
     {loading && <p role="status">{revision === null ? 'Loading Actions…' : 'Refreshing Actions…'}</p>}
@@ -136,8 +137,8 @@ function ActionsPanel({ ticketId, ticketStatus, onRefreshTicket, workflowRevisio
     {uncertain && <button className="btn btn-outline-success" disabled={busy || !canWrite || loading} onClick={() => void save(createAttempt.current!, true)}>Retry same create request</button>}
     {!loading && !readError && revision !== null && actions.length === 0 && <p>No Actions Taken yet.</p>}
     <ol className="action-list">
-      {ordered.map(action => <li key={action.id} className="action-item" role="article" aria-label={`Action ${action.id}`}>
-        <h3 className="h5">Action #{action.id} — {action.status}</h3>
+      {ordered.map(action => <li key={action.id} className="action-item" aria-label={`Action ${action.id}`}>
+        <article aria-label={`Action ${action.id}`}><h3 className="h5">Action #{action.id} — {action.status}</h3>
         <dl><dt>Action Date/Time</dt><dd><time dateTime={action.createdAt}>{new Date(action.createdAt).toLocaleString()}</time></dd>
           <dt>Action Description</dt><dd>{action.description}</dd><dt>Result</dt><dd>{action.result || 'Not recorded'}</dd>
           <dt>Performed by</dt><dd>{action.performedBy.name}</dd><dt>Assigned to</dt><dd>{action.assignedTo ? `${action.assignedTo.name}${action.assignedTo.isActive ? '' : ' (inactive)'}` : 'Unassigned'}</dd>
@@ -145,7 +146,7 @@ function ActionsPanel({ ticketId, ticketStatus, onRefreshTicket, workflowRevisio
           {(action.followUpRequired || action.followUpNote) && <><dt>Follow-up Note</dt><dd>{action.followUpNote || 'Not recorded'}</dd></>}
           <dt>Attachment Notes</dt><dd>{action.attachmentNotes || 'None'}</dd></dl>
         {writable && action.status !== 'CANCELLED' && <button className="btn btn-outline-success" disabled={!!editing || busy || loading || !!readError} onClick={() => begin(action)}>{action.status === 'COMPLETED' ? 'Correct completed Action' : 'Edit Action'}</button>}
-        {action.status === 'CANCELLED' && <p>Cancelled Actions cannot be edited.</p>}
+        {action.status === 'CANCELLED' && <p>Cancelled Actions cannot be edited.</p>}</article>
       </li>)}
     </ol>
     {writable && !editing && <button className="btn btn-success" disabled={loading || revision === null || !!readError} onClick={() => begin('new')}>Add Action</button>}

@@ -257,7 +257,7 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
               ...commonStyle,
               backgroundColor: "#FEE2E2",
               borderColor: "#FCA5A5",
-              color: "#DC2626",
+              color: "#B42318",
             }}
           >
             HIGH
@@ -288,7 +288,7 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
               ...commonStyle,
               backgroundColor: "#FEF3C7",
               borderColor: "#FDE68A",
-              color: "#D97706",
+              color: "#92400E",
             }}
           >
             MEDIUM
@@ -363,7 +363,7 @@ export const MyTicketsList: React.FC<MyTicketsListProps> = ({
               ...commonStyle,
               backgroundColor: "#FEF3C7",
               borderColor: "#FDE68A",
-              color: "#D97706",
+              color: "#92400E",
             }}
           >
             PENDING

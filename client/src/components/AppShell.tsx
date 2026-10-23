@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { ChangePassword } from "./ChangePassword";
 
@@ -24,6 +24,23 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
     finally { logoutPending.current = false; setLoggingOut(false); }
   };
 
+  const profileTrigger = useRef<HTMLButtonElement>(null);
+  const main = useRef<HTMLElement>(null);
+  useEffect(() => {
+    // Navigation replaces content without changing the URL: place keyboard
+    // focus on the new page heading once asynchronous content arrives.
+    const focusHeading = () => {
+      if (main.current?.contains(document.activeElement) && document.activeElement !== main.current) return true;
+      const heading = main.current?.querySelector<HTMLElement>('h1');
+      if (!heading) return false;
+      heading.tabIndex = -1; heading.focus(); return true;
+    };
+    if (focusHeading()) return;
+    const observer = new MutationObserver(() => { if (focusHeading()) observer.disconnect(); });
+    if (main.current) observer.observe(main.current, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [currentTab, showChangePasswordModal]);
+
   if (!user) return <>{children}</>;
 
   const getRoleBadge = (role: string) => {
@@ -40,31 +57,33 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
   };
 
   return (
-    <div className="d-flex flex-column min-vh-100 bg-light">
+    <div className="app-shell d-flex flex-column min-vh-100 bg-light">
       <header className="navbar navbar-expand-lg navbar-dark shadow-sm py-2" style={{ backgroundColor: "#006B3C" }}>
         <div className="container-fluid px-4">
-          <a className="navbar-brand d-flex align-items-center fw-bold fs-4" href="#" onClick={(e) => { e.preventDefault(); onTabChange("my-tickets"); }}>
+          <a className="navbar-brand d-flex align-items-center fw-bold fs-4" href="#" onClick={(e) => { e.preventDefault(); onTabChange(user.role === "REQUESTER" ? "my-tickets" : user.role === "ADMINISTRATOR" ? "user-management" : "ticket-queue"); }}>
             <span className="me-2">🕒</span> TokTickIT
           </a>
 
-          <div className="navbar-nav me-auto flex-row ms-4">
+          <nav aria-label="Main navigation" className="navbar-nav me-auto flex-row ms-4">
             {user.role === "REQUESTER" && (
               <>
                 <button
-                  className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "requester-dashboard" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
+                  className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "requester-dashboard" ? "fw-bold border-bottom border-2 border-white" : ""}`}
                   aria-current={currentTab === "requester-dashboard" ? "page" : undefined}
                   onClick={() => onTabChange("requester-dashboard")}
                 >
                   Dashboard
                 </button>
                 <button
-                  className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "my-tickets" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
+                  className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "my-tickets" ? "fw-bold border-bottom border-2 border-white" : ""}`}
+                  aria-current={currentTab === "my-tickets" ? "page" : undefined}
                   onClick={() => onTabChange("my-tickets")}
                 >
                   📋 My Tickets
                 </button>
                 <button
-                  className={`btn btn-link nav-link text-white text-decoration-none ${currentTab === "create-ticket" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
+                  className={`btn btn-link nav-link text-white text-decoration-none ${currentTab === "create-ticket" ? "fw-bold border-bottom border-2 border-white" : ""}`}
+                  aria-current={currentTab === "create-ticket" ? "page" : undefined}
                   onClick={() => onTabChange("create-ticket")}
                 >
                   ➕ Create Ticket
@@ -73,7 +92,7 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
             )}
 
             {(user.role === "IT_STAFF" || user.role === "ADMINISTRATOR") && (
-              <button className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "staff-dashboard" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
+              <button className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "staff-dashboard" ? "fw-bold border-bottom border-2 border-white" : ""}`}
                 aria-current={currentTab === "staff-dashboard" ? "page" : undefined} onClick={() => onTabChange("staff-dashboard")}>
                 Dashboard
               </button>
@@ -81,8 +100,9 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
 
             {user.role === "IT_STAFF" && (
               <button
-                className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "ticket-queue" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
-                onClick={() => onTabChange("ticket-queue")}
+                className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "ticket-queue" ? "fw-bold border-bottom border-2 border-white" : ""}`}
+                aria-current={currentTab === "ticket-queue" ? "page" : undefined}
+                  onClick={() => onTabChange("ticket-queue")}
               >
                 📥 Ticket Queue
               </button>
@@ -91,24 +111,30 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
             {user.role === "ADMINISTRATOR" && (
               <>
                 <button
-                  className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "ticket-queue" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
+                  className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "ticket-queue" ? "fw-bold border-bottom border-2 border-white" : ""}`}
+                  aria-current={currentTab === "ticket-queue" ? "page" : undefined}
                   onClick={() => onTabChange("ticket-queue")}
                 >
                   📥 Ticket Queue
                 </button>
                 <button
-                  className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "user-management" ? "fw-bold border-bottom border-2 border-white" : "opacity-75"}`}
+                  className={`btn btn-link nav-link me-3 text-white text-decoration-none ${currentTab === "user-management" ? "fw-bold border-bottom border-2 border-white" : ""}`}
+                  aria-current={currentTab === "user-management" ? "page" : undefined}
                   onClick={() => onTabChange("user-management")}
                 >
                   👥 User Management
                 </button>
               </>
             )}
-          </div>
+          </nav>
 
-          <div className="position-relative">
+          <div className="position-relative profile-container" onKeyDown={event => {
+            if (event.key === "Escape" && showProfileMenu) { setShowProfileMenu(false); profileTrigger.current?.focus(); }
+          }} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setShowProfileMenu(false); }}>
             <button
-              className="btn btn-outline-light d-flex align-items-center rounded-pill px-3 py-1"
+              ref={profileTrigger}
+              aria-expanded={showProfileMenu} aria-controls="profile-disclosure"
+              className="profile-trigger btn btn-outline-light d-flex align-items-center rounded-pill px-3 py-1"
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               aria-label="User profile menu"
             >
@@ -120,7 +146,8 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
 
             {showProfileMenu && (
               <div
-                className="position-absolute end-0 mt-2 bg-white rounded shadow border py-2 z-3"
+                id="profile-disclosure"
+                className="profile-disclosure position-absolute end-0 mt-2 bg-white rounded shadow border py-2 z-3"
                 style={{ minWidth: "200px" }}
               >
                 <div className="px-3 py-2 border-bottom">
@@ -153,7 +180,7 @@ export const AppShell: React.FC<AppShellProps> = ({ currentTab, onTabChange, chi
         {logoutError} <button className="btn btn-outline-danger" disabled={loggingOut} onClick={() => void handleLogout()}>Retry sign out</button>
       </div>}
 
-      <main className="flex-grow-1">
+      <main ref={main} className="flex-grow-1">
         {showChangePasswordModal ? (
           <div className="container py-4">
             <button

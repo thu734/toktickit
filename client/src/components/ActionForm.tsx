@@ -36,6 +36,7 @@ interface Props {
 }
 export function ActionForm({ original, performer, busy, blocked, lockDiscard, onSave, onClose }: Props) {
   const [draft, setDraft] = useState(() => draftFor(original));
+  const [terminalAttempt, setTerminalAttempt] = useState(false);
   const [errors, setErrors] = useState<ReturnType<typeof validateDraft>>({});
   const [staff, setStaff] = useState<StaffUser[]>([]);
   const [staffState, setStaffState] = useState<"loading" | "ready" | "error">("loading");
@@ -51,10 +52,11 @@ export function ActionForm({ original, performer, busy, blocked, lockDiscard, on
       .catch(() => { if (active) setStaffState("error"); });
     return () => { active = false; };
   }, [attempt, completed]);
-  useEffect(() => { form.current?.querySelector<HTMLTextAreaElement>("textarea:not([disabled])")?.focus(); }, []);
+  useEffect(() => { form.current?.querySelector<HTMLTextAreaElement>("textarea:not([disabled]):not([readonly])")?.focus(); }, []);
   const submit = (event: FormEvent, status?: "COMPLETED" | "CANCELLED") => {
     event.preventDefault();
     if (busy || blocked) return;
+    setTerminalAttempt(completed || !!status);
     const validation = validateDraft(draft, completed || !!status);
     setErrors(validation);
     const first = Object.keys(validation)[0];
@@ -64,8 +66,9 @@ export function ActionForm({ original, performer, busy, blocked, lockDiscard, on
     onSave(changes, draft);
   };
   const text = (key: "description" | "result" | "followUpNote" | "attachmentNotes", label: string, readOnly = false) => <div className="mb-3">
-    <label className="form-label" htmlFor={`${prefix}-${key}`}>{label}</label>
-    <textarea id={`${prefix}-${key}`} className="form-control" rows={3} value={draft[key]} readOnly={readOnly}
+    <label className="form-label" htmlFor={`${prefix}-${key}`}>{label}</label>{(key === "description" || (key === "result" && (completed || terminalAttempt)) || (key === "followUpNote" && draft.followUpRequired)) && <span className="text-danger" aria-hidden="true"> *</span>}
+    <textarea id={`${prefix}-${key}`} className={`form-control${errors[key] ? " is-invalid" : ""}`} rows={3} value={draft[key]} readOnly={readOnly}
+      aria-required={key === "description" || (key === "result" && (completed || terminalAttempt)) || (key === "followUpNote" && draft.followUpRequired)}
       aria-invalid={!!errors[key]} aria-describedby={errors[key] ? `${prefix}-${key}-error` : undefined}
       onChange={e => setDraft({ ...draft, [key]: e.target.value })} />
     {errors[key] && <p id={`${prefix}-${key}-error`} className="text-danger" role="alert">{errors[key]}</p>}
@@ -73,6 +76,8 @@ export function ActionForm({ original, performer, busy, blocked, lockDiscard, on
   return <form ref={form} aria-label={original ? "Edit Action" : "Create Action"} onSubmit={submit} className="border rounded p-3 my-3" noValidate>
     <h3 className="h6">{completed ? "Correct completed Action" : original ? "Edit Action" : "Create Action"}</h3>
     <p>Performed by: {original?.performedBy.name || performer}<br />Created: {original ? new Date(original.createdAt).toLocaleString() : "Assigned automatically when saved"}</p>
+    <p className="small text-muted">Description is required. Result is required to complete or cancel an Action. Follow-Up Note is required when follow-up is selected.</p>
+    {busy && <p role="status">Saving Action…</p>}
     <fieldset disabled={busy || blocked}>
       {text("description", "Description", completed)}
       {text("result", "Result")}

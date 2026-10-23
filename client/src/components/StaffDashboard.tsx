@@ -96,7 +96,7 @@ function DashboardContent({ onNavigateTickets, onOpenTicket }: Props) {
               <button type="button" className="btn btn-link p-0 text-start" aria-label={`Open Action ${action.id} on Ticket ${action.ticket.ticketNumber}`}
                 onClick={() => onOpenTicket(action.ticket.id, true)}>View Actions — {action.ticket.ticketNumber}</button>
               <p className="small my-1">{statusLabels[action.ticket.currentStatus]}</p>
-              {['CLOSED', 'CANCELLED'].includes(action.ticket.currentStatus) && <p className="small text-muted mb-0">Actions on this Ticket are read-only.</p>}
+              {['RESOLVED', 'CLOSED', 'CANCELLED'].includes(action.ticket.currentStatus) && <p className="small text-muted mb-0">Actions on this Ticket are read-only.</p>}
             </li>)}</ul>}
         </div></section>
       </div>

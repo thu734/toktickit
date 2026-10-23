@@ -139,16 +139,16 @@ For each dashboard and Action/Ticket mode define: loading, saving, success, fiel
 R/I: semantic labels/headings; keyboard-operable links/buttons; visible focus; no color-only statuses; understandable validation; clear private/shared labels; readable long text; no clipping/overlap/horizontal page scroll; accessible modal dialogs.
 A verification choices: desktop 1280x720, tablet 800x900, mobile 390x844 inherited evidence sizes; additional narrow-width/zoom checks. Test focus entry/trapping/Escape/restoration where dialogs are used and announce meaningful status/error feedback. Record computed styles and geometry in browser tests; screenshot presence alone is not proof of accessibility or overflow correctness.
 
-Visual checklist (all pending future execution):
+Issue 26 frontend checklist executed 2026-10-23; see [verification record](issue-26-verification.md) for actual runs, visual inspection and limits. Canonical integrated screenshots remain Issue 27 work:
 
-- [ ] Zen Green tokens and existing component conventions consistent.
-- [ ] Dashboard labels/counts/drill-downs agree with the API contract.
-- [ ] Action attribution, assignment, follow-up and editable/read-only fields clear.
-- [ ] Private Internal Notes visually distinct from shared Action content.
-- [ ] Keyboard navigation and focus/validation announcements verified.
-- [ ] Dialog focus and recoverable form data verified.
-- [ ] Desktop/tablet/mobile long-content states free of clipping, overlap and overflow.
-- [ ] Loading/zero/error/conflict states inspected; no unfinished controls or console errors.
+- [x] Zen Green tokens and existing component conventions consistent.
+- [x] Dashboard presentation and destinations agree with the API contract in current component/UI fixtures; integrated query reconciliation remains Issue 27.
+- [x] Action attribution, assignment, follow-up and editable/read-only fields clear.
+- [x] Private Internal Notes visually distinct from shared Action content.
+- [x] Keyboard navigation, focus and semantic status/error announcement hooks verified; spoken screen-reader output is not claimed.
+- [x] Dialog focus and recoverable form data verified.
+- [x] Desktop/tablet/mobile long-content states free of clipping, overlap and overflow.
+- [x] Loading/zero/error/conflict states inspected; named controls and no uncaught browser runtime errors in verified scenarios.
 
 ## 9. Screenshot Evidence Plan
 
@@ -157,7 +157,7 @@ A capture policy: deterministic scenarios; assert state before capture; no visib
 
 ## 10. Traceability and Approval
 
-FR-01..FR-18 and FR-21 are exercised by AC-01..AC-20 and AC-23..AC-24. [tests.md](tests.md) lists planned UI/style/responsive/E2E paths. D-01 through D-16 are explicitly user-approved; implementation and visual verification remain unexecuted.
+FR-01..FR-18 and FR-21 are exercised by AC-01..AC-20 and AC-23..AC-24. [tests.md](tests.md) distinguishes executed component/transport tests from deferred UI/style/responsive/E2E work. D-01 through D-16 are explicitly user-approved; implementation is covered by automated regression, while final browser accessibility and visual verification remain Issues 26–27.
 
 ## Issue 25 recoverable failures (2026-10-17)
 
@@ -166,3 +166,14 @@ Public Comments and Internal Notes distinguish loading, successful empty data an
 Logout awaits the server result. Failure keeps the current session view with a safe uncertainty message and explicit Retry sign out; concurrent submissions are guarded. A 401 logout response means the session is already unavailable and permits local sign-out. Successful logout still clears identity.
 
 HTTP 5xx diagnostics are removed at the client response boundary; non-JSON failure bodies retain HTTP status and use local fallback messages. Action/Requester Dashboard read failures also reject arbitrary network/server messages from display. Validation/conflict explanations remain available. Staff attachment downloads use the configured VITE_API_URL. Existing Action retry keys, stale-workflow review, input retention, role landings and dashboard metrics remain unchanged. Final browser accessibility/visual verification remains Issue 26.
+
+## Issue 26 verification (2026-10-23)
+
+The initial frontend run passed 78 browser cases and 249 client tests but missed the independent-audit findings. After the five focused corrections, the expanded run passed 96 browser cases and all 249 client tests without act warnings; typing/build/diff checks passed. [issue-26-verification.md](issue-26-verification.md) records scope, actual results, source/run identity and the completed visual checklist. Browser screenshots are asserted run-local verification output; AC-24 and published canonical evidence remain Issue 27.
+
+Accessibility corrections retain the existing palette and layouts: muted text is `#5F6F85` on the page surface; amber badge text uses `#92400E` on `#FEF3C7`; high-priority/reopened red text uses `#B42318` on `#FEE2E2`. The inherited lighter foreground pairings failed measured normal-text contrast. Primary `#006B3C`, focus `#0B7A46`, page/card/read-only backgrounds and badge meanings remain as specified. Read-only Action correction fields are shaded; field errors sit below controls with required/invalid/description associations. Shared/private/read-only cues include text. Dialogs retain their existing operations and add accessible names, focus containment, inert backgrounds, dismissal and restoration.
+
+
+### Independent-review corrections (Issue 26, 2026-10-23)
+
+Successful attachment removal focuses the stable Attachments heading after its original Remove control disappears; cancellation retains opener restoration. Inactive header navigation has full-opacity white text while active-page underline/bold treatment remains. Admin Create/Edit/Reset dialogs prohibit Escape, close and Cancel while their operation is pending. Create Ticket system-generated read-only controls retain their existing labels with explicit label associations; form, success and reset views use a consistent focused h1 with existing visual sizing. These are accessibility/state corrections, not a redesign. The expanded frontend regression evidence and its limits are recorded in the Issue 26 verification report.

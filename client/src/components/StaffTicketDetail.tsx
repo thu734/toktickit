@@ -1,3 +1,4 @@
+import { useDialogAccessibility } from "../hooks/useDialogAccessibility";
 import { attachmentDownloadUrl } from "../apiOrigin";
 import { safeFailure } from "../utils/safeFailure";
 import React, { useEffect, useState, useCallback, useRef } from "react";
@@ -89,6 +90,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   const [selectedStatus, setSelectedStatus] = useState("");
   const [resolutionSummaryInput, setResolutionSummaryInput] = useState("");
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const confirmationDialog = useDialogAccessibility(showConfirmationModal, () => setShowConfirmationModal(false));
   const [pendingStatusChange, setPendingStatusChange] = useState("");
 
   // Tabs: "comments", "notes", "attachments"
@@ -335,14 +337,14 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
       {successBanner && (
         <div className="alert alert-success alert-dismissible fade show" role="alert">
           {successBanner}
-          <button type="button" className="btn-close" onClick={() => setSuccessBanner("")}></button>
+          <button type="button" className="btn-close" aria-label="Dismiss success message" onClick={() => setSuccessBanner("")}></button>
         </div>
       )}
 
       {error && (
         <div className="alert alert-danger alert-dismissible fade show" role="alert">
           {error}
-          <button type="button" className="btn-close" onClick={() => setError("")}></button>
+          <button type="button" className="btn-close" aria-label="Dismiss error message" onClick={() => setError("")}></button>
         </div>
       )}
 
@@ -352,6 +354,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
             <button type="button" className="btn btn-outline-success" disabled={workflowRefreshing || !actionsState || actionsState.workflowRevision !== ticket.workflowRevision}
               onClick={() => setWorkflowConflict(null)}>I have reviewed the latest Ticket</button></>}
       </div>}
+      <h1 className="h3 mb-3" style={{ color: "#006B3C" }}>Ticket Detail</h1>
       <ActionsTaken key={ticketId} ticketId={ticketId} ticketStatus={ticket.currentStatus}
         viewer={{ role: currentUserRole || "REQUESTER", name: currentUserName || "Current signed-in user" }}
         onRefreshTicket={async () => { await refreshTicket(); }} workflowRevision={ticket.workflowRevision}
@@ -363,7 +366,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
         <div className="col-12 col-lg-7">
           <div className="card p-4 surface-card mb-4" style={{ borderColor: "#E2E8F0" }}>
             <div className="d-flex justify-content-between align-items-start mb-2">
-              <h3 className="mb-0" style={{ color: "#006B3C" }}>{ticket.ticketNumber}</h3>
+              <h2 className="h3 mb-0" style={{ color: "#006B3C" }}>{ticket.ticketNumber}</h2>
               <span className="badge badge-pale">{ticket.currentStatus.replace(/_/g, " ")}</span>
             </div>
             <h5 className="mb-3 text-dark">{ticket.summary}</h5>
@@ -396,6 +399,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                   <button
                     type="button"
                     className={`nav-link px-3 py-2 border-0 ${activeTab === "comments" ? "active fw-bold text-success border-bottom border-success border-2" : "text-muted"}`}
+                    aria-pressed={activeTab === "comments"}
                     onClick={() => setActiveTab("comments")}
                   >
                     Public Comments <span className="badge bg-success ms-1">{comments.length}</span>
@@ -405,6 +409,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                   <button
                     type="button"
                     className={`nav-link px-3 py-2 border-0 ${activeTab === "notes" ? "active fw-bold text-warning border-bottom border-warning border-2" : "text-muted"}`}
+                    aria-pressed={activeTab === "notes"}
                     onClick={() => setActiveTab("notes")}
                   >
                     Internal Notes <span className="badge bg-warning text-dark ms-1">{internalNotes.length}</span>
@@ -414,6 +419,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                   <button
                     type="button"
                     className={`nav-link px-3 py-2 border-0 ${activeTab === "attachments" ? "active fw-bold text-primary border-bottom border-primary border-2" : "text-muted"}`}
+                    aria-pressed={activeTab === "attachments"}
                     onClick={() => setActiveTab("attachments")}
                   >
                     Attachments <span className="badge bg-secondary ms-1">{ticket.attachments?.length || 0}</span>
@@ -423,7 +429,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
             </div>
 
             <div className="card-body p-3">
-              {tabError && <div className="alert alert-danger p-2 small mb-3">{tabError}</div>}
+              {tabError && <div role="alert" className="alert alert-danger p-2 small mb-3">{tabError}</div>}
 
               {/* Public Comments Tab */}
               {activeTab === "comments" && (
@@ -453,6 +459,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                       <input
                         type="text"
                         className="form-control form-control-sm"
+                        aria-label="Public comment"
                         placeholder="Write a public comment (3–1000 characters)..."
                         value={newCommentInput}
                         onChange={(e) => setNewCommentInput(e.target.value)}
@@ -473,6 +480,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
               {/* Internal Notes Tab (Amber Background Shading #FEF3C7 per BR-04, FR-16) */}
               {activeTab === "notes" && (
                 <div className="p-3 rounded" style={{ backgroundColor: "#FEF3C7" }}>
+                  <p className="small">Private — visible only to IT Staff and Administrators.</p>
                   <div className="notes-feed mb-3" style={{ maxHeight: "350px", overflowY: "auto" }}>
                     {feedLoading.notes ? <p role="status">Loading internal notes…</p> : feedErrors.notes ?
                       <div role="alert">{feedErrors.notes} <button className="btn btn-outline-secondary" onClick={() => void loadFeed('notes')}>Retry internal notes</button></div> : internalNotes.length === 0 ? (
@@ -498,6 +506,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                       <input
                         type="text"
                         className="form-control form-control-sm"
+                        aria-label="Private Internal Note"
                         placeholder="Write private internal note (3–2000 characters)..."
                         value={newNoteInput}
                         onChange={(e) => setNewNoteInput(e.target.value)}
@@ -564,7 +573,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
             {/* Ownership / Assignment Control */}
             <div className="mb-4">
-              <label className="form-label small fw-bold text-muted">Assigned Owner</label>
+              <label htmlFor="assigned-owner" className="form-label small fw-bold text-muted">Assigned Owner</label>
               <div className="d-flex align-items-center gap-2 mb-2">
                 <span className="fw-bold">
                   {ticket.assignedStaff ? ticket.assignedStaff.name : <span className="text-muted fst-italic">Unassigned</span>}
@@ -583,7 +592,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
               {isStaff && (
                 <div className="input-group input-group-sm">
-                  <select
+                  <select id="assigned-owner"
                     className="form-select"
                     value={ticket.assignedStaffId || "unassigned"}
                     onChange={(e) => handleAssignChange(e.target.value)}
@@ -604,8 +613,8 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
             {/* Requested Priority */}
             <div className="mb-3">
-              <label className="form-label small fw-bold text-muted">Requested Priority</label>
-              <input
+              <label htmlFor="requested-priority" className="form-label small fw-bold text-muted">Requested Priority</label>
+              <input id="requested-priority"
                 type="text"
                 className="form-control form-control-sm text-dark fw-bold"
                 value={ticket.requestedPriority}
@@ -700,12 +709,12 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
       {/* Confirmation Modal for CANCELLED or REOPENED status transitions */}
       {showConfirmationModal && (
-        <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div ref={confirmationDialog} role="dialog" aria-modal="true" aria-labelledby="status-confirmation-title" className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Confirm Status Change</h5>
-                <button type="button" className="btn-close" onClick={() => setShowConfirmationModal(false)}></button>
+                <h2 id="status-confirmation-title" className="modal-title h5">Confirm Status Change</h2>
+                <button type="button" className="btn-close" aria-label="Close dialog" onClick={() => setShowConfirmationModal(false)}></button>
               </div>
               <div className="modal-body">
                 <p className="mb-0">
@@ -713,7 +722,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                 </p>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowConfirmationModal(false)}>
+                <button type="button" className="btn btn-secondary btn-sm" data-dialog-initial onClick={() => setShowConfirmationModal(false)}>
                   Cancel
                 </button>
                 <button type="button" className="btn btn-zen-primary btn-sm" onClick={confirmStatusChange}>
