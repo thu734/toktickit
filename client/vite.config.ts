@@ -21,7 +21,7 @@ export default defineConfig({
       return null;
     },
   }, react()],
-  server: { port: 5173 },
+  server: { host: "localhost", port: 5173, strictPort: true },
   test: {
     environment: "jsdom",
     globals: true,

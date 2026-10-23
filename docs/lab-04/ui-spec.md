@@ -127,8 +127,10 @@ A/D-05: editing appends a minimal audit event, without full revision snapshots; 
 
 ## 6. Ticket Workflow Feedback
 
+Use the user-facing Ticket Number to identify the Staff/Admin Ticket Detail page. Do not display the raw database Ticket ID; internal routes and relationships retain it.
+
 R/I: retain the eight status labels and advisory Requester resolution action. Show only approved transitions and refresh summary status after a successful operation (R).
-A/D-07: when outstanding work blocks resolution, show a permitted explanation and route to relevant Actions; disclose no private/unowned data. An authorized completed-Action follow-up correction can clear the blocker without reopening the Action; use current validated fields when refreshing gate feedback. D-07 applies the same gate to both resolution and closure: any PLANNED or COMPLETED-with-follow-up Action blocks. CANCELLED Actions and zero Actions do not block. Completed corrections require a writable parent Ticket under D-09. D-08 governs zero-action legacy Tickets. Do not auto-complete/cancel Actions or change Ticket status merely from editing fields unless explicitly approved.
+A/D-07: do not show a permanent resolution/closure warning on Ticket view. Once current Actions are loaded, Staff/Admin may select an otherwise permitted RESOLVED/CLOSED target; if outstanding work blocks it, keep Save disabled and show concise, accessible feedback beside Update Status, associated with the select, linking to Actions Taken. Explain completing/cancelling planned work and clearing required follow-up without technical counts; remove the feedback when another target is selected or the blocker clears. Keep these targets unavailable while current Actions are loading/unavailable, retain the submit guard, and keep the backend authoritative; disclose no private/unowned data. An authorized completed-Action follow-up correction can clear the blocker without reopening the Action; use current validated fields when refreshing gate feedback. D-07 applies the same gate to both resolution and closure: any PLANNED or COMPLETED-with-follow-up Action blocks. CANCELLED Actions and zero Actions do not block. Completed corrections require a writable parent Ticket under D-09. D-08 governs zero-action legacy Tickets. Do not auto-complete/cancel Actions or change Ticket status merely from editing fields unless explicitly approved.
 
 ## 7. Meaningful Screen States
 
@@ -152,7 +154,7 @@ Issue 26 frontend checklist executed 2026-10-23; see [verification record](issue
 
 ## 9. Screenshot Evidence Plan
 
-R minimum future folders: artifacts/lab-04/screenshots/staff-dashboard/, requester-dashboard/, actions-taken/. A: desktop.png, tablet.png and mobile.png per folder, plus behavioral captures for assignment, validation, complete/cancel, Requester read-only view, blocked resolution, conflict, zero/error and drill-down.
+R canonical folders: artifacts/lab-04/screenshots/staff-dashboard/, requester-dashboard/, actions-taken/. A: baseline-desktop.png, baseline-tablet.png and baseline-mobile.png per folder. Current-source supplementary evidence uses validation and Requester read-only captures at all three viewports, plus Administrator Dashboard, contextual blocked resolution and stale conflict desktop captures. Assignment and completed/cancelled states share existing captures; API/database/browser assertions demonstrate behavior, counts and recovery. Controlled loading/500/network presentation remains separate frontend evidence. Publish only asserted complete-run captures with source/build/run/AC/submission-part traceability, preserving earlier evidence. Issue 28 owns the rendered specification and final PDF.
 A capture policy: deterministic scenarios; assert state before capture; no visibility-conditioned silent skips; manifest with AC, scenario, viewport, tested code revision and run. Routine output is isolated; publish validated Lab 4 evidence explicitly. Extra workflow/regression folders may supplement, never replace, the minimum structure. Do not regenerate Lab 1-3 artifacts in Issue 18.
 
 ## 10. Traceability and Approval

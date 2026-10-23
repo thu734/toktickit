@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { changedFields, draftFor, validateDraft } from "../../src/components/ActionForm";
@@ -150,6 +151,33 @@ describe("Actions management", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create Action" }));
     await waitFor(() => expect(api.createAction).toHaveBeenCalledTimes(2));
     expect(vi.mocked(api.createAction).mock.calls[1][1].workflowRevision).toBe(9);
+  });
+  it("completes the first conflict refresh when the parent publishes the new Ticket revision", async () => {
+    vi.mocked(api.updateAction).mockRejectedValueOnce({ status: 409, code: "STALE_REVISION" });
+    let finishRefresh!: () => void;
+    function TicketHarness() {
+      const [revision, setRevision] = useState(4);
+      return <ActionsTaken ticketId={7} ticketStatus="OPEN" viewer={viewer} workflowRevision={revision}
+        onRefreshTicket={async () => {
+          setRevision(5);
+          await new Promise<void>(resolve => { finishRefresh = resolve; });
+        }} />;
+    }
+    render(<TicketHarness />);
+    const editButton = await screen.findByRole("button", { name: "Edit Action" });
+    await act(async () => { fireEvent.click(editButton); });
+    enter("Result", "Retain this resolution draft");
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    const refresh = await screen.findByRole("button", { name: "Refresh and review" });
+    vi.mocked(api.fetchActions).mockResolvedValue({ actions: [{ ...action, attachmentNotes: "Newer work" }], workflowRevision: 5 });
+    await act(async () => { fireEvent.click(refresh); });
+    await act(async () => { finishRefresh(); });
+    const review = await screen.findByRole("button", { name: "I have reviewed the latest Actions" });
+    expect(review).toBeEnabled();
+    expect(screen.getByLabelText("Result")).toHaveValue("Retain this resolution draft");
+    expect(api.updateAction).toHaveBeenCalledTimes(1);
+    await act(async () => { fireEvent.click(review); });
+    expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled();
   });
   it("discards draft and returns focus to the section heading", async () => {
     await openCreate();

@@ -1,0 +1,2164 @@
+{
+  "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+  "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+  "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+  "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+  "phases": [
+    {
+      "label": "generate",
+      "executable": "/usr/local/bin/node",
+      "args": [
+        "/usr/local/lib/node_modules/npm/bin/npm-cli.js",
+        "exec",
+        "--prefix",
+        "server",
+        "--",
+        "prisma",
+        "generate",
+        "--schema",
+        "server/prisma/schema.prisma"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "server-build",
+      "executable": "/usr/local/bin/node",
+      "args": [
+        "/usr/local/lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "build",
+        "--prefix",
+        "server",
+        "--",
+        "--outDir",
+        "/Users/thuthuwai/Documents/toktickit/server/node_modules/.cache/issue-27-2026-10-23T12-37-24-458Z-3f77c2bd/dist"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "client-build",
+      "executable": "/usr/local/bin/node",
+      "args": [
+        "/usr/local/lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "build",
+        "--prefix",
+        "client",
+        "--",
+        "--outDir",
+        "/Users/thuthuwai/Documents/toktickit/test-results/issue-27-2026-10-23T12-37-24-458Z-3f77c2bd/client-build"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "client-regression",
+      "executable": "/usr/local/bin/node",
+      "args": [
+        "/usr/local/lib/node_modules/npm/bin/npm-cli.js",
+        "test",
+        "--prefix",
+        "client"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "server-regression",
+      "executable": "/usr/local/bin/node",
+      "args": [
+        "/usr/local/lib/node_modules/npm/bin/npm-cli.js",
+        "test",
+        "--prefix",
+        "server"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "client-types",
+      "executable": "/usr/local/bin/node",
+      "args": [
+        "/usr/local/lib/node_modules/npm/bin/npm-cli.js",
+        "exec",
+        "--prefix",
+        "client",
+        "--",
+        "tsc",
+        "--noEmit",
+        "--project",
+        "client/tsconfig.json"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "server-types",
+      "executable": "/usr/local/bin/node",
+      "args": [
+        "server/node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "server/tsconfig.json"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "integration-types",
+      "executable": "/usr/local/bin/node",
+      "args": [
+        "server/node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--module",
+        "esnext",
+        "--moduleResolution",
+        "bundler",
+        "--target",
+        "es2022",
+        "--esModuleInterop",
+        "--skipLibCheck",
+        "--allowImportingTsExtensions",
+        "--types",
+        "node",
+        "--typeRoots",
+        "server/node_modules/@types",
+        "playwright.integration.config.ts",
+        "e2e/lab-04/actions-taken-flow.spec.ts",
+        "e2e/lab-04/ticket-resolution.spec.ts",
+        "e2e/lab-04/dashboards.spec.ts",
+        "e2e/lab-04/fixtures/integration.ts",
+        "e2e/lab-04/fixtures/integration-server.mts"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "browser",
+      "executable": "/usr/local/bin/node",
+      "args": [
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.integration.config.ts"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "accessibility",
+      "executable": "/usr/local/bin/node",
+      "args": [
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.accessibility.config.ts",
+        "--reporter=line,json"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "diff-check",
+      "executable": "git",
+      "args": [
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "stats": {
+    "startTime": "2026-10-23T12:38:38.241Z",
+    "duration": 130727.39,
+    "expected": 21,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "accessibility": {
+    "startTime": "2026-10-23T12:40:49.228Z",
+    "duration": 124971.769,
+    "expected": 102,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "evidence": [
+    {
+      "project": "desktop",
+      "test": "E2E-ACT-01 — real Staff Action lifecycle, assignment, retry, attribution and Requester read-only privacy",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_957fd6232ade43c2be79cbf2321b1f65"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-ZG8RBB/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_957fd6232ade43c2be79cbf2321b1f65\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "actionIds": [
+              1,
+              2
+            ],
+            "events": [
+              "CREATED",
+              "UPDATED",
+              "COMPLETED",
+              "CORRECTED"
+            ],
+            "successfulPlannedEdit": true,
+            "inactiveAssigneeAbsent": true,
+            "immutableIdentity": true,
+            "auditEventsAppendOnly": true,
+            "stableOrdering": true,
+            "retryNoDuplicate": true,
+            "invalidWritesRolledBack": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_957fd6232ade43c2be79cbf2321b1f65",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "tablet",
+      "test": "E2E-ACT-01 — real Staff Action lifecycle, assignment, retry, attribution and Requester read-only privacy",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_541da2c55da84d81b6b2fe8944f21728"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-BaEeql/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_541da2c55da84d81b6b2fe8944f21728\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "actionIds": [
+              1,
+              2
+            ],
+            "events": [
+              "CREATED",
+              "UPDATED",
+              "COMPLETED",
+              "CORRECTED"
+            ],
+            "successfulPlannedEdit": true,
+            "inactiveAssigneeAbsent": true,
+            "immutableIdentity": true,
+            "auditEventsAppendOnly": true,
+            "stableOrdering": true,
+            "retryNoDuplicate": true,
+            "invalidWritesRolledBack": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_541da2c55da84d81b6b2fe8944f21728",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "mobile",
+      "test": "E2E-ACT-01 — real Staff Action lifecycle, assignment, retry, attribution and Requester read-only privacy",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_f39cb3e7475947c7bc02298ffc078c72"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-NxBDAt/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_f39cb3e7475947c7bc02298ffc078c72\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "actionIds": [
+              1,
+              2
+            ],
+            "events": [
+              "CREATED",
+              "UPDATED",
+              "COMPLETED",
+              "CORRECTED"
+            ],
+            "successfulPlannedEdit": true,
+            "inactiveAssigneeAbsent": true,
+            "immutableIdentity": true,
+            "auditEventsAppendOnly": true,
+            "stableOrdering": true,
+            "retryNoDuplicate": true,
+            "invalidWritesRolledBack": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_f39cb3e7475947c7bc02298ffc078c72",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "desktop",
+      "test": "E2E-DASH-01 — Requester SQL reconciliation, all metric drill-downs, recent ordering and ownership",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_b7a08409bbdb4dc182e87e9baa615547"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-wMAGIE/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_b7a08409bbdb4dc182e87e9baa615547\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "role": "REQUESTER",
+            "metricTable": [
+              {
+                "metric": "All Active",
+                "predicate": "requesterId=session.userId AND currentStatus IN (NEW,OPEN,IN_PROGRESS,WAITING_FOR_REQUESTER,REOPENED)",
+                "role": "REQUESTER",
+                "databaseValue": 5,
+                "apiValue": 5,
+                "uiValue": 5,
+                "result": "PASS"
+              },
+              {
+                "metric": "Open",
+                "predicate": "requesterId=session.userId AND currentStatus='OPEN'",
+                "role": "REQUESTER",
+                "databaseValue": 1,
+                "apiValue": 1,
+                "uiValue": 1,
+                "result": "PASS"
+              },
+              {
+                "metric": "Waiting for Requester",
+                "predicate": "requesterId=session.userId AND currentStatus='WAITING_FOR_REQUESTER'",
+                "role": "REQUESTER",
+                "databaseValue": 1,
+                "apiValue": 1,
+                "uiValue": 1,
+                "result": "PASS"
+              },
+              {
+                "metric": "Resolved",
+                "predicate": "requesterId=session.userId AND currentStatus='RESOLVED'",
+                "role": "REQUESTER",
+                "databaseValue": 1,
+                "apiValue": 1,
+                "uiValue": 1,
+                "result": "PASS"
+              }
+            ],
+            "expectedCounts": {
+              "active": 5,
+              "new": 1,
+              "open": 1,
+              "inProgress": 1,
+              "waitingForRequester": 1,
+              "resolved": 1,
+              "reopened": 1
+            },
+            "recentIds": [
+              8,
+              7,
+              6,
+              5,
+              4
+            ],
+            "allSevenDrillDowns": true,
+            "sessionOwnership": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_b7a08409bbdb4dc182e87e9baa615547",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "desktop",
+      "test": "E2E-DASH-02-staff — operational SQL reconciliation, My Actions and role restrictions",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_842d43644ed34cce98ff0022b8df5d68"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-fRvWNI/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_842d43644ed34cce98ff0022b8df5d68\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "role": "IT_STAFF",
+            "metricTable": [
+              {
+                "metric": "Unassigned Active",
+                "predicate": "assignedStaffId IS NULL AND currentStatus IN active statuses",
+                "role": "IT_STAFF",
+                "databaseValue": 4,
+                "apiValue": 4,
+                "uiValue": 4,
+                "result": "PASS"
+              },
+              {
+                "metric": "My Assigned Active",
+                "predicate": "assignedStaffId=session.userId AND currentStatus IN active statuses",
+                "role": "IT_STAFF",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "New",
+                "predicate": "currentStatus='NEW'",
+                "role": "IT_STAFF",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "Urgent",
+                "predicate": "itPriority='URGENT'",
+                "role": "IT_STAFF",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "My Planned Actions preview",
+                "predicate": "assignedToId=session.userId AND status='PLANNED' ORDER BY createdAt,id LIMIT 5",
+                "role": "IT_STAFF",
+                "databaseValue": 5,
+                "apiValue": 5,
+                "uiValue": 5,
+                "result": "PASS"
+              }
+            ],
+            "adminAccountCreateEdit": false,
+            "counts": {
+              "unassignedActive": 4,
+              "myActive": 2,
+              "byStatus": {
+                "NEW": 2,
+                "OPEN": 1,
+                "IN_PROGRESS": 1,
+                "WAITING_FOR_REQUESTER": 1,
+                "RESOLVED": 1,
+                "CLOSED": 1,
+                "REOPENED": 1,
+                "CANCELLED": 1
+              },
+              "byPriority": {
+                "LOW": 2,
+                "MEDIUM": 3,
+                "HIGH": 2,
+                "URGENT": 2
+              }
+            },
+            "myActions": [
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "recent": [
+              2,
+              9,
+              8,
+              7,
+              6
+            ],
+            "allMetricDestinations": true,
+            "forgedAttributionIgnored": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_842d43644ed34cce98ff0022b8df5d68",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "desktop",
+      "test": "E2E-DASH-02-admin — operational SQL reconciliation, My Actions and role restrictions",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_8e3f727d81d94b74a428c2a39127da55"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-Uv2bBI/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_8e3f727d81d94b74a428c2a39127da55\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "role": "ADMINISTRATOR",
+            "metricTable": [
+              {
+                "metric": "Unassigned Active",
+                "predicate": "assignedStaffId IS NULL AND currentStatus IN active statuses",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 4,
+                "apiValue": 4,
+                "uiValue": 4,
+                "result": "PASS"
+              },
+              {
+                "metric": "My Assigned Active",
+                "predicate": "assignedStaffId=session.userId AND currentStatus IN active statuses",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 0,
+                "apiValue": 0,
+                "uiValue": 0,
+                "result": "PASS"
+              },
+              {
+                "metric": "New",
+                "predicate": "currentStatus='NEW'",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "Urgent",
+                "predicate": "itPriority='URGENT'",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "My Planned Actions preview",
+                "predicate": "assignedToId=session.userId AND status='PLANNED' ORDER BY createdAt,id LIMIT 5",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 5,
+                "apiValue": 5,
+                "uiValue": 5,
+                "result": "PASS"
+              }
+            ],
+            "adminAccountCreateEdit": true,
+            "counts": {
+              "unassignedActive": 4,
+              "myActive": 0,
+              "byStatus": {
+                "NEW": 2,
+                "OPEN": 1,
+                "IN_PROGRESS": 1,
+                "WAITING_FOR_REQUESTER": 1,
+                "RESOLVED": 1,
+                "CLOSED": 1,
+                "REOPENED": 1,
+                "CANCELLED": 1
+              },
+              "byPriority": {
+                "LOW": 2,
+                "MEDIUM": 3,
+                "HIGH": 2,
+                "URGENT": 2
+              }
+            },
+            "myActions": [
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "recent": [
+              2,
+              9,
+              8,
+              7,
+              6
+            ],
+            "allMetricDestinations": true,
+            "forgedAttributionIgnored": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_8e3f727d81d94b74a428c2a39127da55",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "desktop",
+      "test": "E2E-DASH-03 — genuine empty data and expired-session error with real retry recovery",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_236baddb47804084bc2b12eb8c29a789"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-6GcFo6/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_236baddb47804084bc2b12eb8c29a789\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "emptyOperationalTicketCount": 0,
+            "rolesRecovered": [
+              "REQUESTER",
+              "IT_STAFF",
+              "ADMINISTRATOR"
+            ],
+            "emptyRequesterTicketCount": 0,
+            "expiredSession401": true,
+            "retryRecovered": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_236baddb47804084bc2b12eb8c29a789",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "tablet",
+      "test": "E2E-DASH-01 — Requester SQL reconciliation, all metric drill-downs, recent ordering and ownership",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_352cfc067c454e619e35c4c27a80e0cb"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-5Ml0iw/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_352cfc067c454e619e35c4c27a80e0cb\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "role": "REQUESTER",
+            "metricTable": [
+              {
+                "metric": "All Active",
+                "predicate": "requesterId=session.userId AND currentStatus IN (NEW,OPEN,IN_PROGRESS,WAITING_FOR_REQUESTER,REOPENED)",
+                "role": "REQUESTER",
+                "databaseValue": 5,
+                "apiValue": 5,
+                "uiValue": 5,
+                "result": "PASS"
+              },
+              {
+                "metric": "Open",
+                "predicate": "requesterId=session.userId AND currentStatus='OPEN'",
+                "role": "REQUESTER",
+                "databaseValue": 1,
+                "apiValue": 1,
+                "uiValue": 1,
+                "result": "PASS"
+              },
+              {
+                "metric": "Waiting for Requester",
+                "predicate": "requesterId=session.userId AND currentStatus='WAITING_FOR_REQUESTER'",
+                "role": "REQUESTER",
+                "databaseValue": 1,
+                "apiValue": 1,
+                "uiValue": 1,
+                "result": "PASS"
+              },
+              {
+                "metric": "Resolved",
+                "predicate": "requesterId=session.userId AND currentStatus='RESOLVED'",
+                "role": "REQUESTER",
+                "databaseValue": 1,
+                "apiValue": 1,
+                "uiValue": 1,
+                "result": "PASS"
+              }
+            ],
+            "expectedCounts": {
+              "active": 5,
+              "new": 1,
+              "open": 1,
+              "inProgress": 1,
+              "waitingForRequester": 1,
+              "resolved": 1,
+              "reopened": 1
+            },
+            "recentIds": [
+              8,
+              7,
+              6,
+              5,
+              4
+            ],
+            "allSevenDrillDowns": true,
+            "sessionOwnership": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_352cfc067c454e619e35c4c27a80e0cb",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "tablet",
+      "test": "E2E-DASH-02-staff — operational SQL reconciliation, My Actions and role restrictions",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_5f121b5c12c544c598808d43e96c6888"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-k7bmx4/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_5f121b5c12c544c598808d43e96c6888\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "role": "IT_STAFF",
+            "metricTable": [
+              {
+                "metric": "Unassigned Active",
+                "predicate": "assignedStaffId IS NULL AND currentStatus IN active statuses",
+                "role": "IT_STAFF",
+                "databaseValue": 4,
+                "apiValue": 4,
+                "uiValue": 4,
+                "result": "PASS"
+              },
+              {
+                "metric": "My Assigned Active",
+                "predicate": "assignedStaffId=session.userId AND currentStatus IN active statuses",
+                "role": "IT_STAFF",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "New",
+                "predicate": "currentStatus='NEW'",
+                "role": "IT_STAFF",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "Urgent",
+                "predicate": "itPriority='URGENT'",
+                "role": "IT_STAFF",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "My Planned Actions preview",
+                "predicate": "assignedToId=session.userId AND status='PLANNED' ORDER BY createdAt,id LIMIT 5",
+                "role": "IT_STAFF",
+                "databaseValue": 5,
+                "apiValue": 5,
+                "uiValue": 5,
+                "result": "PASS"
+              }
+            ],
+            "adminAccountCreateEdit": false,
+            "counts": {
+              "unassignedActive": 4,
+              "myActive": 2,
+              "byStatus": {
+                "NEW": 2,
+                "OPEN": 1,
+                "IN_PROGRESS": 1,
+                "WAITING_FOR_REQUESTER": 1,
+                "RESOLVED": 1,
+                "CLOSED": 1,
+                "REOPENED": 1,
+                "CANCELLED": 1
+              },
+              "byPriority": {
+                "LOW": 2,
+                "MEDIUM": 3,
+                "HIGH": 2,
+                "URGENT": 2
+              }
+            },
+            "myActions": [
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "recent": [
+              2,
+              9,
+              8,
+              7,
+              6
+            ],
+            "allMetricDestinations": true,
+            "forgedAttributionIgnored": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_5f121b5c12c544c598808d43e96c6888",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "tablet",
+      "test": "E2E-DASH-02-admin — operational SQL reconciliation, My Actions and role restrictions",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_7f10b7b322ef4c3bbc9014a875ccdba3"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-1TNGnq/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_7f10b7b322ef4c3bbc9014a875ccdba3\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "role": "ADMINISTRATOR",
+            "metricTable": [
+              {
+                "metric": "Unassigned Active",
+                "predicate": "assignedStaffId IS NULL AND currentStatus IN active statuses",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 4,
+                "apiValue": 4,
+                "uiValue": 4,
+                "result": "PASS"
+              },
+              {
+                "metric": "My Assigned Active",
+                "predicate": "assignedStaffId=session.userId AND currentStatus IN active statuses",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 0,
+                "apiValue": 0,
+                "uiValue": 0,
+                "result": "PASS"
+              },
+              {
+                "metric": "New",
+                "predicate": "currentStatus='NEW'",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "Urgent",
+                "predicate": "itPriority='URGENT'",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "My Planned Actions preview",
+                "predicate": "assignedToId=session.userId AND status='PLANNED' ORDER BY createdAt,id LIMIT 5",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 5,
+                "apiValue": 5,
+                "uiValue": 5,
+                "result": "PASS"
+              }
+            ],
+            "adminAccountCreateEdit": true,
+            "counts": {
+              "unassignedActive": 4,
+              "myActive": 0,
+              "byStatus": {
+                "NEW": 2,
+                "OPEN": 1,
+                "IN_PROGRESS": 1,
+                "WAITING_FOR_REQUESTER": 1,
+                "RESOLVED": 1,
+                "CLOSED": 1,
+                "REOPENED": 1,
+                "CANCELLED": 1
+              },
+              "byPriority": {
+                "LOW": 2,
+                "MEDIUM": 3,
+                "HIGH": 2,
+                "URGENT": 2
+              }
+            },
+            "myActions": [
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "recent": [
+              2,
+              9,
+              8,
+              7,
+              6
+            ],
+            "allMetricDestinations": true,
+            "forgedAttributionIgnored": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_7f10b7b322ef4c3bbc9014a875ccdba3",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "tablet",
+      "test": "E2E-DASH-03 — genuine empty data and expired-session error with real retry recovery",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_3f3a97812f28488eb8c53a2251be3bdf"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-6M3aew/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_3f3a97812f28488eb8c53a2251be3bdf\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "emptyOperationalTicketCount": 0,
+            "rolesRecovered": [
+              "REQUESTER",
+              "IT_STAFF",
+              "ADMINISTRATOR"
+            ],
+            "emptyRequesterTicketCount": 0,
+            "expiredSession401": true,
+            "retryRecovered": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_3f3a97812f28488eb8c53a2251be3bdf",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "mobile",
+      "test": "E2E-DASH-01 — Requester SQL reconciliation, all metric drill-downs, recent ordering and ownership",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_39038d5635ba4fecb8ca3f4159cf42a5"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-S3yIZd/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_39038d5635ba4fecb8ca3f4159cf42a5\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "role": "REQUESTER",
+            "metricTable": [
+              {
+                "metric": "All Active",
+                "predicate": "requesterId=session.userId AND currentStatus IN (NEW,OPEN,IN_PROGRESS,WAITING_FOR_REQUESTER,REOPENED)",
+                "role": "REQUESTER",
+                "databaseValue": 5,
+                "apiValue": 5,
+                "uiValue": 5,
+                "result": "PASS"
+              },
+              {
+                "metric": "Open",
+                "predicate": "requesterId=session.userId AND currentStatus='OPEN'",
+                "role": "REQUESTER",
+                "databaseValue": 1,
+                "apiValue": 1,
+                "uiValue": 1,
+                "result": "PASS"
+              },
+              {
+                "metric": "Waiting for Requester",
+                "predicate": "requesterId=session.userId AND currentStatus='WAITING_FOR_REQUESTER'",
+                "role": "REQUESTER",
+                "databaseValue": 1,
+                "apiValue": 1,
+                "uiValue": 1,
+                "result": "PASS"
+              },
+              {
+                "metric": "Resolved",
+                "predicate": "requesterId=session.userId AND currentStatus='RESOLVED'",
+                "role": "REQUESTER",
+                "databaseValue": 1,
+                "apiValue": 1,
+                "uiValue": 1,
+                "result": "PASS"
+              }
+            ],
+            "expectedCounts": {
+              "active": 5,
+              "new": 1,
+              "open": 1,
+              "inProgress": 1,
+              "waitingForRequester": 1,
+              "resolved": 1,
+              "reopened": 1
+            },
+            "recentIds": [
+              8,
+              7,
+              6,
+              5,
+              4
+            ],
+            "allSevenDrillDowns": true,
+            "sessionOwnership": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_39038d5635ba4fecb8ca3f4159cf42a5",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "mobile",
+      "test": "E2E-DASH-02-staff — operational SQL reconciliation, My Actions and role restrictions",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_4426fcc7ce4f411f94fe7cdd75d44f5f"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-i4u4wj/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_4426fcc7ce4f411f94fe7cdd75d44f5f\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "role": "IT_STAFF",
+            "metricTable": [
+              {
+                "metric": "Unassigned Active",
+                "predicate": "assignedStaffId IS NULL AND currentStatus IN active statuses",
+                "role": "IT_STAFF",
+                "databaseValue": 4,
+                "apiValue": 4,
+                "uiValue": 4,
+                "result": "PASS"
+              },
+              {
+                "metric": "My Assigned Active",
+                "predicate": "assignedStaffId=session.userId AND currentStatus IN active statuses",
+                "role": "IT_STAFF",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "New",
+                "predicate": "currentStatus='NEW'",
+                "role": "IT_STAFF",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "Urgent",
+                "predicate": "itPriority='URGENT'",
+                "role": "IT_STAFF",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "My Planned Actions preview",
+                "predicate": "assignedToId=session.userId AND status='PLANNED' ORDER BY createdAt,id LIMIT 5",
+                "role": "IT_STAFF",
+                "databaseValue": 5,
+                "apiValue": 5,
+                "uiValue": 5,
+                "result": "PASS"
+              }
+            ],
+            "adminAccountCreateEdit": false,
+            "counts": {
+              "unassignedActive": 4,
+              "myActive": 2,
+              "byStatus": {
+                "NEW": 2,
+                "OPEN": 1,
+                "IN_PROGRESS": 1,
+                "WAITING_FOR_REQUESTER": 1,
+                "RESOLVED": 1,
+                "CLOSED": 1,
+                "REOPENED": 1,
+                "CANCELLED": 1
+              },
+              "byPriority": {
+                "LOW": 2,
+                "MEDIUM": 3,
+                "HIGH": 2,
+                "URGENT": 2
+              }
+            },
+            "myActions": [
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "recent": [
+              2,
+              9,
+              8,
+              7,
+              6
+            ],
+            "allMetricDestinations": true,
+            "forgedAttributionIgnored": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_4426fcc7ce4f411f94fe7cdd75d44f5f",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "mobile",
+      "test": "E2E-DASH-02-admin — operational SQL reconciliation, My Actions and role restrictions",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_e5ee0e2c268f4186854bf9250666c349"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-IwsyGm/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_e5ee0e2c268f4186854bf9250666c349\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "role": "ADMINISTRATOR",
+            "metricTable": [
+              {
+                "metric": "Unassigned Active",
+                "predicate": "assignedStaffId IS NULL AND currentStatus IN active statuses",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 4,
+                "apiValue": 4,
+                "uiValue": 4,
+                "result": "PASS"
+              },
+              {
+                "metric": "My Assigned Active",
+                "predicate": "assignedStaffId=session.userId AND currentStatus IN active statuses",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 0,
+                "apiValue": 0,
+                "uiValue": 0,
+                "result": "PASS"
+              },
+              {
+                "metric": "New",
+                "predicate": "currentStatus='NEW'",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "Urgent",
+                "predicate": "itPriority='URGENT'",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 2,
+                "apiValue": 2,
+                "uiValue": 2,
+                "result": "PASS"
+              },
+              {
+                "metric": "My Planned Actions preview",
+                "predicate": "assignedToId=session.userId AND status='PLANNED' ORDER BY createdAt,id LIMIT 5",
+                "role": "ADMINISTRATOR",
+                "databaseValue": 5,
+                "apiValue": 5,
+                "uiValue": 5,
+                "result": "PASS"
+              }
+            ],
+            "adminAccountCreateEdit": true,
+            "counts": {
+              "unassignedActive": 4,
+              "myActive": 0,
+              "byStatus": {
+                "NEW": 2,
+                "OPEN": 1,
+                "IN_PROGRESS": 1,
+                "WAITING_FOR_REQUESTER": 1,
+                "RESOLVED": 1,
+                "CLOSED": 1,
+                "REOPENED": 1,
+                "CANCELLED": 1
+              },
+              "byPriority": {
+                "LOW": 2,
+                "MEDIUM": 3,
+                "HIGH": 2,
+                "URGENT": 2
+              }
+            },
+            "myActions": [
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "recent": [
+              2,
+              9,
+              8,
+              7,
+              6
+            ],
+            "allMetricDestinations": true,
+            "forgedAttributionIgnored": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_e5ee0e2c268f4186854bf9250666c349",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "mobile",
+      "test": "E2E-DASH-03 — genuine empty data and expired-session error with real retry recovery",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_37c97fbabcca41678a03e8d649cf52c7"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-bTva2X/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_37c97fbabcca41678a03e8d649cf52c7\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "emptyOperationalTicketCount": 0,
+            "rolesRecovered": [
+              "REQUESTER",
+              "IT_STAFF",
+              "ADMINISTRATOR"
+            ],
+            "emptyRequesterTicketCount": 0,
+            "expiredSession401": true,
+            "retryRecovered": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_37c97fbabcca41678a03e8d649cf52c7",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "desktop",
+      "test": "E2E-WF-01 — Requester create, persisted retry, comments, advisory and attachment continuity",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_8fa593e4a8514ecf814748ac8d893126"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-M8qpiL/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_8fa593e4a8514ecf814748ac8d893126\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "ticketId": 10,
+            "requesterId": 2,
+            "ticketReplayCount": 1,
+            "comments": 2,
+            "advisoryStatus": "NEW",
+            "attachmentId": 1,
+            "softRemovalPreservesBytes": true,
+            "reloadPersistence": true,
+            "crossOwner404": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_8fa593e4a8514ecf814748ac8d893126",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "desktop",
+      "test": "E2E-WF-02 — real resolution gate, stale draft recovery, corrections, closure and zero-Action policy",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_cf0fd0f6ab064aef8706a0cbaf596162"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-e3qdsD/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_cf0fd0f6ab064aef8706a0cbaf596162\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "ticketId": 3,
+            "plannedGate409": true,
+            "followUpGate409": true,
+            "stale409": true,
+            "finalStatus": "REOPENED",
+            "correctedStatus": "COMPLETED",
+            "legacyNoFabricatedActions": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_cf0fd0f6ab064aef8706a0cbaf596162",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "tablet",
+      "test": "E2E-WF-01 — Requester create, persisted retry, comments, advisory and attachment continuity",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_60a3f2c4bbae4557a1f573995e790c65"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-ERbcdz/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_60a3f2c4bbae4557a1f573995e790c65\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "ticketId": 10,
+            "requesterId": 2,
+            "ticketReplayCount": 1,
+            "comments": 2,
+            "advisoryStatus": "NEW",
+            "attachmentId": 1,
+            "softRemovalPreservesBytes": true,
+            "reloadPersistence": true,
+            "crossOwner404": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_60a3f2c4bbae4557a1f573995e790c65",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "tablet",
+      "test": "E2E-WF-02 — real resolution gate, stale draft recovery, corrections, closure and zero-Action policy",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_770f4629073549d4ae8f60ba529e635a"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-5wwedD/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_770f4629073549d4ae8f60ba529e635a\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "ticketId": 3,
+            "plannedGate409": true,
+            "followUpGate409": true,
+            "stale409": true,
+            "finalStatus": "REOPENED",
+            "correctedStatus": "COMPLETED",
+            "legacyNoFabricatedActions": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_770f4629073549d4ae8f60ba529e635a",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "mobile",
+      "test": "E2E-WF-01 — Requester create, persisted retry, comments, advisory and attachment continuity",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_00cacd8f60724b46ad219a91ec643838"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-54h7Xm/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_00cacd8f60724b46ad219a91ec643838\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "ticketId": 10,
+            "requesterId": 2,
+            "ticketReplayCount": 1,
+            "comments": 2,
+            "advisoryStatus": "NEW",
+            "attachmentId": 1,
+            "softRemovalPreservesBytes": true,
+            "reloadPersistence": true,
+            "crossOwner404": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_00cacd8f60724b46ad219a91ec643838",
+            "remaining": 0
+          }
+        }
+      ]
+    },
+    {
+      "project": "mobile",
+      "test": "E2E-WF-02 — real resolution gate, stale draft recovery, corrections, closure and zero-Action policy",
+      "attachments": [
+        {
+          "name": "schema-readiness",
+          "data": {
+            "identity": {
+              "database": "toktickit_test",
+              "schema": "lab4_test_ed50b160dcf240d58c351bfdc6c4d214"
+            },
+            "migrations": [
+              "20260813193707_init",
+              "20260831081242_add_lab2_models",
+              "20260905071101_add_ticket_model",
+              "20260905181037_add_attachments",
+              "20260918211500_evolve_user_and_lab3_models",
+              "20261015090000_reconcile_lab3_schema",
+              "20261015090100_lab4_actions_foundation",
+              "20261019090000_ticket_creation_retry"
+            ],
+            "checksumsVerified": true,
+            "prismaDiff": "-- This is an empty migration.",
+            "checks": [
+              "tickets_workflow_revision_nonnegative",
+              "actions_description_nonblank",
+              "actions_terminal_result",
+              "actions_followup_note",
+              "action_event_fields_object",
+              "action_request_key_nonblank",
+              "action_request_hash_sha256",
+              "action_request_result_object"
+            ],
+            "triggers": [
+              "action_identity_immutable",
+              "action_events_append_only",
+              "action_creation_result_immutable"
+            ],
+            "retryColumnsAndIndex": true,
+            "deployment": "Environment variables loaded from .env\nPrisma schema loaded from ../../../../../var/folders/9r/gw5rs6gd4992nqjkkc17lxvr0000gn/T/toktickit-lab4-ob1eId/schema.prisma\nDatasource \"db\": PostgreSQL database \"toktickit_test\", schema \"lab4_test_ed50b160dcf240d58c351bfdc6c4d214\" at \"localhost:5432\"\n\n8 migrations found in prisma/migrations\n\nApplying migration `20260813193707_init`\nApplying migration `20260831081242_add_lab2_models`\nApplying migration `20260905071101_add_ticket_model`\nApplying migration `20260905181037_add_attachments`\nApplying migration `20260918211500_evolve_user_and_lab3_models`\nApplying migration `20261015090000_reconcile_lab3_schema`\nApplying migration `20261015090100_lab4_actions_foundation`\nApplying migration `20261019090000_ticket_creation_retry`\n\nThe following migration(s) have been applied:\n\nmigrations/\n  └─ 20260813193707_init/\n    └─ migration.sql\n  └─ 20260831081242_add_lab2_models/\n    └─ migration.sql\n  └─ 20260905071101_add_ticket_model/\n    └─ migration.sql\n  └─ 20260905181037_add_attachments/\n    └─ migration.sql\n  └─ 20260918211500_evolve_user_and_lab3_models/\n    └─ migration.sql\n  └─ 20261015090000_reconcile_lab3_schema/\n    └─ migration.sql\n  └─ 20261015090100_lab4_actions_foundation/\n    └─ migration.sql\n  └─ 20261019090000_ticket_creation_retry/\n    └─ migration.sql\n      \nAll migrations have been successfully applied.\n"
+          }
+        },
+        {
+          "name": "database-reconciliation",
+          "data": {
+            "ticketId": 3,
+            "plannedGate409": true,
+            "followUpGate409": true,
+            "stale409": true,
+            "finalStatus": "REOPENED",
+            "correctedStatus": "COMPLETED",
+            "legacyNoFabricatedActions": true
+          }
+        },
+        {
+          "name": "owned-schema-cleanup",
+          "data": {
+            "schema": "lab4_test_ed50b160dcf240d58c351bfdc6c4d214",
+            "remaining": 0
+          }
+        }
+      ]
+    }
+  ]
+}

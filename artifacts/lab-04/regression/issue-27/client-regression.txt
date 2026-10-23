@@ -1,0 +1,40 @@
+
+> toktickit-client@1.0.0 test
+> vitest run
+
+
+ RUN  v2.1.9 /Users/thuthuwai/Documents/toktickit/client
+
+ ✓ tests/lab-02/AttachmentSection.test.tsx (6 tests) 134ms
+ ✓ tests/lab-04/recoverable-failures.test.tsx (9 tests) 395ms
+ ✓ tests/lab-02/CreateTicket.test.tsx (8 tests) 290ms
+ ✓ tests/lab-04/StaffDashboard.test.tsx (15 tests) 510ms
+ ✓ tests/lab-04/RequesterDashboard.test.tsx (18 tests) 565ms
+ ✓ tests/lab-04/ActionsTaken.test.tsx (33 tests) 744ms
+ ✓ tests/lab-03/UserManagement.test.tsx (5 tests) 287ms
+ ✓ tests/lab-03/CommentsAndNotes.test.tsx (3 tests) 171ms
+ ✓ tests/lab-03/StaffTicketQueue.test.tsx (4 tests) 246ms
+ ✓ tests/lab-04/ZenGreenStyle.test.tsx (6 tests) 342ms
+ ✓ tests/lab-02/RequesterTicketDetail.test.tsx (3 tests) 85ms
+ ✓ tests/lab-04/api-error-safety.test.tsx (30 tests) 7ms
+ ✓ tests/lab-02/MyTickets.test.tsx (4 tests) 270ms
+ ✓ tests/lab-03/StaffTicketDetail.test.tsx (4 tests) 306ms
+ ✓ tests/lab-04/requester-dashboard-navigation.test.tsx (11 tests) 910ms
+ ✓ tests/lab-04/TicketWorkflow.test.tsx (42 tests) 1915ms
+ ✓ tests/lab-04/ticket-creation-retry.test.tsx (3 tests) 190ms
+ ✓ tests/lab-03/AppShell.test.tsx (4 tests) 106ms
+ ✓ tests/lab-04/staff-queue-transport.test.tsx (2 tests) 163ms
+ ✓ tests/lab-04/actions-api.test.tsx (6 tests) 8ms
+ ✓ tests/lab-03/ChangePassword.test.tsx (4 tests) 136ms
+ ✓ tests/lab-03/Login.test.tsx (3 tests) 100ms
+ ✓ tests/lab-04/requester-drilldown.test.tsx (5 tests) 125ms
+ ✓ tests/lab-04/staff-drilldown.test.tsx (6 tests) 134ms
+ ✓ tests/lab-01/App.test.tsx (2 tests) 77ms
+ ✓ tests/lab-04/workflow-api.test.tsx (4 tests) 3ms
+ ✓ tests/lab-04/requester-dashboard-api.test.tsx (3 tests) 3ms
+ ✓ tests/lab-04/staff-dashboard-navigation.test.tsx (16 tests) 1153ms
+
+ Test Files  28 passed (28)
+      Tests  259 passed (259)
+   Start at  19:37:28
+   Duration  3.57s (transform 778ms, setup 1.04s, collect 2.75s, tests 9.38s, environment 6.17s, prepare 936ms)

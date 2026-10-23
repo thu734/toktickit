@@ -57,6 +57,7 @@ describe("UI-05: IT Staff Ticket Detail Component Tests (AC-12..15, BR-19)", () 
 
     await waitFor(() => {
       expect(screen.getByText("TKT-2026-000001")).toBeInTheDocument();
+      expect(screen.queryByText(/^ID:\s*1$/)).not.toBeInTheDocument();
       expect(screen.getByText("VPN Connection drops frequently")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /claim ticket/i })).toBeInTheDocument();
     });

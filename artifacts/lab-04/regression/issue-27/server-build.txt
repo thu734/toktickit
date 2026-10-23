@@ -1,0 +1,3 @@
+
+> toktickit-server@1.0.0 build
+> tsc --outDir /Users/thuthuwai/Documents/toktickit/server/node_modules/.cache/issue-27-2026-10-23T12-37-24-458Z-3f77c2bd/dist

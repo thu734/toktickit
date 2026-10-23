@@ -126,14 +126,31 @@ The default seed includes Labs 1–4. Existing accounts, password hashes, activi
   cd server
   npm run dev
   ```
-  API starts at `http://localhost:3000`.
+  API starts from current TypeScript source at `http://localhost:3000`. `npm run dev` explicitly loads `server/.env`; an already exported variable takes precedence. A missing `.env` or `DATABASE_URL` fails clearly. Port-in-use errors identify an existing server; do not launch a second API or kill an unidentified process.
 
 - **Frontend React Application**:
   ```bash
   cd client
   npm run dev
   ```
-  Vite server starts at `http://localhost:5173`.
+  Vite starts at `http://localhost:5173` with a strict port: it fails rather than silently selecting another port. `client/.env` must set `VITE_API_URL=http://localhost:3000`. Use `localhost` consistently for frontend and API so the Strict session cookie stays same-site.
+
+**Existing account credentials:** `Initial123!` is only the initial password for a newly created seeded account. After first-login password change, use that account's current password. Seeding preserves existing hashes (`update: {}`); it does not restore the initial password. Never reset/reseed as a response to a connection error. Unknown current credentials must be reported, not replaced automatically.
+
+**Failure distinction:** an unreachable API shows “Unable to reach the sign-in service”; a server/configuration failure shows “Sign-in service unavailable”; a rejected current credential remains “Invalid email or password.” `/api/health` alone does not prove database readiness.
+
+**Startup smoke, from the repository root:**
+
+```bash
+npm run test:startup
+npm run smoke:startup -- --connectivity-only
+```
+
+The smoke owns separate source API/frontend services on localhost ports 3300/5300, never reuses an unidentified server, and stops them afterward. It loads the existing server configuration, checks the normal development frontend/API configuration, queries the API's own Prisma connection for `toktickit/public` and Ticket retry columns, verifies health plus a database-backed read, and checks the actual served frontend API origin. It performs no database writes, seed, migration or password change. Override `SMOKE_API_PORT`/`SMOKE_FRONTEND_PORT` for free smoke ports; `SMOKE_EXPECTED_DATABASE`/`SMOKE_EXPECTED_SCHEMA` explicitly select a different intended target. Normal development services on 3000/5173 can keep running. Do not run it against an unapproved deployment.
+
+For authentication verification, securely supply `SMOKE_EMAIL`, `SMOKE_PASSWORD` and `SMOKE_ROLE` (`REQUESTER`, `IT_STAFF` or `ADMINISTRATOR`) for an explicitly controlled current account, then run `npm run smoke:startup`. Repeat for each role as needed. Chromium must be installed for the existing Playwright dependency. The smoke verifies real browser login, the localhost HttpOnly session cookie, matching `/api/auth/me` identity/role and reload. It never logs the password, session value, secret or database URL. Without credentials the authenticated command fails; `--connectivity-only` explicitly reports **AUTH NOT VERIFIED**. This is a startup/session smoke, not migration replay, integrated workflow regression, or screenshot evidence.
+
+**Production entrypoint:** after `npm run build --prefix server`, run `npm start --prefix server`. TypeScript currently emits `server/dist/src/index.js` because the compilation includes `src`, `prisma` and `tests`; `npm start` targets that entrypoint. It optionally loads `server/.env`, preserving exported deployment values. Provide the intended deployment `DATABASE_URL` and private `SESSION_SECRET`; build/start does not migrate or seed. Final deployment and schema-readiness verification remains Issue 28.
 
 ### 5. Running Automated Tests
 

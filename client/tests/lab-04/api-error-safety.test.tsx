@@ -1,5 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import * as api from '../../src/api';
+import { API_URL } from '../../src/apiOrigin';
 afterEach(() => vi.unstubAllGlobals());
 const calls: [string, () => Promise<unknown>][] = [
   ['Ticket detail', () => api.fetchTicketDetail(7)],
@@ -32,4 +33,24 @@ it('retains approved validation and conflict guidance', async () => {
 it('treats an already-expired logout as signed out', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ok:false,status:401}));
   await expect(api.logoutApi()).resolves.toBeUndefined();
+});
+
+it('distinguishes an unreachable login API from invalid credentials', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
+  await expect(api.loginApi('user@test.local', 'private-input')).rejects.toThrow('Unable to reach the sign-in service. Check that the API is running and try again.');
+});
+it('distinguishes login service failure from a rejected credential without leaking diagnostics', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ok:false,status:500,json:async()=>({error:'DATABASE_URL secret diagnostic'})}));
+  await expect(api.loginApi('user@test.local', 'private-input')).rejects.toMatchObject({status:500,message:'Sign-in service unavailable. Check API configuration and try again.'});
+});
+it('preserves invalid-credential feedback and credentialed login requests', async () => {
+  const fetch = vi.fn().mockResolvedValue({ok:false,status:401,json:async()=>({error:'Invalid email or password.'})});
+  vi.stubGlobal('fetch', fetch);
+  await expect(api.loginApi('user@test.local', 'private-input')).rejects.toMatchObject({status:401,message:'Invalid email or password.'});
+  expect(fetch).toHaveBeenCalledWith(`${API_URL}/api/auth/login`, expect.objectContaining({credentials:'include',headers:expect.objectContaining({'X-Requested-With':'XMLHttpRequest'})}));
+});
+
+it('reports a missing login endpoint as service configuration failure', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ok:false,status:404,json:async()=>{throw new SyntaxError('upstream HTML');}}));
+  await expect(api.loginApi('user@test.local', 'private-input')).rejects.toMatchObject({status:404,message:'Sign-in service unavailable. Check API configuration and try again.'});
 });

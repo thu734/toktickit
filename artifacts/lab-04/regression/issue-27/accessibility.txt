@@ -1,0 +1,121 @@
+[WebServer] (node:6860) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+
+Running 102 tests using 1 worker
+
+(node:6862) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:26:3 › REQUESTER: labelled dashboard and long-content responsive geometry
+[2/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:26:3 › IT_STAFF: labelled dashboard and long-content responsive geometry
+[3/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:26:3 › ADMINISTRATOR: labelled dashboard and long-content responsive geometry
+[4/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:49:1 › Zen Green computed styles and keyboard focus
+[5/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:60:1 › Action validation, editable/read-only surfaces and retained conflict draft
+[6/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:95:3 › IT_STAFF: blocked resolution explains next steps only after keyboard selection
+[7/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:95:3 › ADMINISTRATOR: blocked resolution explains next steps only after keyboard selection
+[8/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:120:1 › status dialog contains keyboard focus, dismisses and restores focus
+[9/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:142:1 › Requester shared Actions are read-only and detail reflows at 320 CSS pixels
+[10/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:153:3 › REQUESTER: every metric is keyboard reachable and activates its destination
+[11/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › REQUESTER: zero dashboard feedback remains distinct and usable
+[12/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › REQUESTER: error dashboard feedback remains distinct and usable
+[13/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › REQUESTER: loading dashboard feedback remains distinct and usable
+[14/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:153:3 › IT_STAFF: every metric is keyboard reachable and activates its destination
+[15/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › IT_STAFF: zero dashboard feedback remains distinct and usable
+[16/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › IT_STAFF: error dashboard feedback remains distinct and usable
+[17/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › IT_STAFF: loading dashboard feedback remains distinct and usable
+[18/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:196:1 › breakpoint boundaries preserve approved dashboard arrangements
+[19/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:210:1 › Requester resolution and attachment dialogs retain labels and restore focus
+[20/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:227:1 › Admin inherited dialogs remain keyboard contained and usable
+[21/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:274:1 › rendered dashboard, Action and private-note text retain contrast and textual cues
+[22/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:286:1 › real 200% browser zoom and 400% reflow retain usable controls
+[23/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:330:3 › Actions loading feedback does not claim an empty successful list
+[24/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:330:3 › Actions error feedback does not claim an empty successful list
+[25/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:353:1 › Requester warning badges and detail text remain readable
+[26/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:359:3 › REQUESTER: visible controls have accessible names and mobile buttons have usable targets
+[27/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:359:3 › IT_STAFF: visible controls have accessible names and mobile buttons have usable targets
+[28/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:359:3 › ADMINISTRATOR: visible controls have accessible names and mobile buttons have usable targets
+[29/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:379:1 › successful attachment removal focuses the stable Attachments heading after refresh
+[30/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:395:1 › header contrast includes navigation text and effective element/ancestor opacity
+[31/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:413:3 › Admin create dialog blocks Escape, close and Cancel while saving
+[32/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:413:3 › Admin edit dialog blocks Escape, close and Cancel while saving
+[33/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:413:3 › Admin reset dialog blocks Escape, close and Cancel while saving
+[34/102] [desktop] › e2e/lab-04/accessibility-responsive.spec.ts:451:1 › Create Ticket names system fields and focuses form/success headings on navigation and reset
+(node:7017) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[35/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:26:3 › REQUESTER: labelled dashboard and long-content responsive geometry
+[36/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:26:3 › IT_STAFF: labelled dashboard and long-content responsive geometry
+[37/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:26:3 › ADMINISTRATOR: labelled dashboard and long-content responsive geometry
+[38/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:49:1 › Zen Green computed styles and keyboard focus
+[39/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:60:1 › Action validation, editable/read-only surfaces and retained conflict draft
+[40/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:95:3 › IT_STAFF: blocked resolution explains next steps only after keyboard selection
+[41/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:95:3 › ADMINISTRATOR: blocked resolution explains next steps only after keyboard selection
+[42/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:120:1 › status dialog contains keyboard focus, dismisses and restores focus
+[43/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:142:1 › Requester shared Actions are read-only and detail reflows at 320 CSS pixels
+[44/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:153:3 › REQUESTER: every metric is keyboard reachable and activates its destination
+[45/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › REQUESTER: zero dashboard feedback remains distinct and usable
+[46/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › REQUESTER: error dashboard feedback remains distinct and usable
+[47/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › REQUESTER: loading dashboard feedback remains distinct and usable
+[48/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:153:3 › IT_STAFF: every metric is keyboard reachable and activates its destination
+[49/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › IT_STAFF: zero dashboard feedback remains distinct and usable
+[50/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › IT_STAFF: error dashboard feedback remains distinct and usable
+[51/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › IT_STAFF: loading dashboard feedback remains distinct and usable
+[52/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:196:1 › breakpoint boundaries preserve approved dashboard arrangements
+[53/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:210:1 › Requester resolution and attachment dialogs retain labels and restore focus
+[54/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:227:1 › Admin inherited dialogs remain keyboard contained and usable
+[55/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:274:1 › rendered dashboard, Action and private-note text retain contrast and textual cues
+[56/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:286:1 › real 200% browser zoom and 400% reflow retain usable controls
+[57/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:330:3 › Actions loading feedback does not claim an empty successful list
+[58/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:330:3 › Actions error feedback does not claim an empty successful list
+[59/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:353:1 › Requester warning badges and detail text remain readable
+[60/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:359:3 › REQUESTER: visible controls have accessible names and mobile buttons have usable targets
+[61/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:359:3 › IT_STAFF: visible controls have accessible names and mobile buttons have usable targets
+[62/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:359:3 › ADMINISTRATOR: visible controls have accessible names and mobile buttons have usable targets
+[63/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:379:1 › successful attachment removal focuses the stable Attachments heading after refresh
+[64/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:395:1 › header contrast includes navigation text and effective element/ancestor opacity
+[65/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:413:3 › Admin create dialog blocks Escape, close and Cancel while saving
+[66/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:413:3 › Admin edit dialog blocks Escape, close and Cancel while saving
+[67/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:413:3 › Admin reset dialog blocks Escape, close and Cancel while saving
+[68/102] [tablet] › e2e/lab-04/accessibility-responsive.spec.ts:451:1 › Create Ticket names system fields and focuses form/success headings on navigation and reset
+(node:7177) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[69/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:26:3 › REQUESTER: labelled dashboard and long-content responsive geometry
+[70/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:26:3 › IT_STAFF: labelled dashboard and long-content responsive geometry
+[71/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:26:3 › ADMINISTRATOR: labelled dashboard and long-content responsive geometry
+[72/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:49:1 › Zen Green computed styles and keyboard focus
+[73/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:60:1 › Action validation, editable/read-only surfaces and retained conflict draft
+[74/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:95:3 › IT_STAFF: blocked resolution explains next steps only after keyboard selection
+[75/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:95:3 › ADMINISTRATOR: blocked resolution explains next steps only after keyboard selection
+[76/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:120:1 › status dialog contains keyboard focus, dismisses and restores focus
+[77/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:142:1 › Requester shared Actions are read-only and detail reflows at 320 CSS pixels
+[78/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:153:3 › REQUESTER: every metric is keyboard reachable and activates its destination
+[79/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › REQUESTER: zero dashboard feedback remains distinct and usable
+[80/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › REQUESTER: error dashboard feedback remains distinct and usable
+[81/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › REQUESTER: loading dashboard feedback remains distinct and usable
+[82/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:153:3 › IT_STAFF: every metric is keyboard reachable and activates its destination
+[83/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › IT_STAFF: zero dashboard feedback remains distinct and usable
+[84/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › IT_STAFF: error dashboard feedback remains distinct and usable
+[85/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:170:5 › IT_STAFF: loading dashboard feedback remains distinct and usable
+[86/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:196:1 › breakpoint boundaries preserve approved dashboard arrangements
+[87/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:210:1 › Requester resolution and attachment dialogs retain labels and restore focus
+[88/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:227:1 › Admin inherited dialogs remain keyboard contained and usable
+[89/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:274:1 › rendered dashboard, Action and private-note text retain contrast and textual cues
+[90/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:286:1 › real 200% browser zoom and 400% reflow retain usable controls
+[91/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:330:3 › Actions loading feedback does not claim an empty successful list
+[92/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:330:3 › Actions error feedback does not claim an empty successful list
+[93/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:353:1 › Requester warning badges and detail text remain readable
+[94/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:359:3 › REQUESTER: visible controls have accessible names and mobile buttons have usable targets
+[95/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:359:3 › IT_STAFF: visible controls have accessible names and mobile buttons have usable targets
+[96/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:359:3 › ADMINISTRATOR: visible controls have accessible names and mobile buttons have usable targets
+[97/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:379:1 › successful attachment removal focuses the stable Attachments heading after refresh
+[98/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:395:1 › header contrast includes navigation text and effective element/ancestor opacity
+[99/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:413:3 › Admin create dialog blocks Escape, close and Cancel while saving
+[100/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:413:3 › Admin edit dialog blocks Escape, close and Cancel while saving
+[101/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:413:3 › Admin reset dialog blocks Escape, close and Cancel while saving
+[102/102] [mobile] › e2e/lab-04/accessibility-responsive.spec.ts:451:1 › Create Ticket names system fields and focuses form/success headings on navigation and reset
+  102 passed (2.1m)
