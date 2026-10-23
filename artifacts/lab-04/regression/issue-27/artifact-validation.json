@@ -1,0 +1,319 @@
+{
+  "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+  "result": "PASS",
+  "canonicalCaptures": 18,
+  "hashesVerified": true,
+  "submissionParts": [
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "accessibilityCases": 102,
+  "integratedCases": 21,
+  "skips": 0,
+  "retries": 0,
+  "historicalLabsUnchanged": true,
+  "existingBuildOutputsUnchanged": true,
+  "preservation": [
+    {
+      "source": "artifacts/lab-04/screenshots/actions-taken/baseline-desktop.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/baseline-desktop.png",
+      "sha256": "7cd64d0f1ce7a0360c91ea17733e29434a973bef2ae320f7fb47fbf4d6cd19b6"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/actions-taken/baseline-mobile.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/baseline-mobile.png",
+      "sha256": "aefd2e5cf6c60e6caa2984b438faff3aeb4fd822fca3042bc5f63957a05ac756"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/actions-taken/baseline-tablet.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/baseline-tablet.png",
+      "sha256": "cccb25576a0fc76f93adc6e663a6983fe54c6113aae06c1bf33adc1d87a20152"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/actions-taken/blocked-resolution-desktop.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/blocked-resolution-desktop.png",
+      "sha256": "c2737d9671169f5666030cbbefbaf60458367ef28535c71634b5576ab4be85ef"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/actions-taken/requester-read-only-desktop.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/requester-read-only-desktop.png",
+      "sha256": "2c43ae2e4f19b30121cdea94f08e1100683c5b97496859ea723feef59806feaa"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/actions-taken/stale-conflict-desktop.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/stale-conflict-desktop.png",
+      "sha256": "1f8acf65f4998ee6a333c4ff8eaca60f6f030ba47e7add57277b2a45fb4f2a9d"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/actions-taken/validation-desktop.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/validation-desktop.png",
+      "sha256": "14a9e7b367b1f2262b1df8e0d87d2cac1cb8c9dd57eff10fbd8653390cdac3c8"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/requester-dashboard/baseline-desktop.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/requester-dashboard/baseline-desktop.png",
+      "sha256": "e80620ed2b08845a1b32599a1130eab2fc9c54f6e586423819fa2a013c1b53b5"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/requester-dashboard/baseline-mobile.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/requester-dashboard/baseline-mobile.png",
+      "sha256": "281cc2155e8689f5032d8a332ad1a144e914c38d2921ebd8c540e2f6fcd30757"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/requester-dashboard/baseline-tablet.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/requester-dashboard/baseline-tablet.png",
+      "sha256": "7772143d92d84137e03d044fcf368e9d6424a6b988b15fdb737e72f053fa5a18"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/staff-dashboard/administrator-desktop.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/administrator-desktop.png",
+      "sha256": "41accff9f3399be7536eb8a9fbe7511fba2dd3f8418a1366287620e37003f91d"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/staff-dashboard/baseline-desktop.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/baseline-desktop.png",
+      "sha256": "5cb08c8bfc8c0267e6d7734b091518e892c1ecfcc2658b4c1b3af013c6c77079"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/staff-dashboard/baseline-mobile.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/baseline-mobile.png",
+      "sha256": "8c6b99c4bab495ff913f369a1c966c09bda94f69a48824c49fb330c308ca343b"
+    },
+    {
+      "source": "artifacts/lab-04/screenshots/staff-dashboard/baseline-tablet.png",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/baseline-tablet.png",
+      "sha256": "6acd274038459dd8437600a2c29cdda1ee529fd0f595c5565e685709f3b185ed"
+    },
+    {
+      "source": "artifacts/lab-04/manifest.json",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/manifest.json",
+      "sha256": "06058c43b02d21ef4e7d525cf110806b6a8eff2e6fb2ddfae20fb3a66c63468f"
+    },
+    {
+      "source": "docs/lab-04/issue-27-verification.md",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/issue-27-verification.md",
+      "sha256": "81b42ff38d914c14c5b1d84b1288f115a5c79691cd7204daa1b4c5822d7b3fd1"
+    },
+    {
+      "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/accessibility.txt",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/accessibility.txt",
+      "sha256": "2d9b9b986d4d11dd1354bf1480d3cdd8565e23572b9708aad741094c8b7321f8"
+    },
+    {
+      "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/browser.txt",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/browser.txt",
+      "sha256": "870d73dce199f3c9574a9962d8b3e7cff3e1498e8ff880c4bae14f18594f5e1f"
+    },
+    {
+      "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/client-build.txt",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/client-build.txt",
+      "sha256": "7712e7b4a3c3a6fed5061b870f62258f45488cce0e0f18bd21d993821a7fc5ea"
+    },
+    {
+      "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/client-regression.txt",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/client-regression.txt",
+      "sha256": "1a0f7ac9a537e546dcbdc27fe6db73f28a23bd56dbfed1d9fc3ae1d2b7584cfc",
+      "originalSha256": "6bbebdf4693df1ec282d6f39b712abd03f74d3061cef76a917a645d33f9d1b2a",
+      "normalization": "Extra blank lines at EOF removed only; original bytes retained in local backup recorded below."
+    },
+    {
+      "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/integration-results.json",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/integration-results.json",
+      "sha256": "9f5a33bd1ada031d12de025bbf1b95e34e76dad8ee426245f260e279296bb4ef"
+    },
+    {
+      "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/migration-verification.json",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/migration-verification.json",
+      "sha256": "c1cb3fe6793c6b93b6d67666e51eff3962d1c3282ad3992fadf47bbc6652f069"
+    },
+    {
+      "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/server-build.txt",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-build.txt",
+      "sha256": "1b599cb12dd98cd38ffc9f62d77a9494144a16af2c807685a60a47e26fa29701",
+      "originalSha256": "f6899a65aa9dc478cd42c10b5cf3e84c184563a549fef717796bc43dd0905ad0",
+      "normalization": "Extra blank lines at EOF removed only; original bytes retained in local backup recorded below."
+    },
+    {
+      "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/server-regression.txt",
+      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-regression.txt",
+      "sha256": "97833bc0054682839e9b68562c08d0be7959fd23ee40c5c527cb4bee0437d038",
+      "originalSha256": "89e54280dc7d0f6bec60d8f5f274fd4b8b90c908ccb475a06003e7079f322a0d",
+      "normalization": "Extra blank lines at EOF removed only; original bytes retained in local backup recorded below."
+    }
+  ],
+  "changes": [
+    {
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/baseline-desktop.png",
+      "previousSha256": "7cd64d0f1ce7a0360c91ea17733e29434a973bef2ae320f7fb47fbf4d6cd19b6",
+      "sha256": "b769190647700ad72995b678bc1e270e7f6a6a89d47a40c7f17432b71577daad",
+      "reason": "Current-source Staff Ticket Detail: removed raw ID and contextual workflow feedback; asserted form/state capture"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/baseline-mobile.png",
+      "previousSha256": "aefd2e5cf6c60e6caa2984b438faff3aeb4fd822fca3042bc5f63957a05ac756",
+      "sha256": "6153683e207a281bb91ef778910f02e828522a19806ac7b34e083646c1942da2",
+      "reason": "Current-source Staff Ticket Detail: removed raw ID and contextual workflow feedback; asserted form/state capture"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/baseline-tablet.png",
+      "previousSha256": "cccb25576a0fc76f93adc6e663a6983fe54c6113aae06c1bf33adc1d87a20152",
+      "sha256": "45d1c06a70a95fcbbd6faa1e3a170058bb660e4bc2e8ad228c1676cc69fc5ab8",
+      "reason": "Current-source Staff Ticket Detail: removed raw ID and contextual workflow feedback; asserted form/state capture"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/blocked-resolution-desktop.png",
+      "previousSha256": "c2737d9671169f5666030cbbefbaf60458367ef28535c71634b5576ab4be85ef",
+      "sha256": "a472677d4be95bb05f64c5952aaacab4f25a36cf6d9fae8a99d943c5a66b1507",
+      "reason": "Current-source Staff Ticket Detail: removed raw ID and contextual workflow feedback; asserted form/state capture"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/requester-read-only-desktop.png",
+      "previousSha256": "2c43ae2e4f19b30121cdea94f08e1100683c5b97496859ea723feef59806feaa",
+      "sha256": "5f56f7fbeda53fd8ccb65acee75947a6b81d700b1ea2827e6d6b839c1b36b0fb",
+      "reason": "Complete current-source candidate run; asserted role/viewport state"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/requester-read-only-mobile.png",
+      "previousSha256": null,
+      "sha256": "e846d82eea2957ed6699dd93f3d5d3217cef4edcb808ae321232a8f2b6f48d11",
+      "reason": "Complete current-source candidate run; asserted role/viewport state"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/requester-read-only-tablet.png",
+      "previousSha256": null,
+      "sha256": "21d1e6c04431000ee0d323611ca32db8c0f7010483802d2c2d77b160088c23ab",
+      "reason": "Complete current-source candidate run; asserted role/viewport state"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/stale-conflict-desktop.png",
+      "previousSha256": "1f8acf65f4998ee6a333c4ff8eaca60f6f030ba47e7add57277b2a45fb4f2a9d",
+      "sha256": "94000debb9691f8c8417ad580b4253f2ef11b301f0485453674f288ef5fd6a89",
+      "reason": "Current-source Staff Ticket Detail: removed raw ID and contextual workflow feedback; asserted form/state capture"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/validation-desktop.png",
+      "previousSha256": "14a9e7b367b1f2262b1df8e0d87d2cac1cb8c9dd57eff10fbd8653390cdac3c8",
+      "sha256": "fdf59a08abc4dcf8af5b154953a6efe0f24e4caea4a73aec99e91c5f3b33f2b8",
+      "reason": "Current-source Staff Ticket Detail: removed raw ID and contextual workflow feedback; asserted form/state capture"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/validation-mobile.png",
+      "previousSha256": null,
+      "sha256": "d7c9a812bfd202e07e26e7ea9330d04503ea9dc89c0c2b44c6e6ac5ef9b4dac7",
+      "reason": "Current-source Staff Ticket Detail: removed raw ID and contextual workflow feedback; asserted form/state capture"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/validation-tablet.png",
+      "previousSha256": null,
+      "sha256": "c347a19bdf20f892c857c3a29f629e2d8e23816e967918ead634dd881d291028",
+      "reason": "Current-source Staff Ticket Detail: removed raw ID and contextual workflow feedback; asserted form/state capture"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/requester-dashboard/baseline-desktop.png",
+      "previousSha256": "e80620ed2b08845a1b32599a1130eab2fc9c54f6e586423819fa2a013c1b53b5",
+      "sha256": "9c8b1a6820f2b76b8c39c10dc5fe3491e3d58ad89258a0c61c67819644282435",
+      "reason": "Complete current-source candidate run; asserted role/viewport state"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/requester-dashboard/baseline-mobile.png",
+      "previousSha256": "281cc2155e8689f5032d8a332ad1a144e914c38d2921ebd8c540e2f6fcd30757",
+      "sha256": "cf5121e3f3b63d89ea3056643c5aee7d2512b4ab441986ebb3f226c9174480f4",
+      "reason": "Complete current-source candidate run; asserted role/viewport state"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/requester-dashboard/baseline-tablet.png",
+      "previousSha256": "7772143d92d84137e03d044fcf368e9d6424a6b988b15fdb737e72f053fa5a18",
+      "sha256": "ff8df6c2045a04c77660c94413a6c23f54cfe43f259ab1f42f13f54fa0273450",
+      "reason": "Complete current-source candidate run; asserted role/viewport state"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/staff-dashboard/administrator-desktop.png",
+      "previousSha256": "41accff9f3399be7536eb8a9fbe7511fba2dd3f8418a1366287620e37003f91d",
+      "sha256": "427eb7105cad545df56766513dc3696d27d75ad8a163822777978de8fb049607",
+      "reason": "Complete current-source candidate run; asserted role/viewport state"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/staff-dashboard/baseline-desktop.png",
+      "previousSha256": "5cb08c8bfc8c0267e6d7734b091518e892c1ecfcc2658b4c1b3af013c6c77079",
+      "sha256": "8615091db44c7a5d8c9b934f939fa29a29b99c19a453cb7ec1748ef9133ed3e1",
+      "reason": "Complete current-source candidate run; asserted role/viewport state"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/staff-dashboard/baseline-mobile.png",
+      "previousSha256": "8c6b99c4bab495ff913f369a1c966c09bda94f69a48824c49fb330c308ca343b",
+      "sha256": "e3d20b4f5162eca9f3cf198fbfb856dfd7230dd2ecfb1cfb6313fd52597d435d",
+      "reason": "Complete current-source candidate run; asserted role/viewport state"
+    },
+    {
+      "artifact": "artifacts/lab-04/screenshots/staff-dashboard/baseline-tablet.png",
+      "previousSha256": "6acd274038459dd8437600a2c29cdda1ee529fd0f595c5565e685709f3b185ed",
+      "sha256": "9499afdd52152e9c3d45b9f36a4e2679bd50d7af10b0b12b9841a49058f4a0f9",
+      "reason": "Complete current-source candidate run; asserted role/viewport state"
+    }
+  ],
+  "independentPostPublicationReview": {
+    "sourceFingerprintMatches": true,
+    "buildFingerprintMatches": true,
+    "currentArtifactHashesVerified": 18,
+    "archivedFileHashesVerified": 24,
+    "requiredMetadataVerified": true,
+    "readinessAndCleanupRecordsVerified": 21,
+    "reportLocalLinksValid": true,
+    "canonicalCapturesVisuallyInspectedBy": "Codex",
+    "canonicalCapturesInspected": 18,
+    "humanApprovalClaimed": false
+  },
+  "eofWhitespaceCorrection": {
+    "scope": "Evidence-only packaging correction; no test execution, result, timestamp, screenshot, source/build fingerprint or implementation change.",
+    "localBackupDirectory": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e",
+    "files": [
+      {
+        "path": "artifacts/lab-04/regression/issue-27/client-regression.txt",
+        "originalSha256": "d1068c7aed3ea2c5cf71b829f1f4d03ccddc42446540139216b887ae119ae31a",
+        "sha256": "0d50c58f6fb034a93646540f2a19e657f3e8da643ddc75aaaf08afa26e5d8783",
+        "removedTrailingBlankLines": 1,
+        "localOriginal": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e/artifacts/lab-04/regression/issue-27/client-regression.txt"
+      },
+      {
+        "path": "artifacts/lab-04/regression/issue-27/server-build.txt",
+        "originalSha256": "58fe99e444fff8bab47dbb4857e431b8baf11299e8a73da610f423a171856514",
+        "sha256": "aaee6a8f1a0608a095bf6a5ef20d754c8e491a8f8e99642144a10f54e6180f13",
+        "removedTrailingBlankLines": 1,
+        "localOriginal": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e/artifacts/lab-04/regression/issue-27/server-build.txt"
+      },
+      {
+        "path": "artifacts/lab-04/regression/issue-27/server-regression.txt",
+        "originalSha256": "9f5b8f06a88b0088751ec7d83a255eff7f0a49280f65541efe283ec1c5db93a6",
+        "sha256": "8d5a810fb3e4c2507b0101ff6b0a5c60ba5f701b23887917f24a1783cd062bdb",
+        "removedTrailingBlankLines": 1,
+        "localOriginal": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e/artifacts/lab-04/regression/issue-27/server-regression.txt"
+      },
+      {
+        "path": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/client-regression.txt",
+        "originalSha256": "6bbebdf4693df1ec282d6f39b712abd03f74d3061cef76a917a645d33f9d1b2a",
+        "sha256": "1a0f7ac9a537e546dcbdc27fe6db73f28a23bd56dbfed1d9fc3ae1d2b7584cfc",
+        "removedTrailingBlankLines": 1,
+        "localOriginal": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e/artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/client-regression.txt"
+      },
+      {
+        "path": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-build.txt",
+        "originalSha256": "f6899a65aa9dc478cd42c10b5cf3e84c184563a549fef717796bc43dd0905ad0",
+        "sha256": "1b599cb12dd98cd38ffc9f62d77a9494144a16af2c807685a60a47e26fa29701",
+        "removedTrailingBlankLines": 1,
+        "localOriginal": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e/artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-build.txt"
+      },
+      {
+        "path": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-regression.txt",
+        "originalSha256": "89e54280dc7d0f6bec60d8f5f274fd4b8b90c908ccb475a06003e7079f322a0d",
+        "sha256": "97833bc0054682839e9b68562c08d0be7959fd23ee40c5c527cb4bee0437d038",
+        "removedTrailingBlankLines": 1,
+        "localOriginal": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e/artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-regression.txt"
+      }
+    ],
+    "preservation": "21 archive files remain byte-identical; 3 archived logs differ only by removal of extra EOF blank lines. All 6 original logs are retained locally.",
+    "archiveHashesVerifiedAfterCorrection": 24
+  }
+}

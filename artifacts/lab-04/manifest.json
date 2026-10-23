@@ -1,0 +1,799 @@
+{
+  "issue": 27,
+  "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+  "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+  "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+  "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+  "uiSpec": {
+    "path": "docs/lab-04/ui-spec.md",
+    "sha256": "6318ca326415c027225f7063e60dc9d4016bb5190e2c7d4e7e2b4aa90bab11b5"
+  },
+  "submissionParts": [
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "accessibility": {
+    "run": "test-results/issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+    "stats": {
+      "startTime": "2026-10-23T12:40:49.228Z",
+      "duration": 124971.769,
+      "expected": 102,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "scope": "intercepted frontend evidence only"
+  },
+  "generatedAt": "2026-10-23T12:42:54.464Z",
+  "result": "PASS",
+  "stats": {
+    "startTime": "2026-10-23T12:38:38.241Z",
+    "duration": 130727.39,
+    "expected": 21,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "command": "npm run test:lab4:integrated",
+  "retries": 0,
+  "skips": 0,
+  "coreApisMocked": false,
+  "acceptance": [
+    {
+      "ac": "AC-01",
+      "integrated": "E2E-ACT-01; E2E-DASH-02-staff/admin",
+      "supplement": "ACT-API-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-02",
+      "integrated": "E2E-ACT-01",
+      "supplement": "ACT-API-01; ACT-ASSIGN-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-03",
+      "integrated": "E2E-ACT-01; E2E-WF-01",
+      "supplement": "ACT-SEC-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-04",
+      "integrated": "E2E-ACT-01",
+      "supplement": "ACT-VAL-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-05",
+      "integrated": "E2E-ACT-01",
+      "supplement": "ACT-VAL-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-06",
+      "integrated": "E2E-ACT-01",
+      "supplement": "ACT-ASSIGN-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-07",
+      "integrated": "E2E-ACT-01; E2E-WF-02",
+      "supplement": "ACT-LIFE-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-08",
+      "integrated": "E2E-ACT-01",
+      "supplement": "ACT-LIFE-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-09",
+      "integrated": "E2E-ACT-01",
+      "supplement": "ACT-VAL-01; ACT-LIFE-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-10",
+      "integrated": "E2E-WF-02",
+      "supplement": "ACT-CONFLICT-01; WF-RACE-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-11",
+      "integrated": "E2E-ACT-01; E2E-WF-01",
+      "supplement": "ACT-RETRY-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-12",
+      "integrated": "E2E-WF-02",
+      "supplement": "WF-UNIT-01; WF-API-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-13",
+      "integrated": "E2E-WF-02",
+      "supplement": "WF-API-01; WF-RACE-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-14",
+      "integrated": "E2E-WF-02",
+      "supplement": "MIG-01; WF-API-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-15",
+      "integrated": "E2E-WF-01",
+      "supplement": "WF-SEC-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-16",
+      "integrated": "E2E-DASH-02-admin; E2E-ACT-01; E2E-WF-01",
+      "supplement": "WF-SEC-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-17",
+      "integrated": "E2E-DASH-01",
+      "supplement": "REQ-DASH-01; REQ-TIME-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-18",
+      "integrated": "E2E-DASH-02-staff/admin",
+      "supplement": "STAFF-DASH-01; DASH-PERF-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-19",
+      "integrated": "E2E-DASH-01; E2E-DASH-02-staff/admin",
+      "supplement": "REQ-DASH-01; STAFF-DASH-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-20",
+      "integrated": "E2E-WF-02; E2E-DASH-03",
+      "supplement": "ACT-UI-01; WF-UI-01; REQ-UI-01; STAFF-UI-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-21",
+      "integrated": "Separate server migration/seed/recovery gate",
+      "supplement": "MIG-01; DATA-01; SEED-01",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-22",
+      "integrated": "Representative inherited journeys: E2E-WF-01/02; E2E-DASH-02-admin",
+      "supplement": "Complete current server/client suites; full historical browser/release regression is not claimed",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "support; complete historical browser regression pending release verification"
+    },
+    {
+      "ac": "AC-23",
+      "integrated": "Three-viewports geometry and separate Issue 26 frontend suite",
+      "supplement": "STYLE-01; RESP-A11Y-01 (frontend-only; see Issue 27 report for fresh separate execution)",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    },
+    {
+      "ac": "AC-24",
+      "integrated": "Asserted canonical captures + strict publication/manifest gate",
+      "supplement": "ART-01; candidate revision/source fingerprint, final-main revalidation belongs to Issue 28",
+      "evidence": "docs/lab-04/issue-27-verification.md",
+      "scope": "Issue 27 candidate evidence"
+    }
+  ],
+  "database": "toktickit_test / generated per-test schemas; real migrations; disposed after each test",
+  "scope": "Issue 27 integrated evidence; Issue 26 frontend evidence remains separate. Final-main/deployment and full historical E2E release verification belong to Issue 28.",
+  "artifacts": [
+    {
+      "submissionParts": [
+        6,
+        7,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/baseline-desktop.png",
+      "scenario": "Created shared planned Action; performer, assignee and Ticket Owner differ; replay checked in DB",
+      "role": "IT_STAFF",
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-05",
+        "AC-11",
+        "AC-23",
+        "AC-24"
+      ],
+      "test": [
+        "actions-taken-flow.spec.ts",
+        "E2E-ACT-01 — real Staff Action lifecycle, assignment, retry, attribution and Requester read-only privacy"
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "project": "desktop",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "b769190647700ad72995b678bc1e270e7f6a6a89d47a40c7f17432b71577daad",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        6,
+        7,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/baseline-mobile.png",
+      "scenario": "Created shared planned Action; performer, assignee and Ticket Owner differ; replay checked in DB",
+      "role": "IT_STAFF",
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-05",
+        "AC-11",
+        "AC-23",
+        "AC-24"
+      ],
+      "test": [
+        "actions-taken-flow.spec.ts",
+        "E2E-ACT-01 — real Staff Action lifecycle, assignment, retry, attribution and Requester read-only privacy"
+      ],
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "project": "mobile",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "6153683e207a281bb91ef778910f02e828522a19806ac7b34e083646c1942da2",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        6,
+        7,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/baseline-tablet.png",
+      "scenario": "Created shared planned Action; performer, assignee and Ticket Owner differ; replay checked in DB",
+      "role": "IT_STAFF",
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-05",
+        "AC-11",
+        "AC-23",
+        "AC-24"
+      ],
+      "test": [
+        "actions-taken-flow.spec.ts",
+        "E2E-ACT-01 — real Staff Action lifecycle, assignment, retry, attribution and Requester read-only privacy"
+      ],
+      "viewport": {
+        "width": 800,
+        "height": 900
+      },
+      "project": "tablet",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "45d1c06a70a95fcbbd6faa1e3a170058bb660e4bc2e8ad228c1676cc69fc5ab8",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        6,
+        7,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/blocked-resolution-desktop.png",
+      "scenario": "Selecting resolution explains outstanding work; frontend save and direct API resolution remain blocked without mutation",
+      "role": "IT_STAFF",
+      "acs": [
+        "AC-12",
+        "AC-13",
+        "AC-24"
+      ],
+      "test": [
+        "ticket-resolution.spec.ts",
+        "E2E-WF-02 — real resolution gate, stale draft recovery, corrections, closure and zero-Action policy"
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "project": "desktop",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "a472677d4be95bb05f64c5952aaacab4f25a36cf6d9fae8a99d943c5a66b1507",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/requester-read-only-desktop.png",
+      "scenario": "Completed and cancelled shared lines, Requester read-only and private-note exclusion",
+      "role": "REQUESTER",
+      "acs": [
+        "AC-03",
+        "AC-07",
+        "AC-08",
+        "AC-09",
+        "AC-24"
+      ],
+      "test": [
+        "actions-taken-flow.spec.ts",
+        "E2E-ACT-01 — real Staff Action lifecycle, assignment, retry, attribution and Requester read-only privacy"
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "project": "desktop",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "5f56f7fbeda53fd8ccb65acee75947a6b81d700b1ea2827e6d6b839c1b36b0fb",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/requester-read-only-mobile.png",
+      "scenario": "Completed and cancelled shared lines, Requester read-only and private-note exclusion",
+      "role": "REQUESTER",
+      "acs": [
+        "AC-03",
+        "AC-07",
+        "AC-08",
+        "AC-09",
+        "AC-24"
+      ],
+      "test": [
+        "actions-taken-flow.spec.ts",
+        "E2E-ACT-01 — real Staff Action lifecycle, assignment, retry, attribution and Requester read-only privacy"
+      ],
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "project": "mobile",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "e846d82eea2957ed6699dd93f3d5d3217cef4edcb808ae321232a8f2b6f48d11",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/requester-read-only-tablet.png",
+      "scenario": "Completed and cancelled shared lines, Requester read-only and private-note exclusion",
+      "role": "REQUESTER",
+      "acs": [
+        "AC-03",
+        "AC-07",
+        "AC-08",
+        "AC-09",
+        "AC-24"
+      ],
+      "test": [
+        "actions-taken-flow.spec.ts",
+        "E2E-ACT-01 — real Staff Action lifecycle, assignment, retry, attribution and Requester read-only privacy"
+      ],
+      "viewport": {
+        "width": 800,
+        "height": 900
+      },
+      "project": "tablet",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "21d1e6c04431000ee0d323611ca32db8c0f7010483802d2c2d77b160088c23ab",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        6,
+        7,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/stale-conflict-desktop.png",
+      "scenario": "A real second Staff session wins; 409 retains the first browser draft",
+      "role": "IT_STAFF",
+      "acs": [
+        "AC-10",
+        "AC-20",
+        "AC-24"
+      ],
+      "test": [
+        "ticket-resolution.spec.ts",
+        "E2E-WF-02 — real resolution gate, stale draft recovery, corrections, closure and zero-Action policy"
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "project": "desktop",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "94000debb9691f8c8417ad580b4253f2ef11b301f0485453674f288ef5fd6a89",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        6,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/validation-desktop.png",
+      "scenario": "Required Follow-Up Note is associated with the field; no Action persisted",
+      "role": "IT_STAFF",
+      "acs": [
+        "AC-04",
+        "AC-05",
+        "AC-24"
+      ],
+      "test": [
+        "actions-taken-flow.spec.ts",
+        "E2E-ACT-01 — real Staff Action lifecycle, assignment, retry, attribution and Requester read-only privacy"
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "project": "desktop",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "fdf59a08abc4dcf8af5b154953a6efe0f24e4caea4a73aec99e91c5f3b33f2b8",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        6,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/validation-mobile.png",
+      "scenario": "Required Follow-Up Note is associated with the field; no Action persisted",
+      "role": "IT_STAFF",
+      "acs": [
+        "AC-04",
+        "AC-05",
+        "AC-24"
+      ],
+      "test": [
+        "actions-taken-flow.spec.ts",
+        "E2E-ACT-01 — real Staff Action lifecycle, assignment, retry, attribution and Requester read-only privacy"
+      ],
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "project": "mobile",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "d7c9a812bfd202e07e26e7ea9330d04503ea9dc89c0c2b44c6e6ac5ef9b4dac7",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        6,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/actions-taken/validation-tablet.png",
+      "scenario": "Required Follow-Up Note is associated with the field; no Action persisted",
+      "role": "IT_STAFF",
+      "acs": [
+        "AC-04",
+        "AC-05",
+        "AC-24"
+      ],
+      "test": [
+        "actions-taken-flow.spec.ts",
+        "E2E-ACT-01 — real Staff Action lifecycle, assignment, retry, attribution and Requester read-only privacy"
+      ],
+      "viewport": {
+        "width": 800,
+        "height": 900
+      },
+      "project": "tablet",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "c347a19bdf20f892c857c3a29f629e2d8e23816e967918ead634dd881d291028",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        8,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/requester-dashboard/baseline-desktop.png",
+      "scenario": "Seven counts and recent-five reconcile to independent SQL; owned Requester dashboard",
+      "role": "REQUESTER",
+      "acs": [
+        "AC-17",
+        "AC-19",
+        "AC-23",
+        "AC-24"
+      ],
+      "test": [
+        "dashboards.spec.ts",
+        "E2E-DASH-01 — Requester SQL reconciliation, all metric drill-downs, recent ordering and ownership"
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "project": "desktop",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "9c8b1a6820f2b76b8c39c10dc5fe3491e3d58ad89258a0c61c67819644282435",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        8,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/requester-dashboard/baseline-mobile.png",
+      "scenario": "Seven counts and recent-five reconcile to independent SQL; owned Requester dashboard",
+      "role": "REQUESTER",
+      "acs": [
+        "AC-17",
+        "AC-19",
+        "AC-23",
+        "AC-24"
+      ],
+      "test": [
+        "dashboards.spec.ts",
+        "E2E-DASH-01 — Requester SQL reconciliation, all metric drill-downs, recent ordering and ownership"
+      ],
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "project": "mobile",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "cf5121e3f3b63d89ea3056643c5aee7d2512b4ab441986ebb3f226c9174480f4",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        8,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/requester-dashboard/baseline-tablet.png",
+      "scenario": "Seven counts and recent-five reconcile to independent SQL; owned Requester dashboard",
+      "role": "REQUESTER",
+      "acs": [
+        "AC-17",
+        "AC-19",
+        "AC-23",
+        "AC-24"
+      ],
+      "test": [
+        "dashboards.spec.ts",
+        "E2E-DASH-01 — Requester SQL reconciliation, all metric drill-downs, recent ordering and ownership"
+      ],
+      "viewport": {
+        "width": 800,
+        "height": 900
+      },
+      "project": "tablet",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "ff8df6c2045a04c77660c94413a6c23f54cfe43f259ab1f42f13f54fa0273450",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        5,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/staff-dashboard/administrator-desktop.png",
+      "scenario": "All operational metrics and My Actions reconcile independently; server-controlled attribution",
+      "role": "ADMINISTRATOR",
+      "acs": [
+        "AC-01",
+        "AC-16",
+        "AC-18",
+        "AC-19",
+        "AC-23",
+        "AC-24"
+      ],
+      "test": [
+        "dashboards.spec.ts",
+        "E2E-DASH-02-admin — operational SQL reconciliation, My Actions and role restrictions"
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "project": "desktop",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "427eb7105cad545df56766513dc3696d27d75ad8a163822777978de8fb049607",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        5,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/staff-dashboard/baseline-desktop.png",
+      "scenario": "All operational metrics and My Actions reconcile independently; server-controlled attribution",
+      "role": "IT_STAFF",
+      "acs": [
+        "AC-01",
+        "AC-16",
+        "AC-18",
+        "AC-19",
+        "AC-23",
+        "AC-24"
+      ],
+      "test": [
+        "dashboards.spec.ts",
+        "E2E-DASH-02-staff — operational SQL reconciliation, My Actions and role restrictions"
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "project": "desktop",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "8615091db44c7a5d8c9b934f939fa29a29b99c19a453cb7ec1748ef9133ed3e1",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        5,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/staff-dashboard/baseline-mobile.png",
+      "scenario": "All operational metrics and My Actions reconcile independently; server-controlled attribution",
+      "role": "IT_STAFF",
+      "acs": [
+        "AC-01",
+        "AC-16",
+        "AC-18",
+        "AC-19",
+        "AC-23",
+        "AC-24"
+      ],
+      "test": [
+        "dashboards.spec.ts",
+        "E2E-DASH-02-staff — operational SQL reconciliation, My Actions and role restrictions"
+      ],
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "project": "mobile",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "e3d20b4f5162eca9f3cf198fbfb856dfd7230dd2ecfb1cfb6313fd52597d435d",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    },
+    {
+      "submissionParts": [
+        5,
+        9
+      ],
+      "buildHash": "dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe",
+      "artifact": "artifacts/lab-04/screenshots/staff-dashboard/baseline-tablet.png",
+      "scenario": "All operational metrics and My Actions reconcile independently; server-controlled attribution",
+      "role": "IT_STAFF",
+      "acs": [
+        "AC-01",
+        "AC-16",
+        "AC-18",
+        "AC-19",
+        "AC-23",
+        "AC-24"
+      ],
+      "test": [
+        "dashboards.spec.ts",
+        "E2E-DASH-02-staff — operational SQL reconciliation, My Actions and role restrictions"
+      ],
+      "viewport": {
+        "width": 800,
+        "height": 900
+      },
+      "project": "tablet",
+      "revision": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+      "sourceHash": "0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8",
+      "run": "issue-27-2026-10-23T12-37-24-458Z-3f77c2bd",
+      "result": "PASS",
+      "sha256": "9499afdd52152e9c3d45b9f36a4e2679bd50d7af10b0b12b9841a49058f4a0f9",
+      "integration": "real frontend/API/session/Prisma/PostgreSQL; isolated migrated schema"
+    }
+  ]
+}

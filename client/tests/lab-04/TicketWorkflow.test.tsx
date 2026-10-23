@@ -27,7 +27,7 @@ beforeEach(() => {
 async function open(role: 'IT_STAFF' | 'ADMINISTRATOR' | 'REQUESTER' = 'IT_STAFF') {
   render(<StaffTicketDetail ticketId={7} currentUserId={2} currentUserRole={role} currentUserName="Staff" />);
   await screen.findByText('WF-7');
-  await waitFor(() => expect(screen.queryByText(/Checking current Actions/)).not.toBeInTheDocument());
+  await waitFor(() => expect(screen.queryByText(/Loading Actions/)).not.toBeInTheDocument());
 }
 function choose(target: string) { fireEvent.change(screen.getByLabelText('Update Status'), { target: { value: target } }); }
 function resolve() { choose('RESOLVED'); fireEvent.change(screen.getByLabelText(/Resolution Summary/), { target: { value: 'Retain my summary' } }); fireEvent.click(screen.getByRole('button', { name: 'Save Transition to RESOLVED' })); }
@@ -56,16 +56,35 @@ describe('WF-UI-01', () => {
     expect(screen.getByRole('option',{name:'RESOLVED (Current)'})).toBeInTheDocument();
     expect(screen.getByText(/Reopen this Ticket before adding/)).toBeInTheDocument();
   });
-  it.each(['PLANNED','COMPLETED'] as const)('blocks resolution for %s outstanding work', async status => {
-    actions = [{ ...action, status, followUpRequired: status === 'COMPLETED', followUpNote: 'Check' }]; await open();
-    expect(screen.getByRole('option',{name:'RESOLVED'})).toBeDisabled();
-    expect(screen.getByText(/Resolution and closure blocked:/)).toBeInTheDocument();
-    expect(screen.getByRole('link',{name:'Review Actions Taken'})).toHaveAttribute('href','#actions-heading-7');
-    expect(api.updateStaffTicketStatus).not.toHaveBeenCalled();
-  });
-  it('rechecks closure feedback on resolved legacy tickets', async () => {
-    latest.currentStatus = 'RESOLVED'; actions = [action]; await open();
-    expect(screen.getByRole('option',{name:'CLOSED'})).toBeDisabled(); expect(screen.getByRole('option',{name:'REOPENED'})).toBeEnabled();
+  describe.each(['IT_STAFF', 'ADMINISTRATOR'] as const)('%s contextual workflow gate', role => {
+    it.each(['PLANNED', 'COMPLETED'] as const)('blocks resolution for %s work only after selection', async status => {
+      actions = [{ ...action, status, followUpRequired: status === 'COMPLETED', followUpNote: 'Check' }];
+      await open(role);
+      expect(screen.queryByRole('link', { name: 'Review Actions Taken' })).not.toBeInTheDocument();
+      choose('RESOLVED');
+      const feedback = screen.getByText(status === 'PLANNED'
+        ? /Complete or cancel planned Actions, then clear any required follow-up/
+        : /Clear the required follow-up on completed Actions/);
+      expect(feedback).toHaveAttribute('role', 'status');
+      expect(screen.getByLabelText('Update Status')).toHaveAccessibleDescription(feedback.textContent!);
+      expect(screen.getByRole('link', { name: 'Review Actions Taken' })).toHaveAttribute('href', '#actions-heading-7');
+      expect(screen.getByRole('button', { name: 'Save Transition to RESOLVED' })).toBeDisabled();
+      fireEvent.submit(screen.getByLabelText('Update Status').closest('form')!);
+      expect(api.updateStaffTicketStatus).not.toHaveBeenCalled();
+      choose('IN_PROGRESS');
+      expect(screen.queryByRole('link', { name: 'Review Actions Taken' })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Save Transition to IN PROGRESS' })).toBeEnabled();
+    });
+    it.each(['PLANNED', 'COMPLETED'] as const)('blocks closure with %s work while keeping reopening available', async status => {
+      latest.currentStatus = 'RESOLVED'; actions = [{ ...action, status, followUpRequired: status === 'COMPLETED' }]; await open(role);
+      expect(screen.queryByRole('link', { name: 'Review Actions Taken' })).not.toBeInTheDocument();
+      choose('CLOSED');
+      expect(screen.getByText(status === 'PLANNED' ? /Complete or cancel planned Actions/ : /Clear the required follow-up on completed Actions/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Save Transition to CLOSED' })).toBeDisabled();
+      fireEvent.submit(screen.getByLabelText('Update Status').closest('form')!);
+      expect(api.updateStaffTicketStatus).not.toHaveBeenCalled();
+      expect(screen.getByRole('option', { name: 'REOPENED' })).toBeEnabled();
+    });
   });
   it.each([{values: []}, {values: [{ ...action, status: 'CANCELLED' as const, followUpRequired: true }]}, {values: [{ ...action, status: 'COMPLETED' as const, followUpRequired: false }]}])('permits resolution for nonblocking Actions $values', async ({values}) => {
     actions = values; await open(); expect(screen.getByRole('option',{name:'RESOLVED'})).toBeEnabled();
@@ -81,13 +100,19 @@ describe('WF-UI-01', () => {
     vi.mocked(api.updateStaffTicketStatus).mockRejectedValueOnce({status:409,code,blockingWork:{planned:1,followUp:0}});
     await open(); resolve(); await screen.findByRole('button',{name:'Refresh and review Ticket'});
     expect(screen.getByLabelText(/Resolution Summary/)).toHaveValue('Retain my summary');
+    if (code === 'RESOLUTION_BLOCKED') {
+      expect(screen.getByText(/Complete or cancel planned Actions/)).toHaveAttribute('role', 'status');
+      expect(screen.getByLabelText('Update Status')).toHaveAccessibleDescription(/Complete or cancel planned Actions/);
+      expect(screen.queryByText(/1 planned/)).not.toBeInTheDocument();
+    }
     expect(screen.getByRole('button',{name:'Save Transition to RESOLVED'})).toBeDisabled();
     latest.workflowRevision = 5; actions = [action];
     fireEvent.click(screen.getByRole('button',{name:'Refresh and review Ticket'}));
     const review = await screen.findByRole('button',{name:'I have reviewed the latest Ticket'});
     await waitFor(() => expect(review).toBeEnabled()); fireEvent.click(review);
     expect(screen.getByLabelText(/Resolution Summary/)).toHaveValue('Retain my summary');
-    expect(screen.getByRole('option',{name:'RESOLVED'})).toBeDisabled(); expect(api.updateStaffTicketStatus).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button',{name:'Save Transition to RESOLVED'})).toBeDisabled();
+    expect(screen.getByText(/Complete or cancel planned Actions/)).toBeInTheDocument(); expect(api.updateStaffTicketStatus).toHaveBeenCalledTimes(1);
   });
   it('retains workflow and comment drafts after refresh failure, then retries with current revision', async () => {
     vi.mocked(api.updateStaffTicketStatus).mockRejectedValueOnce({status:409,code:'STALE_REVISION'}).mockImplementationOnce(async () => ({...latest,currentStatus:'RESOLVED',workflowRevision:6}));

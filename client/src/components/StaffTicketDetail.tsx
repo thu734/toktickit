@@ -52,6 +52,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   const [successBanner, setSuccessBanner] = useState("");
   const [workflowConflict, setWorkflowConflict] = useState<'refresh' | 'review' | null>(null);
   const [workflowRefreshing, setWorkflowRefreshing] = useState(false);
+  const [resolutionBlockedByServer, setResolutionBlockedByServer] = useState(false);
   const [actionsState, setActionsState] = useState<ActionsResponse | null>(null);
   const [actionsRefreshKey, setActionsRefreshKey] = useState(0);
   const workflowSaving = useRef(false);
@@ -65,8 +66,9 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   const workflowFailure = (err: any, fallback: string) => {
     if (err.status === 409 || !err.status || err.status >= 500) {
       setWorkflowConflict('refresh');
+      setResolutionBlockedByServer(err.code === 'RESOLUTION_BLOCKED');
       setError(err.code === 'RESOLUTION_BLOCKED'
-        ? `Outstanding Actions block resolution or closure (${err.blockingWork?.planned ?? '?'} planned, ${err.blockingWork?.followUp ?? '?'} requiring follow-up). Review Actions Taken. Your draft is retained.`
+        ? 'Review Actions Taken and finish outstanding work before resolving or closing this Ticket. Your draft is retained.'
         : 'Ticket may have changed. Your draft is retained. Refresh and review before saving again.');
     } else if (err.status === 401) setError('Your session has expired. Sign in again.');
     else if (err.code === 'MUST_CHANGE_PASSWORD') setError('Change your password before continuing.');
@@ -76,7 +78,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   };
   const refreshWorkflow = async () => {
     setWorkflowRefreshing(true);
-    try { await refreshTicket(); setActionsRefreshKey(key => key + 1); setWorkflowConflict('review'); setError(''); }
+    try { await refreshTicket(); setActionsRefreshKey(key => key + 1); setWorkflowConflict('review'); setResolutionBlockedByServer(false); setError(''); }
     catch (err: any) { setError(err.message || 'Unable to refresh. Retry when available.'); }
     finally { setWorkflowRefreshing(false); }
   };
@@ -322,7 +324,9 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   const workflowBusy = assigning || priorityUpdating || statusUpdating || workflowRefreshing || !!workflowConflict;
   const planned = actionsState?.actions.filter(a => a.status === 'PLANNED').length ?? 0;
   const followUp = actionsState?.actions.filter(a => a.status === 'COMPLETED' && a.followUpRequired).length ?? 0;
-  const gateBlocked = !actionsState || actionsState.workflowRevision !== ticket.workflowRevision || planned > 0 || followUp > 0;
+  const actionsReady = !!actionsState && actionsState.workflowRevision === ticket.workflowRevision;
+  const gateBlocked = !actionsReady || planned > 0 || followUp > 0;
+  const showGateFeedback = isStaff && selectedStatus !== ticket.currentStatus && ['RESOLVED', 'CLOSED'].includes(selectedStatus) && (gateBlocked || resolutionBlockedByServer);
   const allowedNextStatuses = ALLOWED_TRANSITIONS[ticket.currentStatus] || [];
 
   return (
@@ -331,7 +335,6 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
         <button type="button" className="btn btn-outline-secondary btn-sm" onClick={onBack}>
           ← Back to Ticket Queue
         </button>
-        <span className="badge badge-secondary">ID: {ticket.id}</span>
       </div>
 
       {successBanner && (
@@ -643,10 +646,6 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
             {/* State-Machine Status Transition */}
             <div className="mb-3">
-              {isStaff && allowedNextStatuses.some(s => ['RESOLVED', 'CLOSED'].includes(s)) && gateBlocked && <p role="status" className="small">
-                {!actionsState || actionsState.workflowRevision !== ticket.workflowRevision ? 'Checking current Actions before resolution or closure.' : `Resolution and closure blocked: ${planned} planned Actions, ${followUp} completed Actions requiring follow-up.`}
-                {' '}<a href={`#actions-heading-${ticketId}`}>Review Actions Taken</a>
-              </p>}
               {selectedStatus !== ticket.currentStatus && !allowedNextStatuses.includes(selectedStatus) && <p role="status" className="small">
                 Your draft target {selectedStatus.replace(/_/g, ' ')} is no longer permitted from {ticket.currentStatus.replace(/_/g, ' ')}. Choose an allowed transition; your summary is retained.
               </p>}
@@ -663,15 +662,25 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                       className="form-select form-select-sm mb-2"
                       value={selectedStatus}
                       onChange={handleStatusSelectChange}
+                      aria-describedby={showGateFeedback ? "status-gate-feedback" : undefined}
                       disabled={!isStaff || workflowBusy}
                     >
                       <option value={ticket.currentStatus}>{ticket.currentStatus.replace(/_/g, " ")} (Current)</option>
                       {allowedNextStatuses.map((st) => (
-                        <option key={st} value={st} disabled={gateBlocked && ["RESOLVED", "CLOSED"].includes(st)}>
+                        <option key={st} value={st} disabled={!actionsReady && ["RESOLVED", "CLOSED"].includes(st)}>
                           {st.replace(/_/g, " ")}
                         </option>
                       ))}
                     </select>
+
+                    {showGateFeedback && <p id="status-gate-feedback" role="status" className="small mb-2">
+                      {!actionsReady
+                        ? 'Checking current Actions before updating the status.'
+                        : planned > 0 || resolutionBlockedByServer
+                          ? 'Complete or cancel planned Actions, then clear any required follow-up before resolving or closing this Ticket.'
+                          : 'Clear the required follow-up on completed Actions before resolving or closing this Ticket.'}
+                      {' '}<a href={`#actions-heading-${ticketId}`}>Review Actions Taken</a>
+                    </p>}
 
                     {selectedStatus === "RESOLVED" && (
                       <div className="mb-2">

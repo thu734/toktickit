@@ -91,6 +91,32 @@ test('Action validation, editable/read-only surfaces and retained conflict draft
   await correction.screenshot({ path: testInfo.outputPath(`read-only-${testInfo.project.name}.png`) });
 });
 
+for (const role of ['IT_STAFF', 'ADMINISTRATOR'] as const) {
+  test(`${role}: blocked resolution explains next steps only after keyboard selection`, async ({ page, unexpected }) => {
+    await mount(page, { role }, unexpected); await detail(page);
+    const select = page.getByLabel('Update Status', { exact: true });
+    const guidance = page.getByRole('status').filter({ hasText: 'Complete or cancel planned Actions' });
+    await expect(page.getByRole('button', { name: 'Add Action', exact: true })).toBeEnabled();
+    await expect(guidance).toHaveCount(0);
+    await select.focus();
+    await page.keyboard.press('r');
+    await page.keyboard.press('Enter');
+    await expect(select).toHaveValue('RESOLVED');
+    await expect(select).toBeFocused();
+    await expect(guidance).toBeVisible();
+    await expect(select).toHaveAttribute('aria-describedby', 'status-gate-feedback');
+    await expect(select).toHaveAccessibleDescription(/Complete or cancel planned Actions/);
+    await expect(page.getByRole('button', { name: 'Save Transition to RESOLVED', exact: true })).toBeDisabled();
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: 'Review Actions Taken', exact: true })).toBeFocused();
+    await select.selectOption('IN_PROGRESS');
+    await expect(guidance).toHaveCount(0);
+    await expect(select).not.toHaveAttribute('aria-describedby');
+    await expect(page.getByRole('button', { name: 'Save Transition to IN PROGRESS', exact: true })).toBeEnabled();
+    await noOverflow(page);
+  });
+}
+
 test('status dialog contains keyboard focus, dismisses and restores focus', async ({ page, unexpected }, testInfo) => {
   await mount(page, { role: 'IT_STAFF' }, unexpected); await detail(page);
   const select = page.getByLabel('Update Status', { exact: true });

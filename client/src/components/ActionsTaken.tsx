@@ -67,11 +67,15 @@ function ActionsPanel({ ticketId, ticketStatus, onRefreshTicket, workflowRevisio
     } finally { if (mounted.current && sequence === readSequence.current) setLoading(false); }
   }
   useEffect(() => { void loadActions(); }, [ticketId, canWrite]);
+  const reviewingRefresh = useRef(false);
   const observedWorkflow = useRef({ workflowRevision, refreshKey });
   useEffect(() => {
     const previous = observedWorkflow.current;
     observedWorkflow.current = { workflowRevision, refreshKey };
     if (previous.workflowRevision === workflowRevision && previous.refreshKey === refreshKey) return;
+    // Explicit conflict recovery owns both reads. A parent revision update from
+    // its Ticket refresh must not supersede the following authoritative Actions read.
+    if (reviewingRefresh.current) return;
     if (editing && !uncertain && workflowRevision !== revision) {
       setConflict('refresh');
       setError('Ticket workflow changed. Your draft is retained. Refresh and review before saving again.');
@@ -81,7 +85,10 @@ function ActionsPanel({ ticketId, ticketStatus, onRefreshTicket, workflowRevisio
 
 
   async function refreshConflict() {
-    if (await loadActions(true)) { setConflict('review'); setError(''); }
+    reviewingRefresh.current = true;
+    try {
+      if (await loadActions(true)) { setConflict('review'); setError(''); }
+    } finally { reviewingRefresh.current = false; }
   }
   function begin(action: ActionTaken | 'new') {
     setEditing(action); setError(''); setSuccess(''); setConflict(null); setUncertain(false); createAttempt.current = null;

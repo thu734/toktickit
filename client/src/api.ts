@@ -435,19 +435,26 @@ export interface User {
 }
 
 export async function loginApi(email: string, password: string): Promise<{ user: User }> {
-  const res = await fetch(`${API_URL}/api/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-    },
-    credentials: "include",
-    body: JSON.stringify({ email, password }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/api/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
+  } catch {
+    throw new Error("Unable to reach the sign-in service. Check that the API is running and try again.");
+  }
 
   const data = await responseData(res);
   if (!res.ok) {
-    const errorObj = new Error(data.error || "Invalid email or password.");
+    const errorObj = new Error(res.status >= 500 || res.status === 404
+      ? "Sign-in service unavailable. Check API configuration and try again."
+      : data.error || (res.status === 401 ? "Invalid email or password." : "Unable to sign in. Please try again."));
     (errorObj as any).status = res.status;
     throw errorObj;
   }

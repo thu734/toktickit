@@ -1,0 +1,17 @@
+
+> toktickit-client@1.0.0 build
+> tsc && vite build --outDir /Users/thuthuwai/Documents/toktickit/test-results/issue-27-2026-10-23T12-37-24-458Z-3f77c2bd/client-build
+
+vite v6.4.3 building for production...
+
+(!) outDir /Users/thuthuwai/Documents/toktickit/test-results/issue-27-2026-10-23T12-37-24-458Z-3f77c2bd/client-build is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+transforming...
+✓ 49 modules transformed.
+rendering chunks...
+computing gzip size...
+../test-results/issue-27-2026-10-23T12-37-24-458Z-3f77c2bd/client-build/index.html                   0.39 kB │ gzip:  0.27 kB
+../test-results/issue-27-2026-10-23T12-37-24-458Z-3f77c2bd/client-build/assets/index-DaLdg_jb.css  235.20 kB │ gzip: 31.98 kB
+../test-results/issue-27-2026-10-23T12-37-24-458Z-3f77c2bd/client-build/assets/index-BhQ82Ru3.js   297.44 kB │ gzip: 79.36 kB
+✓ built in 396ms

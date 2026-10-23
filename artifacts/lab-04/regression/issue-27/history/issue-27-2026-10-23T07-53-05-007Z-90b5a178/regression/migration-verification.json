@@ -1,0 +1,160 @@
+{
+  "date": "2026-10-23T08:55:45.046521+00:00",
+  "primaryRepository": "/Users/thuthuwai/Documents/toktickit",
+  "primaryBranch": "feature/27-lab4-e2e-artifacts",
+  "head": "a8902031f23d6e1fc52a17dea69904dfa6e5c426",
+  "temporaryWorktree": "/private/tmp/toktickit-issue27",
+  "temporaryState": "detached HEAD; retained unchanged",
+  "backup": "/Users/thuthuwai/Documents/toktickit/.git/issue27-migration-backups/20261023-154754",
+  "sourceHash": "31baae96e4c348abd8e7b44b29aa6c9e00287bd1ac2cf139ef38a295895a9490",
+  "transfer": {
+    "newFiles": 16,
+    "identicalScreenshotsRetained": 14,
+    "trackedCodePatches": 3,
+    "documentationResolution": "Original docs/lab-04/tests.md bytes retained as prefix; Issue 27 status and section appended"
+  },
+  "preservation": {
+    "originalMainFiles": 1309,
+    "originalMainFilesByteIdentical": 1308,
+    "combinedDocumentOriginalPrefixVerified": true,
+    "ignoredJavaScriptFilesUnchanged": 58,
+    "cookieFilesUnchanged": 8,
+    "temporaryFilesUnchanged": 481,
+    "canonicalScreenshotsAndEvidenceOverwritten": false,
+    "originalBuildDirectoriesRestored": true
+  },
+  "verification": {
+    "clientFiles": 28,
+    "clientTests": 250,
+    "serverFiles": 36,
+    "serverTests": 688,
+    "serverApiUnitTests": 662,
+    "migrationDataTests": 26,
+    "browser": {
+      "startTime": "2026-10-23T08:52:34.219Z",
+      "duration": 118432.797,
+      "expected": 21,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "accessibilityTests": 96,
+    "skips": 0,
+    "retries": 0,
+    "schemaReadinessAndDisposalCases": 21,
+    "builds": "PASS",
+    "typescript": "PASS",
+    "rawRunDirectory": "test-results/issue27-migration-20261023T085108Z-5add0f99",
+    "phases": [
+      {
+        "name": "prisma-generate",
+        "command": [
+          "npm",
+          "exec",
+          "--prefix",
+          "server",
+          "--",
+          "prisma",
+          "generate",
+          "--schema",
+          "server/prisma/schema.prisma"
+        ],
+        "exitCode": 0
+      },
+      {
+        "name": "server-build",
+        "command": [
+          "npm",
+          "run",
+          "build",
+          "--prefix",
+          "server"
+        ],
+        "exitCode": 0
+      },
+      {
+        "name": "client-build",
+        "command": [
+          "npm",
+          "run",
+          "build",
+          "--prefix",
+          "client"
+        ],
+        "exitCode": 0
+      },
+      {
+        "name": "client",
+        "command": [
+          "npm",
+          "test",
+          "--prefix",
+          "client"
+        ],
+        "exitCode": 0
+      },
+      {
+        "name": "server",
+        "command": [
+          "npm",
+          "test",
+          "--prefix",
+          "server"
+        ],
+        "exitCode": 0
+      },
+      {
+        "name": "client-types",
+        "command": [
+          "node",
+          "client/node_modules/typescript/bin/tsc",
+          "--noEmit",
+          "--project",
+          "client/tsconfig.json"
+        ],
+        "exitCode": 0
+      },
+      {
+        "name": "integration-types",
+        "command": [
+          "node",
+          "server/node_modules/typescript/bin/tsc",
+          "--noEmit",
+          "--module",
+          "esnext",
+          "--moduleResolution",
+          "bundler",
+          "--target",
+          "es2022",
+          "--esModuleInterop",
+          "--skipLibCheck",
+          "--allowImportingTsExtensions",
+          "--types",
+          "node",
+          "--typeRoots",
+          "server/node_modules/@types",
+          "playwright.integration.config.ts",
+          "e2e/lab-04/actions-taken-flow.spec.ts",
+          "e2e/lab-04/ticket-resolution.spec.ts",
+          "e2e/lab-04/dashboards.spec.ts",
+          "e2e/lab-04/fixtures/integration.ts",
+          "e2e/lab-04/fixtures/integration-server.mts"
+        ],
+        "exitCode": 0
+      },
+      {
+        "name": "browser",
+        "command": [
+          "node",
+          "node_modules/@playwright/test/cli.js",
+          "test",
+          "--config",
+          "playwright.integration.config.ts"
+        ],
+        "exitCode": 0
+      }
+    ]
+  },
+  "committed": false,
+  "pushed": false
+}
