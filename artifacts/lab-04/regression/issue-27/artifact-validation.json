@@ -19,129 +19,177 @@
   "preservation": [
     {
       "source": "artifacts/lab-04/screenshots/actions-taken/baseline-desktop.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/baseline-desktop.png",
-      "sha256": "7cd64d0f1ce7a0360c91ea17733e29434a973bef2ae320f7fb47fbf4d6cd19b6"
+      "sha256": "7cd64d0f1ce7a0360c91ea17733e29434a973bef2ae320f7fb47fbf4d6cd19b6",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/baseline-desktop.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/baseline-desktop.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/actions-taken/baseline-mobile.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/baseline-mobile.png",
-      "sha256": "aefd2e5cf6c60e6caa2984b438faff3aeb4fd822fca3042bc5f63957a05ac756"
+      "sha256": "aefd2e5cf6c60e6caa2984b438faff3aeb4fd822fca3042bc5f63957a05ac756",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/baseline-mobile.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/baseline-mobile.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/actions-taken/baseline-tablet.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/baseline-tablet.png",
-      "sha256": "cccb25576a0fc76f93adc6e663a6983fe54c6113aae06c1bf33adc1d87a20152"
+      "sha256": "cccb25576a0fc76f93adc6e663a6983fe54c6113aae06c1bf33adc1d87a20152",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/baseline-tablet.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/baseline-tablet.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/actions-taken/blocked-resolution-desktop.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/blocked-resolution-desktop.png",
-      "sha256": "c2737d9671169f5666030cbbefbaf60458367ef28535c71634b5576ab4be85ef"
+      "sha256": "c2737d9671169f5666030cbbefbaf60458367ef28535c71634b5576ab4be85ef",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/blocked-resolution-desktop.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/blocked-resolution-desktop.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/actions-taken/requester-read-only-desktop.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/requester-read-only-desktop.png",
-      "sha256": "2c43ae2e4f19b30121cdea94f08e1100683c5b97496859ea723feef59806feaa"
+      "sha256": "2c43ae2e4f19b30121cdea94f08e1100683c5b97496859ea723feef59806feaa",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/requester-read-only-desktop.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/requester-read-only-desktop.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/actions-taken/stale-conflict-desktop.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/stale-conflict-desktop.png",
-      "sha256": "1f8acf65f4998ee6a333c4ff8eaca60f6f030ba47e7add57277b2a45fb4f2a9d"
+      "sha256": "1f8acf65f4998ee6a333c4ff8eaca60f6f030ba47e7add57277b2a45fb4f2a9d",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/stale-conflict-desktop.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/stale-conflict-desktop.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/actions-taken/validation-desktop.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/validation-desktop.png",
-      "sha256": "14a9e7b367b1f2262b1df8e0d87d2cac1cb8c9dd57eff10fbd8653390cdac3c8"
+      "sha256": "14a9e7b367b1f2262b1df8e0d87d2cac1cb8c9dd57eff10fbd8653390cdac3c8",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/validation-desktop.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/validation-desktop.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/requester-dashboard/baseline-desktop.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/requester-dashboard/baseline-desktop.png",
-      "sha256": "e80620ed2b08845a1b32599a1130eab2fc9c54f6e586423819fa2a013c1b53b5"
+      "sha256": "e80620ed2b08845a1b32599a1130eab2fc9c54f6e586423819fa2a013c1b53b5",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/requester-dashboard/baseline-desktop.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/requester-dashboard/baseline-desktop.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/requester-dashboard/baseline-mobile.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/requester-dashboard/baseline-mobile.png",
-      "sha256": "281cc2155e8689f5032d8a332ad1a144e914c38d2921ebd8c540e2f6fcd30757"
+      "sha256": "281cc2155e8689f5032d8a332ad1a144e914c38d2921ebd8c540e2f6fcd30757",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/requester-dashboard/baseline-mobile.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/requester-dashboard/baseline-mobile.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/requester-dashboard/baseline-tablet.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/requester-dashboard/baseline-tablet.png",
-      "sha256": "7772143d92d84137e03d044fcf368e9d6424a6b988b15fdb737e72f053fa5a18"
+      "sha256": "7772143d92d84137e03d044fcf368e9d6424a6b988b15fdb737e72f053fa5a18",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/requester-dashboard/baseline-tablet.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/requester-dashboard/baseline-tablet.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/staff-dashboard/administrator-desktop.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/administrator-desktop.png",
-      "sha256": "41accff9f3399be7536eb8a9fbe7511fba2dd3f8418a1366287620e37003f91d"
+      "sha256": "41accff9f3399be7536eb8a9fbe7511fba2dd3f8418a1366287620e37003f91d",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/administrator-desktop.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/staff-dashboard/administrator-desktop.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/staff-dashboard/baseline-desktop.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/baseline-desktop.png",
-      "sha256": "5cb08c8bfc8c0267e6d7734b091518e892c1ecfcc2658b4c1b3af013c6c77079"
+      "sha256": "5cb08c8bfc8c0267e6d7734b091518e892c1ecfcc2658b4c1b3af013c6c77079",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/baseline-desktop.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/staff-dashboard/baseline-desktop.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/staff-dashboard/baseline-mobile.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/baseline-mobile.png",
-      "sha256": "8c6b99c4bab495ff913f369a1c966c09bda94f69a48824c49fb330c308ca343b"
+      "sha256": "8c6b99c4bab495ff913f369a1c966c09bda94f69a48824c49fb330c308ca343b",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/baseline-mobile.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/staff-dashboard/baseline-mobile.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/screenshots/staff-dashboard/baseline-tablet.png",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/baseline-tablet.png",
-      "sha256": "6acd274038459dd8437600a2c29cdda1ee529fd0f595c5565e685709f3b185ed"
+      "sha256": "6acd274038459dd8437600a2c29cdda1ee529fd0f595c5565e685709f3b185ed",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/baseline-tablet.png",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/staff-dashboard/baseline-tablet.png",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "artifacts/lab-04/manifest.json",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/manifest.json",
-      "sha256": "06058c43b02d21ef4e7d525cf110806b6a8eff2e6fb2ddfae20fb3a66c63468f"
+      "sha256": "06058c43b02d21ef4e7d525cf110806b6a8eff2e6fb2ddfae20fb3a66c63468f",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/manifest.json",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/manifest.json",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "docs/lab-04/issue-27-verification.md",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/issue-27-verification.md",
-      "sha256": "81b42ff38d914c14c5b1d84b1288f115a5c79691cd7204daa1b4c5822d7b3fd1"
+      "sha256": "81b42ff38d914c14c5b1d84b1288f115a5c79691cd7204daa1b4c5822d7b3fd1",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/issue-27-verification.md",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/issue-27-verification.md",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/accessibility.txt",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/accessibility.txt",
-      "sha256": "2d9b9b986d4d11dd1354bf1480d3cdd8565e23572b9708aad741094c8b7321f8"
+      "sha256": "2d9b9b986d4d11dd1354bf1480d3cdd8565e23572b9708aad741094c8b7321f8",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/accessibility.txt",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/accessibility.txt",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/browser.txt",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/browser.txt",
-      "sha256": "870d73dce199f3c9574a9962d8b3e7cff3e1498e8ff880c4bae14f18594f5e1f"
+      "sha256": "870d73dce199f3c9574a9962d8b3e7cff3e1498e8ff880c4bae14f18594f5e1f",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/browser.txt",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/browser.txt",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/client-build.txt",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/client-build.txt",
-      "sha256": "7712e7b4a3c3a6fed5061b870f62258f45488cce0e0f18bd21d993821a7fc5ea"
+      "sha256": "7712e7b4a3c3a6fed5061b870f62258f45488cce0e0f18bd21d993821a7fc5ea",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/client-build.txt",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/client-build.txt",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/client-regression.txt",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/client-regression.txt",
       "sha256": "1a0f7ac9a537e546dcbdc27fe6db73f28a23bd56dbfed1d9fc3ae1d2b7584cfc",
       "originalSha256": "6bbebdf4693df1ec282d6f39b712abd03f74d3061cef76a917a645d33f9d1b2a",
-      "normalization": "Extra blank lines at EOF removed only; original bytes retained in local backup recorded below."
+      "normalization": "Extra blank lines at EOF removed only; original bytes retained in local backup recorded below.",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/client-regression.txt",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/client-regression.txt",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/integration-results.json",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/integration-results.json",
-      "sha256": "9f5a33bd1ada031d12de025bbf1b95e34e76dad8ee426245f260e279296bb4ef"
+      "sha256": "9f5a33bd1ada031d12de025bbf1b95e34e76dad8ee426245f260e279296bb4ef",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/integration-results.json",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/integration-results.json",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/migration-verification.json",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/migration-verification.json",
-      "sha256": "c1cb3fe6793c6b93b6d67666e51eff3962d1c3282ad3992fadf47bbc6652f069"
+      "sha256": "c1cb3fe6793c6b93b6d67666e51eff3962d1c3282ad3992fadf47bbc6652f069",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/migration-verification.json",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/migration-verification.json",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/server-build.txt",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-build.txt",
       "sha256": "1b599cb12dd98cd38ffc9f62d77a9494144a16af2c807685a60a47e26fa29701",
       "originalSha256": "f6899a65aa9dc478cd42c10b5cf3e84c184563a549fef717796bc43dd0905ad0",
-      "normalization": "Extra blank lines at EOF removed only; original bytes retained in local backup recorded below."
+      "normalization": "Extra blank lines at EOF removed only; original bytes retained in local backup recorded below.",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-build.txt",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/server-build.txt",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     },
     {
       "source": "/Users/thuthuwai/Documents/toktickit/artifacts/lab-04/regression/issue-27/server-regression.txt",
-      "archive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-regression.txt",
       "sha256": "97833bc0054682839e9b68562c08d0be7959fd23ee40c5c527cb4bee0437d038",
       "originalSha256": "89e54280dc7d0f6bec60d8f5f274fd4b8b90c908ccb475a06003e7079f322a0d",
-      "normalization": "Extra blank lines at EOF removed only; original bytes retained in local backup recorded below."
+      "normalization": "Extra blank lines at EOF removed only; original bytes retained in local backup recorded below.",
+      "formerTrackedArchive": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-regression.txt",
+      "localArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/server-regression.txt",
+      "tracking": "Local-only backup; removed from the feature branch, not current submission evidence."
     }
   ],
   "changes": [
@@ -296,24 +344,166 @@
         "originalSha256": "6bbebdf4693df1ec282d6f39b712abd03f74d3061cef76a917a645d33f9d1b2a",
         "sha256": "1a0f7ac9a537e546dcbdc27fe6db73f28a23bd56dbfed1d9fc3ae1d2b7584cfc",
         "removedTrailingBlankLines": 1,
-        "localOriginal": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e/artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/client-regression.txt"
+        "localOriginal": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e/artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/client-regression.txt",
+        "tracking": "Removed from Git by the historical archive cleanup; retained locally.",
+        "localNormalizedArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/client-regression.txt"
       },
       {
         "path": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-build.txt",
         "originalSha256": "f6899a65aa9dc478cd42c10b5cf3e84c184563a549fef717796bc43dd0905ad0",
         "sha256": "1b599cb12dd98cd38ffc9f62d77a9494144a16af2c807685a60a47e26fa29701",
         "removedTrailingBlankLines": 1,
-        "localOriginal": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e/artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-build.txt"
+        "localOriginal": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e/artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-build.txt",
+        "tracking": "Removed from Git by the historical archive cleanup; retained locally.",
+        "localNormalizedArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/server-build.txt"
       },
       {
         "path": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-regression.txt",
         "originalSha256": "89e54280dc7d0f6bec60d8f5f274fd4b8b90c908ccb475a06003e7079f322a0d",
         "sha256": "97833bc0054682839e9b68562c08d0be7959fd23ee40c5c527cb4bee0437d038",
         "removedTrailingBlankLines": 1,
-        "localOriginal": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e/artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-regression.txt"
+        "localOriginal": ".git/issue27-evidence-backups/eof-20261023T134103Z-75de989e/artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-regression.txt",
+        "tracking": "Removed from Git by the historical archive cleanup; retained locally.",
+        "localNormalizedArchive": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/server-regression.txt"
       }
     ],
-    "preservation": "21 archive files remain byte-identical; 3 archived logs differ only by removal of extra EOF blank lines. All 6 original logs are retained locally.",
+    "preservation": "Original EOF normalization remains recorded. The 24-file archive inventory is now local-only: 21 files retain their original bytes and 3 logs retain the documented EOF-only normalization; all 6 pre-normalization logs remain in their separate local backup.",
     "archiveHashesVerifiedAfterCorrection": 24
+  },
+  "historicalArchiveCleanup": {
+    "reason": "Exclude superseded UI screenshots from the Issue 27 PR while preserving historical evidence locally.",
+    "localBackupDirectory": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive",
+    "removedTrackedFiles": 25,
+    "historicalPngsRemovedFromTracking": 14,
+    "currentCanonicalCapturesUnchanged": 18,
+    "currentActionsTakenCapturesUnchanged": 11,
+    "files": [
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/README.md",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/README.md",
+        "sha256": "ac2d096a642dbc55674d8e915f9837a11967ec516e60843518c2616ffd8c5450"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/issue-27-verification.md",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/issue-27-verification.md",
+        "sha256": "81b42ff38d914c14c5b1d84b1288f115a5c79691cd7204daa1b4c5822d7b3fd1"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/manifest.json",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/manifest.json",
+        "sha256": "06058c43b02d21ef4e7d525cf110806b6a8eff2e6fb2ddfae20fb3a66c63468f"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/accessibility.txt",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/accessibility.txt",
+        "sha256": "2d9b9b986d4d11dd1354bf1480d3cdd8565e23572b9708aad741094c8b7321f8"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/browser.txt",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/browser.txt",
+        "sha256": "870d73dce199f3c9574a9962d8b3e7cff3e1498e8ff880c4bae14f18594f5e1f"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/client-build.txt",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/client-build.txt",
+        "sha256": "7712e7b4a3c3a6fed5061b870f62258f45488cce0e0f18bd21d993821a7fc5ea"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/client-regression.txt",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/client-regression.txt",
+        "sha256": "1a0f7ac9a537e546dcbdc27fe6db73f28a23bd56dbfed1d9fc3ae1d2b7584cfc"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/integration-results.json",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/integration-results.json",
+        "sha256": "9f5a33bd1ada031d12de025bbf1b95e34e76dad8ee426245f260e279296bb4ef"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/migration-verification.json",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/migration-verification.json",
+        "sha256": "c1cb3fe6793c6b93b6d67666e51eff3962d1c3282ad3992fadf47bbc6652f069"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-build.txt",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/server-build.txt",
+        "sha256": "1b599cb12dd98cd38ffc9f62d77a9494144a16af2c807685a60a47e26fa29701"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/regression/server-regression.txt",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/regression/server-regression.txt",
+        "sha256": "97833bc0054682839e9b68562c08d0be7959fd23ee40c5c527cb4bee0437d038"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/baseline-desktop.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/baseline-desktop.png",
+        "sha256": "7cd64d0f1ce7a0360c91ea17733e29434a973bef2ae320f7fb47fbf4d6cd19b6"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/baseline-mobile.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/baseline-mobile.png",
+        "sha256": "aefd2e5cf6c60e6caa2984b438faff3aeb4fd822fca3042bc5f63957a05ac756"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/baseline-tablet.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/baseline-tablet.png",
+        "sha256": "cccb25576a0fc76f93adc6e663a6983fe54c6113aae06c1bf33adc1d87a20152"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/blocked-resolution-desktop.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/blocked-resolution-desktop.png",
+        "sha256": "c2737d9671169f5666030cbbefbaf60458367ef28535c71634b5576ab4be85ef"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/requester-read-only-desktop.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/requester-read-only-desktop.png",
+        "sha256": "2c43ae2e4f19b30121cdea94f08e1100683c5b97496859ea723feef59806feaa"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/stale-conflict-desktop.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/stale-conflict-desktop.png",
+        "sha256": "1f8acf65f4998ee6a333c4ff8eaca60f6f030ba47e7add57277b2a45fb4f2a9d"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/actions-taken/validation-desktop.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/actions-taken/validation-desktop.png",
+        "sha256": "14a9e7b367b1f2262b1df8e0d87d2cac1cb8c9dd57eff10fbd8653390cdac3c8"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/requester-dashboard/baseline-desktop.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/requester-dashboard/baseline-desktop.png",
+        "sha256": "e80620ed2b08845a1b32599a1130eab2fc9c54f6e586423819fa2a013c1b53b5"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/requester-dashboard/baseline-mobile.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/requester-dashboard/baseline-mobile.png",
+        "sha256": "281cc2155e8689f5032d8a332ad1a144e914c38d2921ebd8c540e2f6fcd30757"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/requester-dashboard/baseline-tablet.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/requester-dashboard/baseline-tablet.png",
+        "sha256": "7772143d92d84137e03d044fcf368e9d6424a6b988b15fdb737e72f053fa5a18"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/administrator-desktop.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/staff-dashboard/administrator-desktop.png",
+        "sha256": "41accff9f3399be7536eb8a9fbe7511fba2dd3f8418a1366287620e37003f91d"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/baseline-desktop.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/staff-dashboard/baseline-desktop.png",
+        "sha256": "5cb08c8bfc8c0267e6d7734b091518e892c1ecfcc2658b4c1b3af013c6c77079"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/baseline-mobile.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/staff-dashboard/baseline-mobile.png",
+        "sha256": "8c6b99c4bab495ff913f369a1c966c09bda94f69a48824c49fb330c308ca343b"
+      },
+      {
+        "formerTrackedPath": "artifacts/lab-04/regression/issue-27/history/issue-27-2026-10-23T07-53-05-007Z-90b5a178/screenshots/staff-dashboard/baseline-tablet.png",
+        "localBackup": ".git/issue27-evidence-backups/historical-cleanup-20261023T140241Z-5e232593/archive/screenshots/staff-dashboard/baseline-tablet.png",
+        "sha256": "6acd274038459dd8437600a2c29cdda1ee529fd0f595c5565e685709f3b185ed"
+      }
+    ],
+    "verification": "All 25 backup hashes match the pre-cleanup tracked files; original archive files also remain locally. No screenshot regeneration or test rerun."
   }
 }
