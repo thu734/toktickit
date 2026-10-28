@@ -267,24 +267,24 @@ All ACs reflect the user-approved D-01 through D-16 choices. [tests.md](tests.md
 
 ### 10.1 Issue 18 Documentation Completion
 
-- [ ] All six documents reviewed and mutually consistent.
-- [ ] Every FR/BR/AC has source provenance and planned test traceability.
+- [x] All six documents reviewed and mutually consistent.
+- [x] Every FR/BR/AC has source provenance and planned test traceability.
 - [x] D-01 through D-16 explicitly approved by the user on 2026-10-15; implementation choices remain distinguished from handout mandates.
-- [ ] Baseline limitations, evidence dates and remediation ownership recorded.
-- [ ] Reviewer record remains an honest placeholder until reviews happen.
-- [ ] AI-use record describes actual prompts and leaves personal reflection to the author.
-- [ ] Documentation approval and feature-readiness gate are recorded separately.
+- [x] Baseline limitations, evidence dates and remediation ownership recorded.
+- [x] Reviewer record remains an honest placeholder until reviews happen.
+- [x] AI-use record describes actual prompts and leaves personal reflection to the author.
+- [x] Documentation approval and feature-readiness gate are recorded separately.
 
 ### 10.2 Sprint 4 Product Completion (R/I)
 
-- [ ] Approved scope and all ACs implemented; direct authorization and resolution bypass tests pass.
-- [ ] Conflict/duplicate behavior and recoverable-input retention pass.
-- [ ] Migration/recovery preserve earlier data; seed scenarios verified.
-- [ ] Complete current Labs 1-3 and Lab 4 server/client/build/E2E checks pass with isolated test data.
-- [ ] Style, responsive, keyboard, focus, geometry and manual visual checks pass.
-- [ ] Required Lab 4 artifact structure and AC-to-run evidence complete; earlier evidence preserved.
-- [ ] Setup, seed, migration, test and demonstration instructions accurate.
-- [ ] Final-main verification recorded after approved staging release.
+- [x] Approved scope and all ACs implemented; direct authorization and resolution bypass tests pass.
+- [x] Conflict/duplicate behavior and recoverable-input retention pass.
+- [x] Migration/recovery preserve earlier data; seed scenarios verified.
+- [x] Complete current Labs 1-3 and Lab 4 server/client/build/E2E checks pass with isolated test data.
+- [x] Style, responsive, keyboard, focus, geometry and manual visual checks pass.
+- [x] Required Lab 4 artifact structure and AC-to-run evidence complete; earlier evidence preserved.
+- [x] Setup, seed, migration, test and demonstration instructions accurate.
+- [x] Final-main verification recorded after approved staging release.
 
 Course delivery (R): peer review, Kanban evidence, feature PRs into lab4-staging, release lab4-staging -> main, reviewer/AI-use records and submission Answer Parts 1-9. Documentation may be committed locally for review when authorized; no push, PR or submission is performed by this drafting task.
 
