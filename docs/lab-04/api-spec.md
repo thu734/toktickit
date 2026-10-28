@@ -1,7 +1,7 @@
 # Lab 4 - REST API Contract
 
 **Issue:** Issue 18 [Lab 4] Engineering Contract and Baseline Gate
-**Status:** Issues 19–24 implemented; Issue 25 hardening implemented with passing current checks, but NOT READY TO PUSH because the original intermittent 404/socket failures remain unexplained. See [current verification](issue-25-verification.md).
+**Status:** Issues 19–25 implemented; Issue 26 frontend verification and Issue 27 candidate/staging evidence are complete. See [Issue 27 verification](issue-27-verification.md) for executed results and limits. Final-main/release verification remains pending under Issue 28; the rendered Parts 1–9 PDF will be assembled only after final-main verification passes.
 **Source:** CPE 334 Lab 4 handout, SE+Lab+4.pdf, all 11 pages, reviewed 2026-10-15.
 
 **Provenance:** R = required by Lab 4; I = inherited from Labs 1-3; A = user-approved implementation choice, not a handout mandate.
@@ -19,6 +19,8 @@ I: retain session-cookie authentication, first-login password change lock, curre
 User Management preserves BR-09/BR-10: self-deactivation remains forbidden, and removing the last active Administrator returns 400. The active-Administrator check and account update are serialized in one transaction, with current actor/target state rechecked after waiting.
 
 Requester `POST /api/tickets` accepts an optional UUID `Idempotency-Key` header for one logical submission. The form retains the key across recoverable failures and changes it only for an intentional new submission/reset. A matching key and normalized creation payload, scoped to the authenticated Requester, returns 201 with the same Ticket ID without another insert. Reusing a committed key with different details returns 409 `CREATION_REQUEST_CONFLICT`; malformed keys return 400 `INVALID_CREATION_REQUEST_KEY`. Keys are saved atomically with Tickets, so replay survives process/session changes. Legacy unkeyed creation and distinct keyed submissions retain their existing behavior, including official Ticket numbering. This is limited to Ticket creation; no application-wide retry framework or automatic write retry is introduced.
+
+The user-approved additive migration `20261019090000_ticket_creation_retry` stores nullable `tickets.creationRequestKey` and `tickets.creationPayloadHash` columns with a unique index on `(requesterId, creationRequestKey)`. Existing Tickets retain NULL values without backfill or seed changes. These private fields are omitted from public Ticket responses and inherited read projections. Migration verification used guarded disposable schemas only; development data was not migrated.
 
 ## 2. Authorization Matrix
 
@@ -216,4 +218,4 @@ This implements inherited Lab 3 BR-16 and Lab 4 D-15; historical Lab 2 ownership
 
 Inherited resource IDs must be complete positive decimal PostgreSQL Int values (maximum 2147483647); malformed IDs are rejected with 400. Reference IDs do not coerce booleans/arrays/fractions. Invalid Requester category/status/priority filters receive safe 400 responses. Existing Staff query fallback remains unchanged. Malformed JSON returns 400 JSON; oversized JSON returns 413 JSON; neither includes parser text, stack traces or source paths.
 
-Failure to read account password-lock state returns safe 500 and denies protected operations. Existing health/authentication exceptions remain available without that lookup. Missing/expired/inactive sessions retain 401, password-locked accounts retain 403 MUST_CHANGE_PASSWORD, and current roles remain authoritative. No authentication model, Ticket transition, Action state, migration or workflow payload is changed.
+Failure to read account password-lock state returns safe 500 and denies protected operations. Existing health/authentication exceptions remain available without that lookup. Missing/expired/inactive sessions retain 401, password-locked accounts retain 403 MUST_CHANGE_PASSWORD, and current roles remain authoritative. No authentication model, Ticket transition, Action state or workflow payload is changed. The approved Ticket retry migration and optional creation header are described in section 1.1.

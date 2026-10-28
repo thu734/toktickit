@@ -1,7 +1,7 @@
 # Lab 4 - Zen Green UI Specification
 
 **Issue:** Issue 18 [Lab 4] Engineering Contract and Baseline Gate
-**Status:** Issues 19–24 implemented; Issue 25 hardening implemented with passing current checks, but NOT READY TO PUSH because the original intermittent 404/socket failures remain unexplained. See [current verification](issue-25-verification.md).
+**Status:** Issues 19–25 implemented; Issue 26 frontend verification and Issue 27 candidate/staging evidence are complete. See [Issue 27 verification](issue-27-verification.md) for executed results and limits. Final-main/release verification remains pending under Issue 28; the rendered Parts 1–9 PDF will be assembled only after final-main verification passes.
 **Source:** CPE 334 Lab 4 handout, SE+Lab+4.pdf, all 11 pages, reviewed 2026-10-15.
 
 **Provenance:** R = required by Lab 4; I = inherited from Labs 1-3; A = user-approved implementation choice, not a handout mandate.
@@ -141,7 +141,7 @@ For each dashboard and Action/Ticket mode define: loading, saving, success, fiel
 R/I: semantic labels/headings; keyboard-operable links/buttons; visible focus; no color-only statuses; understandable validation; clear private/shared labels; readable long text; no clipping/overlap/horizontal page scroll; accessible modal dialogs.
 A verification choices: desktop 1280x720, tablet 800x900, mobile 390x844 inherited evidence sizes; additional narrow-width/zoom checks. Test focus entry/trapping/Escape/restoration where dialogs are used and announce meaningful status/error feedback. Record computed styles and geometry in browser tests; screenshot presence alone is not proof of accessibility or overflow correctness.
 
-Issue 26 frontend checklist executed 2026-10-23; see [verification record](issue-26-verification.md) for actual runs, visual inspection and limits. Canonical integrated screenshots remain Issue 27 work:
+Issue 26 frontend checklist executed 2026-10-23; see [verification record](issue-26-verification.md) for actual runs, visual inspection and limits. Canonical integrated candidate screenshots were subsequently completed by Issue 27; the checklist below records the Issue 26 frontend scope:
 
 - [x] Zen Green tokens and existing component conventions consistent.
 - [x] Dashboard presentation and destinations agree with the API contract in current component/UI fixtures; integrated query reconciliation remains Issue 27.
@@ -154,12 +154,12 @@ Issue 26 frontend checklist executed 2026-10-23; see [verification record](issue
 
 ## 9. Screenshot Evidence Plan
 
-R canonical folders: artifacts/lab-04/screenshots/staff-dashboard/, requester-dashboard/, actions-taken/. A: baseline-desktop.png, baseline-tablet.png and baseline-mobile.png per folder. Current-source supplementary evidence uses validation and Requester read-only captures at all three viewports, plus Administrator Dashboard, contextual blocked resolution and stale conflict desktop captures. Assignment and completed/cancelled states share existing captures; API/database/browser assertions demonstrate behavior, counts and recovery. Controlled loading/500/network presentation remains separate frontend evidence. Publish only asserted complete-run captures with source/build/run/AC/submission-part traceability, preserving earlier evidence. Issue 28 owns the rendered specification and final PDF.
+R canonical folders: artifacts/lab-04/screenshots/staff-dashboard/, requester-dashboard/, actions-taken/. A: baseline-desktop.png, baseline-tablet.png and baseline-mobile.png per folder. Current-source supplementary evidence uses validation and Requester read-only captures at all three viewports, plus Administrator Dashboard, contextual blocked resolution and stale conflict desktop captures. Assignment and completed/cancelled states share existing captures; API/database/browser assertions demonstrate behavior, counts and recovery. Controlled loading/500/network presentation remains separate frontend evidence. Publish only asserted complete-run captures with source/build/run/AC/submission-part traceability, preserving earlier evidence. Issue 28 owns the rendered specification and Parts 1–9 PDF, to be assembled only after final-main verification passes.
 A capture policy: deterministic scenarios; assert state before capture; no visibility-conditioned silent skips; manifest with AC, scenario, viewport, tested code revision and run. Routine output is isolated; publish validated Lab 4 evidence explicitly. Extra workflow/regression folders may supplement, never replace, the minimum structure. Do not regenerate Lab 1-3 artifacts in Issue 18.
 
 ## 10. Traceability and Approval
 
-FR-01..FR-18 and FR-21 are exercised by AC-01..AC-20 and AC-23..AC-24. [tests.md](tests.md) distinguishes executed component/transport tests from deferred UI/style/responsive/E2E work. D-01 through D-16 are explicitly user-approved; implementation is covered by automated regression, while final browser accessibility and visual verification remain Issues 26–27.
+FR-01..FR-18 and FR-21 are exercised by AC-01..AC-20 and AC-23..AC-24. [tests.md](tests.md) distinguishes dated component/transport and frontend checks from the completed Issue 27 integrated candidate gate. D-01 through D-16 are explicitly user-approved. Issue 26 frontend verification and Issue 27 candidate/staging evidence are complete; final-main/release verification remains pending under Issue 28.
 
 ## Issue 25 recoverable failures (2026-10-17)
 
@@ -169,9 +169,11 @@ Logout awaits the server result. Failure keeps the current session view with a s
 
 HTTP 5xx diagnostics are removed at the client response boundary; non-JSON failure bodies retain HTTP status and use local fallback messages. Action/Requester Dashboard read failures also reject arbitrary network/server messages from display. Validation/conflict explanations remain available. Staff attachment downloads use the configured VITE_API_URL. Existing Action retry keys, stale-workflow review, input retention, role landings and dashboard metrics remain unchanged. Final browser accessibility/visual verification remains Issue 26.
 
+Ticket creation retains one operation key with the draft across recoverable failures and uncertain responses. Repeating that logical submission returns the same Ticket; a changed-payload conflict retains the draft, and intentional new submission/reset creates a new key. The approved additive storage migration and API behavior are documented in [api-spec.md section 1.1](api-spec.md#11-inherited-correctness-boundaries-hardened-by-issue-25-ia). Staff Queue distinguishes failed reads from empty results, retains search input and allows explicit same-search recovery.
+
 ## Issue 26 verification (2026-10-23)
 
-The initial frontend run passed 78 browser cases and 249 client tests but missed the independent-audit findings. After the five focused corrections, the expanded run passed 96 browser cases and all 249 client tests without act warnings; typing/build/diff checks passed. [issue-26-verification.md](issue-26-verification.md) records scope, actual results, source/run identity and the completed visual checklist. Browser screenshots are asserted run-local verification output; AC-24 and published canonical evidence remain Issue 27.
+The initial frontend run passed 78 browser cases and 249 client tests but missed the independent-audit findings. After the five focused corrections, the expanded run passed 96 browser cases and all 249 client tests without act warnings; typing/build/diff checks passed. [issue-26-verification.md](issue-26-verification.md) records scope, actual results, source/run identity and the completed visual checklist. These frontend screenshots are asserted run-local verification output. Issue 27 subsequently completed AC-24 candidate evidence and published canonical captures; final-main/release verification remains pending under Issue 28.
 
 Accessibility corrections retain the existing palette and layouts: muted text is `#5F6F85` on the page surface; amber badge text uses `#92400E` on `#FEF3C7`; high-priority/reopened red text uses `#B42318` on `#FEE2E2`. The inherited lighter foreground pairings failed measured normal-text contrast. Primary `#006B3C`, focus `#0B7A46`, page/card/read-only backgrounds and badge meanings remain as specified. Read-only Action correction fields are shaded; field errors sit below controls with required/invalid/description associations. Shared/private/read-only cues include text. Dialogs retain their existing operations and add accessible names, focus containment, inert backgrounds, dismissal and restoration.
 

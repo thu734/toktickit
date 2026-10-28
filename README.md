@@ -48,8 +48,8 @@ An end-user facing IT support ticketing system built with a unified Zen Green de
 - Actions Taken: Staff/Admin create, assign, edit, complete/cancel and make approved completed corrections. Requesters read all current Actions on owned Tickets. Creator/time are immutable; minimal audit events are append-only.
 - Workflow: the approved eight Ticket statuses remain. One workflow revision protects competing writes; outstanding Actions gate resolution and closure. Creation request keys support safe Action retries.
 - Dashboards: backend-owned Requester counts/recent Tickets and shared Staff/Admin operational counts/My Planned Actions, with matching drill-downs. Existing role landing pages remain unchanged.
-- Issue 25: ownership-safe 404s, fail-closed password locks, safe invalid-input responses, recoverable feed/logout handling, configured download origins and disposable test files are implemented. **NOT READY TO PUSH:** earlier intermittent workflow 404 and dashboard socket failures still lack a verified cause despite passing subsequent runs. See [Issue 25 verification](docs/lab-04/issue-25-verification.md).
-- Final accessibility/visual verification, integrated browser screenshots and final release evidence remain Issues 26–28.
+- Issue 25: ownership-safe 404s, fail-closed password locks, safe invalid-input responses, recoverable feed/logout handling, configured download origins, concurrency-safe Administrator protection and durable Ticket creation retries are implemented. Explicit Ticket field selection restores inherited Staff Queue reads; owned IPv4 test listeners correct the reproduced HTTP harness failures. The automated regression gate passes; current coverage and limitations are documented in [Lab 4 tests](docs/lab-04/tests.md).
+- Issue 26 frontend verification and Issue 27 candidate/staging evidence are complete; see [Issue 27 verification](docs/lab-04/issue-27-verification.md) for results and limits. Final-main/release verification remains pending under Issue 28. The rendered Parts 1–9 PDF will be assembled only after final-main verification passes.
 
 ## Workspace Structure
 
@@ -100,7 +100,7 @@ npm ci --prefix client
 
 ### 3. Database Migration & Idempotent Seeding
 
-Issues 19–24 implement the Actions foundation, API/UI, workflow and dashboards. Issue 25 hardens the integrated application; it adds no migration or seed change.
+Issues 19–24 implement the Actions foundation, API/UI, workflow and dashboards. Issue 25 adds the approved additive migration `20261019090000_ticket_creation_retry`: nullable `tickets.creationRequestKey` and `tickets.creationPayloadHash` columns plus a unique index on `(requesterId, creationRequestKey)`. Existing Tickets retain NULL values, with no backfill or seed change. Ticket creation saves its retry key and payload hash atomically; identical retries by the same Requester return the same Ticket. The migration was tested only in guarded disposable schemas and has not been applied to development data.
 
 The historical chain creates `Category` but the schema maps `categories`. The forward prerequisite migration `20261015090000_reconcile_lab3_schema` renames that table, its index/sequence and aligns the existing `users.updatedAt` default without rewriting data. The separate `20261015090100_lab4_actions_foundation` adds Actions, minimal audit events, creation-retry records and a Ticket workflow revision.
 
