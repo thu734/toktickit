@@ -1,6 +1,6 @@
 # Lab 4 - AI Use and Reflection
 
-**LLM/agent used:** Codex (6.1 Sol Medium)
+**LLM/agent used:** Codex (6.1 Sol Medium) 
 
 ## Selected key prompts (6-10)
 

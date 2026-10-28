@@ -4,28 +4,11 @@
 
 **Peer reviewer:** Sai Bhone Myint Myat - 67070503479 - GitHub: @Kerris812
 
-**Peer reviewer:** Lae Lae Kaung Nyunt - GitHub: @LaeLaeKaungNyunt (student ID not recorded in the available review evidence)
-
-Human review evidence checked on 2026-10-28. An approval in a PR comment is distinguished from a formal GitHub approval. General positive feedback is not recorded as an approval.
-
-## Pull Requests I authored (reviewed by my partner)
-
-| PR | Branch | Reviewer verdict |
-| --- | --- | --- |
-| [#58](https://github.com/thu734/toktickit/pull/58) | feature/18-lab4-contract-baseline | No human review recorded |
-| [#59](https://github.com/thu734/toktickit/pull/59) | feature/19-lab4-actions-data | Approved - formal GitHub review by @LaeLaeKaungNyunt |
-| [#60](https://github.com/thu734/toktickit/pull/60) | feature/20-lab4-actions-api | No human review recorded |
-| [#61](https://github.com/thu734/toktickit/pull/61) | feature/21-lab4-actions-ui | Approved in a PR comment by @Kerris812 |
-| [#62](https://github.com/thu734/toktickit/pull/62) | feature/22-lab4-ticket-workflow | Positive feedback from @Kerris812; no explicit approval |
-| [#64](https://github.com/thu734/toktickit/pull/64) | feature/23-lab4-requester-dashboard | No human review recorded |
-| [#65](https://github.com/thu734/toktickit/pull/65) | feature/24-lab4-staff-dashboard | Positive feedback and issue-link reminder from @Kerris812; no explicit approval |
-| [#66](https://github.com/thu734/toktickit/pull/66) | feature/25-lab4-regression-hardening | No human review recorded |
-| [#67](https://github.com/thu734/toktickit/pull/67) | feature/26-lab4-accessibility-responsive | No human review recorded |
-| [#68](https://github.com/thu734/toktickit/pull/68) | feature/27-lab4-e2e-artifacts | @Kerris812 reported no blocking issues; no formal GitHub approval |
+**Peer reviewer:** Lae Lae Kaung Nyunt - 67070503481 - GitHub: @LaeLaeKaungNyunt
 
 Reviewer comment I received:
 
-[#59 - @LaeLaeKaungNyunt, formal approval](https://github.com/thu734/toktickit/pull/59#pullrequestreview-5538621726):
+[#59 - @LaeLaeKaungNyunt](https://github.com/thu734/toktickit/pull/59#pullrequestreview-5538621726):
 
 > Approved. The changes appear to be within Issue #19's scope
 
@@ -55,7 +38,7 @@ How I responded:
 
 > Got it!
 
-[#62](https://github.com/thu734/toktickit/pull/62#issuecomment-6216480763), responding to the workflow revision comment:
+[#62](https://github.com/thu734/toktickit/pull/62#issuecomment-6216480763)
 
 > Thanks! That's the goal.
 
@@ -101,4 +84,3 @@ Partner's response:
 
 > Thank for the feedback, I will continue doing next step.
 
-No partner response was recorded in the inspected PR discussions for #52 or #54. These four reviews were PR comments; no formal GitHub approval was recorded for them.
