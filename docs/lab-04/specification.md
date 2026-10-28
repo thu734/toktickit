@@ -1,7 +1,7 @@
 # Lab 4 - Sprint 4 Engineering Specification
 
 **Issue:** Issue 18 [Lab 4] Engineering Contract and Baseline Gate
-**Status:** Issues 19–24 implemented; Issue 25 hardening implemented with passing current checks, but NOT READY TO PUSH because the original intermittent 404/socket failures remain unexplained. See [current verification](issue-25-verification.md).
+**Status:** Issues 19–25 implemented; Issue 26 frontend verification and Issue 27 candidate/staging evidence are complete. See [Issue 27 verification](issue-27-verification.md) for executed results and limits. Final-main/release verification remains pending under Issue 28; the rendered Parts 1–9 PDF will be assembled only after final-main verification passes.
 **Source:** CPE 334 Lab 4 handout, SE+Lab+4.pdf, all 11 pages, reviewed 2026-10-15.
 
 **Provenance:** R = required by Lab 4; I = inherited from Labs 1-3; A = user-approved implementation choice, not a handout mandate.
@@ -226,6 +226,10 @@ Both seed profiles create missing records without updating existing passwords, a
 
 The explicit `baseline` profile supplies unchanged Lab 1–3 fixture coverage for regression suites that clean up Tickets. Full-seed tests verify all Lab 4 scenarios, repeated/concurrent runs and preservation after user edits. Initial passwords are assigned only on account creation. Earlier historical documents/artifacts remain unchanged.
 
+### 7.4 Approved Issue 25 Ticket Retry Migration
+
+`20261019090000_ticket_creation_retry` adds nullable `tickets.creationRequestKey` and `tickets.creationPayloadHash` columns and a unique index on `(requesterId, creationRequestKey)`. Existing Tickets retain NULL values; no backfill, seed change or historical migration edit is required. The Requester-scoped key and normalized payload hash are saved atomically with creation, preserving one Ticket after an uncertain-outcome retry across process/session changes. Identical replay returns the same Ticket; changed-payload key reuse returns 409. This narrow Ticket creation correction and the additive migration were explicitly approved by the user. Migration/preservation tests use guarded disposable schemas; development data was not migrated or modified.
+
 ## 8. API Contract
 
 [api-spec.md](api-spec.md) contains approved paths, payload field responsibilities, response/error contracts and examples of conflict scenarios. Paths/shapes/tokens are A/D-15/D-10/D-11. Existing protected functionality and authentication remain I unless R explicitly extends permissions.
@@ -343,8 +347,8 @@ Gate release prerequisites: review the updated contract and verify its approved 
 
 Earlier artifacts/documents remain descriptions of their effective increments. Current regressions use the final application's authentication; historical selector/header evidence is not rewritten.
 
-## Issue 25 current hardening and completion boundary (2026-10-17)
+### 11.4 Issue 25 Current Hardening and Completion Boundary (2026-10-20)
 
-GitHub Issue #54 is the logical Issue 25. Its implementation preserves the approved D-01–D-16/D-12-R1 choices and corrects inherited ownership, password-lock, validation, safe-error, recovery and test-file isolation defects. Only the previously superseded ownership 403 expectations and raw upstream error-message expectations change. No migration, seed, lifecycle, transition, metric or authorization-model expansion is introduced.
+GitHub Issue #54 is the logical Issue 25. Its implementation preserves the approved D-01–D-16/D-12-R1 choices and corrects inherited ownership, password-lock, validation, safe-error, recovery and test isolation defects. It also serializes the inherited last-active-Administrator check/update and prevents duplicate Ticket creation after uncertain-outcome retries using the approved additive migration in section 7.4. Inherited reads explicitly select public Ticket fields so private retry columns do not break Staff Queue or related operations. Only the previously superseded ownership 403 expectations and raw upstream error-message expectations change; the approved retry header/conflict behavior is documented in the API contract. No seed, lifecycle, transition, metric or authorization-model expansion is introduced.
 
-Current automated verification and the independent acceptance audit are in [issue-25-verification.md](issue-25-verification.md). Earlier unexpected workflow 404 and dashboard socket failures are not proven fixed by green reruns. They remain unresolved, so Issue 25 is NOT READY TO PUSH. Final accessibility, browser screenshot journeys and release evidence remain Issues 26–28; historical reports and artifacts are preserved.
+Current automated coverage and results are recorded in [tests.md](tests.md). Controlled reproductions verified that an IPv6 listener addressed through IPv4 could reach a different server and produce foreign 401/404 responses or connection resets without reaching Express. Stable owned IPv4 listeners and ordered teardown correct that harness defect; deterministic controls and repeated focused runs supplement the complete passing suites. Original uninstrumented individual failures cannot be assigned an exact endpoint retrospectively; the conclusion rests on direct and controlled transport evidence, not green reruns alone. Issue 26 frontend verification and Issue 27 candidate/staging evidence are complete; final-main/release verification remains pending under Issue 28. Historical artifacts are preserved.

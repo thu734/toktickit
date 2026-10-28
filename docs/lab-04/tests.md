@@ -1,7 +1,7 @@
 # Lab 4 - Planned Tests and AC Traceability
 
 **Issue:** Issue 18 [Lab 4] Engineering Contract and Baseline Gate
-**Status:** Issues 19–24 implemented; Issue 25 hardening implemented with passing current checks, but NOT READY TO PUSH because the original intermittent 404/socket failures remain unexplained. See [current verification](issue-25-verification.md).
+**Status:** Issues 19–25 implemented; Issue 26 frontend verification and Issue 27 candidate/staging evidence are complete. See [Issue 27 verification](issue-27-verification.md) for executed results and limits. Final-main/release verification remains pending under Issue 28; the rendered Parts 1–9 PDF will be assembled only after final-main verification passes.
 **Provenance:** R = Lab 4 requirement; I = inherited; A = user-approved implementation choice, not a handout mandate.
 **Contract:** [specification.md](specification.md), [api-spec.md](api-spec.md), [ui-spec.md](ui-spec.md).
 
@@ -11,7 +11,7 @@ R: cover unit, API/integration, component, UI style, responsive, authorization, 
 I: preserve complete current Labs 1-3 regression; use sessions for current application tests while leaving accurate historical identity-header documentation intact.
 A: D-01 through D-16 are explicitly approved by the user. Test fixtures and assertions must implement those choices; performance measurements are recorded on isolated data, without adding a new product timing promise.
 
-PLANNED means no execution evidence; BLOCKED means a design/baseline prerequisite is unresolved; PASS requires an actual executed result and code revision. Original Issue 18 matrix statuses are historical; later execution sections and the Issue 25 report identify actual current coverage and remaining gaps. The incomplete sample E2E row in the handout is an example, not supplied passing evidence.
+PLANNED means no execution evidence; BLOCKED means a design/baseline prerequisite is unresolved; PASS requires an actual executed result and code revision. Original Issue 18 matrix statuses are historical; later execution sections and the Issue 25 coverage below identify actual current coverage and remaining gaps. The incomplete sample E2E row in the handout is an example, not supplied passing evidence.
 
 ## 2. Original Issue 18 Planned Test Matrix (history)
 
@@ -226,26 +226,31 @@ PLANNED in their existing later-issue rows; Issue 24 does not claim those entire
 This completes Issue 24's API/component/basic responsive portions of AC-18/19/20/22/23. Existing later-issue
 E2E, screenshot and final accessibility rows remain PLANNED; their overall acceptance status is not overridden.
 
-## Issue 25 current regression coverage (2026-10-17)
+## Issue 25 Current Regression Coverage (2026-10-20)
 
-Current execution, exact commands, failures, scope and acceptance verdict: [issue-25-verification.md](issue-25-verification.md). The original Issue 18 PLANNED matrix remains historical; actual paths below and earlier implementation verification sections supersede claims that these files do not exist.
+The last complete regression passed 662 server tests in 33 files, 26 data tests in 3 files and 243 client tests in 27 files, with no skipped tests in those complete runs. Commands were `caffeinate -i npm test` from each of `server/` and `client/`; the server script also runs the data suite. Server/client `./node_modules/.bin/tsc --noEmit` checks and production builds passed, with build output directed to unused temporary directories. These are recorded prior execution results, not a claim that this documentation edit reran those suites. The original Issue 18 PLANNED matrix remains historical; actual paths below and earlier implementation sections distinguish current coverage from deferred browser/manual work.
 
 | Requirement | Actual current coverage | Current result |
 | --- | --- | --- |
-| All Labs 1–3 regressions / AC-22 | Existing server tests/lab-01..03 and client tests/lab-01..03; only approved effective-contract expectations changed | Passing current automated runs; original intermittent causes unresolved |
+| All Labs 1–3 regressions / AC-22 | Existing server tests/lab-01..03 and client tests/lab-01..03; only approved effective-contract expectations changed | Complete automated suites pass with guarded schema/file isolation and owned IPv4 HTTP listeners |
 | Ownership/non-disclosure and Staff/Admin history | server/tests/lab-04/regression-hardening.api.test.ts plus lab-02 detail/attachment suites | Matching missing/foreign 404 bodies; role writes remain denied |
 | Password lock, session expiry, health independence | regression-hardening.api.test.ts plus lab-03/auth.api.test.ts and authorization.api.test.ts | Lookup fault denies reads/writes; eight-hour expiry; health preserved |
 | Invalid IDs/references/filters and parser errors | regression-hardening.api.test.ts | Strict invalid-input rejection, safe JSON, no protected mutation |
 | Actions lifecycle/attribution/audit/replay / AC-01–11,16 | Existing lab-04 Actions contract/API/concurrency/unit suites; ActionsTaken.test.tsx and actions-api.test.tsx | Passing; no weakened lifecycle/retry assertions |
-| Workflow/gates/concurrency / AC-10,12–16 | ticket-workflow.api.test.ts, ticket-transition.unit.test.ts, TicketWorkflow.test.tsx, workflow-api.test.tsx | Passing current runs; earlier unexpected 404 root cause NOT VERIFIED |
-| Dashboard calculations/ownership/drill-down / AC-17–20 | Existing requester/staff dashboard API, performance, component, navigation and drill-down files | Passing current runs; earlier dashboard socket cause NOT VERIFIED |
+| Workflow/gates/concurrency / AC-10,12–16 | ticket-workflow.api.test.ts, ticket-transition.unit.test.ts, TicketWorkflow.test.tsx, workflow-api.test.tsx; http-harness.test.ts | Passing; deterministic controls reproduce foreign 404/reset behavior and verify owned IPv4 listener isolation |
+| Dashboard calculations/ownership/drill-down / AC-17–20 | Existing requester/staff dashboard API, performance, component, navigation and drill-down files; http-harness.test.ts | Passing with stable listeners and HTTP shutdown before Prisma/schema disposal |
 | Safe errors/recoverable drafts/logout/origin / AC-20,22 | client/tests/lab-04/recoverable-failures.test.tsx and api-error-safety.test.tsx | New negative cases reproduced failures before correction; current pass |
 | Migration/seed/preservation/recovery / AC-21 | Existing three lab-04 data suites | Passing on disposable schemas; no development database changes |
+| Last-active-Administrator concurrency | server/tests/lab-04/admin-safety-concurrency.api.test.ts | Four cases pass; concurrent mutations preserve at least one active Administrator |
+| Durable Ticket creation retry | server/tests/lab-04/ticket-creation-retry.api.test.ts; client/tests/lab-04/ticket-creation-retry.test.tsx; migration-regression.test.ts | 11 API and 3 client cases pass; approved additive migration preserves legacy NULL values and adds requester/key uniqueness |
+| Inherited Staff Queue reads and recovery | server/tests/lab-04/staff-queue-schema-regression.api.test.ts; client/tests/lab-04/staff-queue-transport.test.tsx | Five API and two client cases pass, including reads without retry columns, safe failed-read feedback and retained same-search recovery |
 | File isolation and warning-free synchronization | Harness-owned temporary upload/fixture paths; real upload assertion; Login.test.tsx awaited initialization | Passing; original uploads/artifacts retained |
 | Final accessibility / AC-23 | Issue 26 browser/manual checklist | DEFERRED |
 | Integrated E2E/screenshots / AC-24 | Issue 27; existing reusable-server config remains unsafe for development data | DEFERRED, not executed |
 
-Do not enable retries, broaden accepted statuses or add arbitrary delays to address unexplained failures. Workflow matrix failures now record response body/path, current account state, Ticket record and database/schema. Future reproduction must distinguish HTTP/session transport, fixture state and application behavior before proposing a correction.
+Controlled transport tests reproduced false 401 and connection reset outcomes without reaching the intended Express application; the same active Staff session succeeded through the owned IPv4 listener. Six corrected Actions/transport/harness runs passed 214 tests each (1284 total), and parallel Actions/Queue/hardening verification passed 249 tests. The original individual uninstrumented events lack enough telemetry to name their exact endpoints retrospectively; transport classification rests on direct wrong-endpoint samples and deterministic controls, not green reruns alone. Workflow failure diagnostics retain method/path, response, actor, Ticket and schema state. No blind retries, arbitrary delays, broader statuses or weakened assertions were introduced.
+
+The approved migration `20261019090000_ticket_creation_retry` adds nullable `tickets.creationRequestKey` and `tickets.creationPayloadHash` columns and the unique `(requesterId, creationRequestKey)` index, with no backfill or seed change. Replay/preservation tests assert legacy NULL values and eight applied migrations; the seven-migration count in the dated Issue 19 section is historical. Guarded disposable schemas were cleaned up with zero `lab4_test_*` schemas remaining. Development data was not migrated or modified. Integrated browser E2E and final manual visual/accessibility checks remain deferred as shown above.
 
 ## Issue 26 initial frontend verification (2026-10-23; before independent-audit corrections)
 
@@ -260,18 +265,18 @@ The original Issue 18 matrix remains historical. The initial STYLE-01 and RESP-A
 | Manual visual checklist / AC-23 | Actual desktop/tablet/mobile dashboard/Action, validation/read-only, focused-dialog and zoom capture inspection by Codex | Completed; not a human reviewer or spoken-screen-reader certification |
 | ART-01 / AC-24 and E2E-ACT/WF/DASH | Canonical Lab 4 screenshots, manifest and backend-integrated journeys | Still Issue 27; not completed by intercepted UI tests |
 
-Raw successful logs and a run/source record are stored in `artifacts/lab-04/regression/issue-26/`. Asserted screenshots remain in per-run `test-results/lab-04-accessibility/` output. Earlier-lab screenshots remain unchanged. `npm run test:a11y` starts only its own frontend and blocks unexpected API calls; it does not use development services or replace the still-unsafe historical integrated E2E command. No server, migration, seed or real-account operation was performed for Issue 26.
+The initial run described here is historical. Its superseded raw logs and metadata are excluded from repository evidence; local-only copies may remain for reference. Retained corrected logs and source/run metadata are under `artifacts/lab-04/regression/issue-26/audit-corrections/`. Asserted screenshots remain in per-run `test-results/lab-04-accessibility/` output. Earlier-lab screenshots remain unchanged. `npm run test:a11y` starts only its own frontend and blocks unexpected API calls; it does not use development services or replace the still-unsafe historical integrated E2E command. No server, migration, seed or real-account operation was performed for Issue 26.
 
 
 ## Issue 26 independent-audit correction gate (2026-10-23)
 
 The original 78-case browser result above is historical. Six new scenarios in `e2e/lab-04/accessibility-responsive.spec.ts`, repeated at all three configured viewports, cover successful-removal focus; header contrast with element/ancestor-opacity negative controls; each Admin create/edit/reset pending-dismissal policy; and Create Ticket accessible names plus form/success/reset heading focus. The `ZenGreenStyle.test.tsx` saving-state test awaits the asynchronous assignee update; its six-case scope is unchanged.
 
-The expanded contrast helper scans the rendered shell/header and content instead of only main. These remain targeted, intercepted frontend checks, not general WCAG certification or backend/DB integration. Current commands, results and source fingerprints are recorded in `issue-26-verification.md`: **96 browser cases PASS** (zero skips/retries), **249 client tests PASS** (zero act warnings), client/browser typing and production build PASS, diff check PASS. Initial evidence is retained; current logs/source identity are under `artifacts/lab-04/regression/issue-26/audit-corrections/`. AC-20/23 receive the focused corrections; AC-22 receives client-only support; AC-24, real integrated journeys and final-main release verification remain Issues 27–28.
+The expanded contrast helper scans the rendered shell/header and content instead of only main. These remain targeted, intercepted frontend checks, not general WCAG certification or backend/DB integration. Current commands, results and source fingerprints are recorded in `issue-26-verification.md`: **96 browser cases PASS** (zero skips/retries), **249 client tests PASS** (zero act warnings), client/browser typing and production build PASS, diff check PASS. Superseded initial logs and metadata are local-only and excluded from repository evidence; retained corrected logs/source identity are under `artifacts/lab-04/regression/issue-26/audit-corrections/`. AC-20/23 receive the focused corrections; AC-22 receives client-only support. Issue 27 subsequently completed AC-24 candidate evidence and real integrated journeys as recorded below; final-main/release verification remains pending under Issue 28.
 
 ## Issue 27 — real integrated candidate gate
 
-**Status:** Current Issue 27 candidate execution and evidence boundaries are recorded in [issue-27-verification.md](issue-27-verification.md). Original planning/earlier-issue statuses below are historical; final-main/release verification remains Issue 28.
+**Status:** Current Issue 27 candidate execution and evidence boundaries are recorded in [issue-27-verification.md](issue-27-verification.md). Original planning/earlier-issue statuses above are historical; final-main/release verification remains Issue 28.
 
 The current Issue 27 implementation, execution results and evidence boundaries are documented in [issue-27-verification.md](issue-27-verification.md). This section is the current execution supplement to the historical planned matrix above; it does not retroactively change earlier issue reports.
 
@@ -286,7 +291,7 @@ Issue 26's 96-case intercepted frontend suite remains separate frontend evidence
 
 This execution supplement supersedes the earlier 21/250/96 candidate result for current evidence; earlier dated sections remain historical. See [issue-27-verification.md](issue-27-verification.md) for the complete scope/handout matrix, exact paths and limits.
 
-- Run: `issue-27-2026-10-23T12-37-24-458Z-3f77c2bd`; baseline HEAD `a8902031f23d6e1fc52a17dea69904dfa6e5c426` plus source/contract fingerprint `0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8`; build fingerprint `dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe`. Issue 27 remains uncommitted; final-main is not asserted.
+- Run: `issue-27-2026-10-23T12-37-24-458Z-3f77c2bd`; baseline HEAD `a8902031f23d6e1fc52a17dea69904dfa6e5c426` plus source/contract fingerprint `0c82a24059d6c6238c259edbd489183c33a83058aa51605a6e7681e3a871d4f8`; build fingerprint `dd90da4e1349ff6f9e1d57e3bef7ba87f3dd6c6ad05b4d664cbce9804ad903fe`. Issue 27 is committed and integrated into lab4-staging through PR #68; final-main verification remains pending under Issue 28.
 - Complete client **28 files / 259 PASS**; server API/unit **33 files / 662 PASS** plus migration/data **3 files / 26 PASS** (server aggregate **688**); client/server builds and all three TypeScript checks PASS.
 - Integrated **21 PASS**, one worker, zero skips/retries/flaky/unexpected cases; current separate Issue 26 frontend suite **102 PASS**, zero skips/retries. Core integrated APIs are real; controlled frontend loading/500/network/permission presentation remains frontend evidence only.
 - Existing `actions-taken-flow.spec.ts` now proves successful normal planned edit, two-line displayed order after editing, inactive lookup exclusion, persisted lifecycle outcomes and real invalid-assignee rollback. Existing `dashboards.spec.ts` adds assignment totals, selected visible-count reconciliation and browser Admin Create/Edit with persisted checks. `ticket-resolution.spec.ts` proves current contextual blocking, both work gates/clearance, stale recovery, permitted workflow, advisory Requester behavior and inherited continuity.
@@ -294,4 +299,4 @@ This execution supplement supersedes the earlier 21/250/96 candidate result for 
 - **18 canonical captures** under the three approved screenshot folders; all current hashes and source/build/AC/submission-part metadata validated. Four tablet/mobile validation/read-only captures were added. The superseded archive is backed up locally and removed from Git tracking; only the 18 current PNGs are included in the feature-branch submission evidence. [Manifest](../../artifacts/lab-04/manifest.json); [validation/preservation map](../../artifacts/lab-04/regression/issue-27/artifact-validation.json).
 - The runner validates all gates before publication, requires per-case API-process schema readiness and independent disposal, protects existing dist outputs and hashes historical Labs 1–3 before/after. Current visual/accessibility checklist is in the report, with Codex versus human review distinguished.
 
-AC-24 candidate evidence and Parts 5–8 candidate demonstration are ready for independent audit; Part 9's candidate captures/checklist/source linkage are ready. Rendered ui-spec/PDF, final-main/release regression, actual deployment/startup smoke and final submission assembly remain Issue 28. Screenshot presence is not used as accessibility, authorization, count or persistence proof.
+AC-24 candidate evidence and Parts 5–8 candidate demonstration are ready for independent audit; Part 9's candidate captures/checklist/source linkage are ready. Final-main/release regression and actual deployment/startup smoke remain pending under Issue 28. Rendered documentation and the Parts 1–9 PDF will be assembled only after Issue 28 is integrated into lab4-staging, released to main, and final-main verification passes. Screenshot presence is not used as accessibility, authorization, count or persistence proof.
