@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
 import app from "../../src/app.js";
@@ -46,7 +47,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
     inactiveStaffId = inactiveUser!.id;
 
     // Login Staff (Alex Thompson)
-    staffAgent = request.agent(app);
+    staffAgent = request.agent(await startTestServer(app));
     await staffAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)
@@ -61,7 +62,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
       });
 
     // Login Admin (admin@toktickit.local)
-    adminAgent = request.agent(app);
+    adminAgent = request.agent(await startTestServer(app));
     await adminAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)
@@ -76,7 +77,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
       });
 
     // Login Requester (Jennifer Anderson)
-    requesterAgent = request.agent(app);
+    requesterAgent = request.agent(await startTestServer(app));
     await requesterAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)
@@ -130,7 +131,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
     const res = await staffAgent
       .patch(`/api/staff/tickets/${ticketId}/assign`)
       .set(CSRF_HEADER)
-      .send({ assignedStaffId: staffId });
+      .send({ workflowRevision: 0, assignedStaffId: staffId });
 
     expect(res.status).toBe(200);
     expect(res.body.assignedStaffId).toBe(staffId);
@@ -140,7 +141,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
     const res = await staffAgent
       .patch(`/api/staff/tickets/${ticketId}/assign`)
       .set(CSRF_HEADER)
-      .send({ assignedStaffId: adminId });
+      .send({ workflowRevision: 0, assignedStaffId: adminId });
 
     expect(res.status).toBe(200);
     expect(res.body.assignedStaffId).toBe(adminId);
@@ -150,7 +151,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
     const res = await staffAgent
       .patch(`/api/staff/tickets/${ticketId}/assign`)
       .set(CSRF_HEADER)
-      .send({ assignedStaffId: null });
+      .send({ workflowRevision: 0, assignedStaffId: null });
 
     expect(res.status).toBe(200);
     expect(res.body.assignedStaffId).toBeNull();
@@ -160,7 +161,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
     const res = await staffAgent
       .patch(`/api/staff/tickets/${ticketId}/assign`)
       .set(CSRF_HEADER)
-      .send({ assignedStaffId: requesterId });
+      .send({ workflowRevision: 0, assignedStaffId: requesterId });
 
     expect(res.status).toBe(400);
     expect(res.body.code).toBe("INVALID_ASSIGNMENT_TARGET");
@@ -170,7 +171,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
     const res = await staffAgent
       .patch(`/api/staff/tickets/${ticketId}/assign`)
       .set(CSRF_HEADER)
-      .send({ assignedStaffId: inactiveStaffId });
+      .send({ workflowRevision: 0, assignedStaffId: inactiveStaffId });
 
     expect(res.status).toBe(400);
     expect(res.body.code).toBe("INVALID_ASSIGNMENT_TARGET");
@@ -180,7 +181,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
     const res = await staffAgent
       .patch(`/api/staff/tickets/${ticketId}/priority`)
       .set(CSRF_HEADER)
-      .send({ itPriority: "URGENT" });
+      .send({ workflowRevision: 0, itPriority: "URGENT" });
 
     expect(res.status).toBe(200);
     expect(res.body.itPriority).toBe("URGENT");
@@ -212,7 +213,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
     const res1 = await staffAgent
       .patch(`/api/staff/tickets/${ticketId}/status`)
       .set(CSRF_HEADER)
-      .send({ status: "OPEN" });
+      .send({ workflowRevision: 0, status: "OPEN" });
     expect(res1.status).toBe(200);
     expect(res1.body.currentStatus).toBe("OPEN");
 
@@ -220,7 +221,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
     const res2 = await staffAgent
       .patch(`/api/staff/tickets/${ticketId}/status`)
       .set(CSRF_HEADER)
-      .send({ status: "IN_PROGRESS" });
+      .send({ workflowRevision: 1, status: "IN_PROGRESS" });
     expect(res2.status).toBe(200);
     expect(res2.body.currentStatus).toBe("IN_PROGRESS");
 
@@ -229,7 +230,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
       .patch(`/api/staff/tickets/${ticketId}/status`)
       .set(CSRF_HEADER)
       .send({
-        status: "RESOLVED",
+        workflowRevision: 2, status: "RESOLVED",
         resolutionSummary: "Replaced faulty hardware component.",
       });
     expect(res3.status).toBe(200);
@@ -242,7 +243,7 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
     const res = await staffAgent
       .patch(`/api/staff/tickets/${ticketId}/status`)
       .set(CSRF_HEADER)
-      .send({ status: "RESOLVED" });
+      .send({ workflowRevision: 0, status: "RESOLVED" });
 
     expect(res.status).toBe(400);
     expect(res.body.code).toBe("INVALID_STATUS_TRANSITION");
@@ -252,29 +253,29 @@ describe("Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAF
     const res = await staffAgent
       .patch(`/api/staff/tickets/${cancelledTicketId}/status`)
       .set(CSRF_HEADER)
-      .send({ status: "OPEN" });
+      .send({ workflowRevision: 0, status: "OPEN" });
 
     expect(res.status).toBe(400);
     expect(res.body.code).toBe("INVALID_STATUS_TRANSITION");
   });
 
-  it("SEC-API-04: should deny Administrator PATCH operations (assign, priority, status) with HTTP 403 Forbidden", async () => {
+  it("SEC-API-04: should allow Administrator PATCH operations under Lab 4", async () => {
     const assignRes = await adminAgent
       .patch(`/api/staff/tickets/${ticketId}/assign`)
       .set(CSRF_HEADER)
-      .send({ assignedStaffId: adminId });
-    expect(assignRes.status).toBe(403);
+      .send({ workflowRevision: 0, assignedStaffId: adminId });
+    expect(assignRes.status).toBe(200);
 
     const priorityRes = await adminAgent
       .patch(`/api/staff/tickets/${ticketId}/priority`)
       .set(CSRF_HEADER)
-      .send({ itPriority: "HIGH" });
-    expect(priorityRes.status).toBe(403);
+      .send({ workflowRevision: 1, itPriority: "HIGH" });
+    expect(priorityRes.status).toBe(200);
 
     const statusRes = await adminAgent
       .patch(`/api/staff/tickets/${ticketId}/status`)
       .set(CSRF_HEADER)
-      .send({ status: "OPEN" });
-    expect(statusRes.status).toBe(403);
+      .send({ workflowRevision: 2, status: "OPEN" });
+    expect(statusRes.status).toBe(200);
   });
 });

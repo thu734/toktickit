@@ -1,0 +1,151 @@
+import { beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
+import request from 'supertest';
+import { app } from '../../src/app.js';
+import { getPrisma } from '../../src/prisma.js';
+import { loginAsUser } from '../helpers/login.js';
+
+const csrf = { 'X-Requested-With': 'XMLHttpRequest' };
+let owner: Awaited<ReturnType<typeof loginAsUser>>, foreign: typeof owner;
+let staff: typeof owner, admin: typeof owner;
+let ticketId: number, attachmentId: number, ownerId: number;
+beforeAll(async () => {
+  const db = getPrisma();
+  const [target] = await db.$queryRaw<Array<{ db: string; schema: string }>>`SELECT current_database() AS db, current_schema() AS schema`;
+  expect(target.db).toBe('toktickit_test'); expect(target.schema).toMatch(/^lab4_test_[a-f0-9]{32}$/);
+  const users = await db.user.findMany({ where: { role: 'REQUESTER', isActive: true }, orderBy: { id: 'asc' } });
+  ownerId = users[0].id; owner = await loginAsUser(ownerId); foreign = await loginAsUser(users[1].id);
+  staff = await loginAsUser((await db.user.findFirstOrThrow({ where: { role: 'IT_STAFF', isActive: true } })).id);
+  admin = await loginAsUser((await db.user.findFirstOrThrow({ where: { role: 'ADMINISTRATOR', isActive: true } })).id);
+  const ticket = await db.ticket.findFirstOrThrow({ where: { requesterId: ownerId } }); ticketId = ticket.id;
+  attachmentId = (await db.attachment.create({ data: { ticketId, filename: 'private.pdf', storedFilename: 'private.pdf',
+    filePath: '/nonexistent-hardening-fixture', fileSize: 10, mimeType: 'application/pdf' } })).id;
+});
+afterEach(() => vi.restoreAllMocks());
+
+describe('Issue 25 protected resource boundaries', () => {
+  it.each(['detail', 'history', 'upload', 'remove', 'download', 'comments', 'post-comment', 'indicate', 'actions'])('%s conceals missing versus foreign resources', async operation => {
+    const send = (missing: boolean) => {
+      const t = missing ? 2147483647 : ticketId, a = missing ? 2147483647 : attachmentId;
+      switch (operation) {
+        case 'detail': return foreign.get(`/api/tickets/${t}`);
+        case 'history': return foreign.get(`/api/tickets/${t}/attachments`);
+        case 'upload': return foreign.post(`/api/tickets/${t}/attachments`).set(csrf).attach('file', Buffer.from('%PDF test'), 'test.pdf');
+        case 'remove': return foreign.post(`/api/attachments/${a}/soft-remove`).set(csrf).send({ removalReason: 'Remove test file' });
+        case 'download': return foreign.get(`/api/attachments/${a}/download`);
+        case 'comments': return foreign.get(`/api/tickets/${t}/comments`);
+        case 'post-comment': return foreign.post(`/api/tickets/${t}/comments`).set(csrf).send({ content: 'Test comment' });
+        case 'indicate': return foreign.post(`/api/tickets/${t}/indicate-resolved`).set(csrf).send({ comment: 'Appears resolved' });
+        default: return foreign.get(`/api/tickets/${t}/actions-taken`);
+      }
+    };
+    const before = await getPrisma().attachment.findUniqueOrThrow({ where: { id: attachmentId } });
+    const existing = await send(false), missing = await send(true);
+    expect(existing.status).toBe(404); expect(missing.status).toBe(404); expect(existing.body).toEqual(missing.body);
+    expect(await getPrisma().attachment.findUniqueOrThrow({ where: { id: attachmentId } })).toEqual(before);
+  });
+  it.each(['staff', 'admin'] as const)('%s can read history but cannot upload or remove', async role => {
+    const agent = role === 'staff' ? staff : admin;
+    const res = await agent.get(`/api/tickets/${ticketId}/attachments`).expect(200);
+    expect(res.body).toEqual(expect.arrayContaining([expect.objectContaining({ id: attachmentId, filename: 'private.pdf' })]));
+    expect(JSON.stringify(res.body)).not.toMatch(/filePath|storedFilename|passwordHash/);
+    await agent.post(`/api/tickets/${ticketId}/attachments`).set(csrf).attach('file', Buffer.from('%PDF test'), 'test.pdf').expect(403);
+    await agent.post(`/api/attachments/${attachmentId}/soft-remove`).set(csrf).send({ removalReason: 'Remove test file' }).expect(403);
+  });
+  it('conceals removed foreign attachments before revealing Gone status', async () => {
+    await getPrisma().attachment.update({ where: { id: attachmentId }, data: { isRemoved: true } });
+    try {
+      expect((await foreign.get(`/api/attachments/${attachmentId}/download`).expect(404)).body)
+        .toEqual((await foreign.get('/api/attachments/2147483647/download').expect(404)).body);
+      await owner.get(`/api/attachments/${attachmentId}/download`).expect(410);
+    } finally { await getPrisma().attachment.update({ where: { id: attachmentId }, data: { isRemoved: false } }); }
+  });
+  it.each(['read', 'write'])('denies protected %s when lock lookup fails, without mutation', async operation => {
+    const db = getPrisma();
+    await db.user.update({ where: { id: ownerId }, data: { mustChangePassword: true } });
+    const before = await db.ticket.count();
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const original = db.user.findUnique.bind(db.user);
+    let fail = true;
+    db.user.findUnique = ((...args: Parameters<typeof original>) => {
+      if (fail) { fail = false; return Promise.reject(new Error('sensitive database failure')); }
+      return original(...args);
+    }) as unknown as typeof db.user.findUnique;
+    try {
+      const res = operation === 'read' ? await owner.get('/api/tickets') : await owner.post('/api/tickets').set(csrf).send({});
+      expect(res.status).toBe(500); expect(res.body.code).toBe('INTERNAL_ERROR');
+      expect(JSON.stringify(res.body)).not.toMatch(/sensitive|stack|database/);
+      expect(await db.ticket.count()).toBe(before);
+      db.user.findUnique = original;
+      await owner.get('/api/tickets').expect(403);
+      await owner.get('/api/auth/me').expect(200);
+    } finally { db.user.findUnique = original; await db.user.update({ where: { id: ownerId }, data: { mustChangePassword: false } }); }
+  });
+});
+
+describe('Issue 25 input and safe-error boundaries', () => {
+  it.each(['1junk', '1.5', '-1', '0', '2147483648', '1e2', 'NaN'])('rejects malformed resource ID %s on inherited read/write routes', async id => {
+    const before = await getPrisma().ticket.count();
+    await owner.get(`/api/tickets/${id}`).expect(400);
+    await owner.get(`/api/tickets/${id}/attachments`).expect(400);
+    await owner.get(`/api/attachments/${id}/download`).expect(400);
+    await owner.post(`/api/attachments/${id}/soft-remove`).set(csrf).send({ removalReason: 'Valid reason' }).expect(400);
+    await staff.get(`/api/staff/tickets/${id}`).expect(400);
+    await staff.post(`/api/staff/tickets/${id}/notes`).set(csrf).send({content:'Valid note'}).expect(400);
+    await admin.patch(`/api/admin/users/${id}`).set(csrf).send({ name: 'No change' }).expect(400);
+    expect(await getPrisma().ticket.count()).toBe(before);
+  });
+  it.each(['{bad-json', '[', 'null'])('returns safe JSON for malformed body %s', async body => {
+    const res = await owner.post('/api/tickets').set(csrf).set('Content-Type', 'application/json').send(body).expect(400);
+    expect(res.type).toBe('application/json'); expect(res.body).toEqual({ error: 'Bad Request', message: 'Invalid JSON request body.' });
+    expect(res.text).not.toMatch(/SyntaxError|stack|node_modules|<html/i);
+  });
+  it('returns safe JSON for an oversized body', async () => {
+    const res = await owner.post('/api/tickets').set(csrf).send({ summary: 'x'.repeat(110000) }).expect(413);
+    expect(res.type).toBe('application/json'); expect(res.body.message).toBe('Request body is too large.');
+  });
+  it.each([true, [1], 1.5, -1, 2147483648, '1junk'])('rejects malformed reference ID %j without creating a Ticket', async categoryId => {
+    const before = await getPrisma().ticket.count();
+    const res = await owner.post('/api/tickets').set(csrf).send({categoryId,relatedSystemId:1,requestedPriority:'LOW',summary:'Valid summary',description:'Valid description here'}).expect(400);
+    expect(res.body.details.categoryId).toBeDefined(); expect(await getPrisma().ticket.count()).toBe(before);
+  });
+  it.each(['categoryId=1junk', 'requestedPriority=INVALID', 'currentStatus=INVALID'])('rejects invalid Requester filter %s safely', async query => {
+    const res = await owner.get(`/api/tickets?${query}`).expect(400);
+    expect(res.type).toBe('application/json'); expect(res.text).not.toMatch(/Prisma|stack|node_modules/);
+  });
+});
+
+describe('Issue 25 session and file isolation', () => {
+  it('expires the established session after the inherited eight-hour lifetime', async () => {
+    const expiring = await loginAsUser(ownerId);
+    await expiring.get('/api/tickets').expect(200);
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(Date.now() + 8 * 60 * 60 * 1000 + 1000);
+      await expiring.get('/api/tickets').expect(401);
+      await expiring.get('/api/auth/me').expect(401);
+    } finally { vi.useRealTimers(); }
+  });
+  it('writes uploaded bytes only inside the disposable suite directory', async () => {
+    const { readFileSync, existsSync } = await import('node:fs');
+    const path = await import('node:path');
+    const { uploadDir } = await import('../../src/middleware/upload.js');
+    expect(uploadDir).toBe(path.join(process.env.TOKTICKIT_TEST_FILES!, 'uploads'));
+    expect(uploadDir.startsWith(path.resolve('uploads') + path.sep)).toBe(false);
+    const bytes = Buffer.from('%PDF isolated upload');
+    const res = await owner.post(`/api/tickets/${ticketId}/attachments`).set(csrf).attach('file', bytes, 'isolated.pdf').expect(201);
+    const stored = await getPrisma().attachment.findUniqueOrThrow({ where: { id: res.body.id } });
+    expect(path.dirname(stored.filePath)).toBe(uploadDir);
+    expect(readFileSync(stored.filePath)).toEqual(bytes);
+    expect(existsSync(path.resolve('uploads', stored.storedFilename))).toBe(false);
+  });
+});
+
+it('keeps inherited health independent of account lookups even with a session cookie', async () => {
+  const db = getPrisma();
+  const original = db.user.findUnique.bind(db.user);
+  db.user.findUnique = (() => { throw new Error('Health must not query account data'); }) as typeof db.user.findUnique;
+  try {
+    const res = await owner.get('/api/health').expect(200);
+    expect(res.body).toEqual({ status: 'ok', service: 'TokTickIT API' });
+  } finally { db.user.findUnique = original; }
+});

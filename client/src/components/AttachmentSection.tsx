@@ -1,3 +1,4 @@
+import { useDialogAccessibility } from "../hooks/useDialogAccessibility";
 import React, { useState, useRef } from "react";
 import { Attachment, uploadAttachment, downloadAttachment, softRemoveAttachment } from "../api.js";
 import { useRequester } from "../context/RequesterContext.js";
@@ -27,6 +28,11 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
   const [removalReason, setRemovalReason] = useState("");
   const [removalError, setRemovalError] = useState("");
   const [removing, setRemoving] = useState(false);
+
+  const attachmentsHeading = useRef<HTMLHeadingElement>(null);
+  const removalCompleted = useRef(false);
+  const removalDialog = useDialogAccessibility(removalModalOpen, () => { if (!removing) closeRemovalModal(); },
+    () => removalCompleted.current ? attachmentsHeading.current : null);
 
   // Toast / alert for blocked downloads
   const [toastMessage, setToastMessage] = useState("");
@@ -129,6 +135,7 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
   };
 
   const openRemovalModal = (attachment: Attachment) => {
+    removalCompleted.current = false;
     setTargetAttachment(attachment);
     setRemovalReason("");
     setRemovalError("");
@@ -156,6 +163,7 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
 
     try {
       await softRemoveAttachment(targetAttachment.id, trimmed, activeRequester.id);
+      removalCompleted.current = true;
       closeRemovalModal();
       onAttachmentChange();
     } catch (err: any) {
@@ -167,7 +175,7 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
 
   return (
     <div aria-label="Ticket attachments section">
-      <h2 className="h5 fw-semibold mb-3 d-flex align-items-center gap-2" style={{ color: "#1E2923" }}>
+      <h2 ref={attachmentsHeading} tabIndex={-1} className="h5 fw-semibold mb-3 d-flex align-items-center gap-2" style={{ color: "#1E2923" }}>
         <span>Attachments</span>
         <span
           className="badge bg-light text-dark border font-monospace fw-normal"
@@ -372,7 +380,8 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
           className="modal show d-block"
           style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
           tabIndex={-1}
-          role="dialog"
+          ref={removalDialog}
+          role="dialog" aria-modal="true"
           aria-labelledby="removal-modal-title"
         >
           <div className="modal-dialog modal-dialog-centered">
@@ -403,7 +412,7 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
                   </label>
 
                   <textarea
-                    id="removal-reason-input"
+                    id="removal-reason-input" aria-required="true" aria-invalid={!!removalError} aria-describedby={removalError ? "removal-reason-error" : undefined}
                     className={`form-control ${removalError ? "is-invalid" : ""}`}
                     rows={3}
                     maxLength={250}
@@ -420,7 +429,7 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
                     <span className="small text-muted">{removalReason.trim().length} / 250</span>
 
                     {removalError && (
-                      <span className="small text-danger" role="alert">
+                      <span id="removal-reason-error" className="small text-danger" role="alert">
                         {removalError}
                       </span>
                     )}

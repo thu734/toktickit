@@ -1,0 +1,95 @@
+
+> toktickit-server@1.0.0 test
+> vitest run --fileParallelism=false && npm run test:data
+
+
+ RUN  v2.1.9 /Users/thuthuwai/Documents/toktickit/server
+
+ ✓ tests/lab-04/actions-taken.contract.api.test.ts (207 tests) 3381ms
+ ✓ tests/lab-04/ticket-workflow.api.test.ts (150 tests) 1175ms
+ ✓ tests/lab-04/actions-taken.api.test.ts (10 tests) 834ms
+ ✓ tests/lab-04/requester-dashboard.api.test.ts (18 tests) 321ms
+ ✓ tests/lab-03/staff-ticket-detail.api.test.ts (11 tests) 6653ms
+   ✓ Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAFF-API-08) > STAFF-API-02: should allow IT Staff to claim ticket ownership 624ms
+   ✓ Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAFF-API-08) > STAFF-API-02: should allow IT Staff to reassign ticket to an active Administrator 599ms
+   ✓ Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAFF-API-08) > STAFF-API-02: should allow IT Staff to unassign a ticket by passing assignedStaffId: null 611ms
+   ✓ Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAFF-API-08) > STAFF-API-08: should reject assignment to a Requester user with HTTP 400 Bad Request 601ms
+   ✓ Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAFF-API-08) > STAFF-API-08: should reject assignment to an inactive staff user with HTTP 400 Bad Request 597ms
+   ✓ Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAFF-API-08) > STAFF-API-03: should allow IT Staff to update IT priority while preserving requested priority 597ms
+   ✓ Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAFF-API-08) > STAFF-API-06: should automatically initialize itPriority = requestedPriority when ticket is created by Requester 598ms
+   ✓ Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAFF-API-08) > STAFF-API-04: should update status on valid transition (NEW -> OPEN -> IN_PROGRESS -> RESOLVED) and record resolutionSummary 605ms
+   ✓ Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAFF-API-08) > STAFF-API-04: should reject invalid status transition with HTTP 400 Bad Request 589ms
+   ✓ Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAFF-API-08) > STAFF-API-04: should reject any transition out of CANCELLED status on dedicated cancelled ticket 590ms
+   ✓ Lab 3 Staff Ticket Detail & Operations API Tests (STAFF-API-02 to STAFF-API-08) > SEC-API-04: should allow Administrator PATCH operations under Lab 4 602ms
+ ✓ tests/lab-04/staff-dashboard.api.test.ts (10 tests) 483ms
+ ✓ tests/lab-04/regression-hardening.api.test.ts (37 tests) 815ms
+ ✓ tests/lab-04/actions-taken.concurrency.api.test.ts (6 tests) 643ms
+ ✓ tests/lab-03/auth.api.test.ts (8 tests) 1142ms
+ ✓ tests/lab-03/comments-notes.api.test.ts (6 tests) 2813ms
+   ✓ Lab 3 Public Comments & Resolution Indication Tests (COMM-API-01 - COMM-API-04) > COMM-API-01: Authenticated Requester can post and list Public Comments on owned ticket 461ms
+   ✓ Lab 3 Public Comments & Resolution Indication Tests (COMM-API-01 - COMM-API-04) > COMM-API-02: Requester can submit Problem Appears Resolved indication without changing ticket status 426ms
+   ✓ Lab 3 Public Comments & Resolution Indication Tests (COMM-API-01 - COMM-API-04) > COMM-API-03: Rejects invalid or whitespace-only comments with HTTP 400 Bad Request 419ms
+   ✓ Lab 3 Public Comments & Resolution Indication Tests (COMM-API-01 - COMM-API-04) > COMM-API-04: Overrides client-supplied authorId and timestamp with session identity and server time 421ms
+   ✓ Lab 3 Public Comments & Resolution Indication Tests (COMM-API-01 - COMM-API-04) > BR-16: Fetching or posting comments for an unowned ticket returns HTTP 404 Not Found 438ms
+   ✓ Lab 3 Public Comments & Resolution Indication Tests (COMM-API-01 - COMM-API-04) > STAFF-API-05 & SEC-API-03: IT Staff and Admin can view/post Internal Notes; Requester is blocked with HTTP 403 Forbidden 609ms
+ ✓ tests/lab-04/ticket-creation-retry.api.test.ts (11 tests) 316ms
+ ✓ tests/lab-03/users-admin.api.test.ts (8 tests) 2113ms
+   ✓ Lab 3 Admin User Management API Tests (ADMIN-API-01..07, SEC-API-02) > ADMIN-API-02: Admin user creation with initial password (AC-20, BR-08) 308ms
+ ✓ tests/lab-02/attachments.api.test.ts (6 tests) 1536ms
+ ✓ tests/lab-03/authorization.api.test.ts (11 tests) 1240ms
+ ✓ tests/lab-02/my-tickets.api.test.ts (5 tests) 705ms
+ ✓ tests/lab-03/status-transition.unit.test.ts (15 tests) 28ms
+ ✓ tests/lab-04/staff-queue-schema-regression.api.test.ts (5 tests) 141ms
+ ✓ tests/lab-04/admin-safety-concurrency.api.test.ts (4 tests) 140ms
+ ✓ tests/lab-03/requester-regression.api.test.ts (2 tests) 586ms
+ ✓ tests/lab-02/create-ticket.api.test.ts (4 tests) 331ms
+ ✓ tests/lab-04/action-validation.unit.test.ts (34 tests) 35ms
+ ✓ tests/lab-03/staff-queue.api.test.ts (5 tests) 3069ms
+   ✓ Lab 3 Staff Ticket Queue API Tests (STAFF-API-01, STAFF-API-07) > STAFF-API-01: should return paginated staff ticket queue with filters, search, and pagination metadata 628ms
+   ✓ Lab 3 Staff Ticket Queue API Tests (STAFF-API-01, STAFF-API-07) > STAFF-API-01: should support searching queue by ticket number, summary, or description 594ms
+   ✓ Lab 3 Staff Ticket Queue API Tests (STAFF-API-01, STAFF-API-07) > STAFF-API-01: should allow Administrator read oversight access on GET /api/staff/tickets 588ms
+   ✓ Lab 3 Staff Ticket Queue API Tests (STAFF-API-01, STAFF-API-07) > STAFF-API-01: should deny Requester access to staff queue with HTTP 403 Forbidden 597ms
+   ✓ Lab 3 Staff Ticket Queue API Tests (STAFF-API-01, STAFF-API-07) > STAFF-API-07: should fall back safely to default pagination and sorting on invalid parameters with HTTP 200 OK 622ms
+ ✓ tests/lab-04/actions-transport-regression.api.test.ts (2 tests) 96ms
+stdout | tests/lab-04/dashboard-performance.test.ts > DASH-PERF-01 keeps query count and previews bounded as isolated operational data grows
+DASH-PERF-01 {"addedTickets":1000,"addedActions":3000,"queryCount":12,"repeatedReadMs":[5.56,4.49,4.15],"responseBytes":3274,"recentPlan":{"QUERY PLAN":[{"Plan":{"Node Type":"Limit","Parallel Aware":false,"Async Capable":false,"Startup Cost":34.17,"Total Cost":34.18,"Plan Rows":5,"Plan Width":12,"Actual Startup Time":0.182,"Actual Total Time":0.183,"Actual Rows":5,"Actual Loops":1,"Shared Hit Blocks":19,"Shared Read Blocks":0,"Shared Dirtied Blocks":0,"Shared Written Blocks":0,"Local Hit Blocks":0,"Local Read Blocks":0,"Local Dirtied Blocks":0,"Local Written Blocks":0,"Temp Read Blocks":0,"Temp Written Blocks":0,"Plans":[{"Node Type":"Sort","Parent Relationship":"Outer","Parallel Aware":false,"Async Capable":false,"Startup Cost":34.17,"Total Cost":35.59,"Plan Rows":570,"Plan Width":12,"Actual Startup Time":0.182,"Actual Total Time":0.182,"Actual Rows":5,"Actual Loops":1,"Sort Key":["\"updatedAt\" DESC","id DESC"],"Sort Method":"top-N heapsort","Sort Space Used":25,"Sort Space Type":"Memory","Shared Hit Blocks":19,"Shared Read Blocks":0,"Shared Dirtied Blocks":0,"Shared Written Blocks":0,"Local Hit Blocks":0,"Local Read Blocks":0,"Local Dirtied Blocks":0,"Local Written Blocks":0,"Temp Read Blocks":0,"Temp Written Blocks":0,"Plans":[{"Node Type":"Seq Scan","Parent Relationship":"Outer","Parallel Aware":false,"Async Capable":false,"Relation Name":"tickets","Alias":"tickets","Startup Cost":0,"Total Cost":24.7,"Plan Rows":570,"Plan Width":12,"Actual Startup Time":0.001,"Actual Total Time":0.095,"Actual Rows":1016,"Actual Loops":1,"Shared Hit Blocks":19,"Shared Read Blocks":0,"Shared Dirtied Blocks":0,"Shared Written Blocks":0,"Local Hit Blocks":0,"Local Read Blocks":0,"Local Dirtied Blocks":0,"Local Written Blocks":0,"Temp Read Blocks":0,"Temp Written Blocks":0}]}]},"Planning":{"Shared Hit Blocks":0,"Shared Read Blocks":0,"Shared Dirtied Blocks":0,"Shared Written Blocks":0,"Local Hit Blocks":0,"Local Read Blocks":0,"Local Dirtied Blocks":0,"Local Written Blocks":0,"Temp Read Blocks":0,"Temp Written Blocks":0},"Planning Time":0.015,"Triggers":[],"Execution Time":0.186}]},"actionPlan":{"QUERY PLAN":[{"Plan":{"Node Type":"Limit","Parallel Aware":false,"Async Capable":false,"Startup Cost":8.3,"Total Cost":8.3,"Plan Rows":1,"Plan Width":12,"Actual Startup Time":0.471,"Actual Total Time":0.471,"Actual Rows":5,"Actual Loops":1,"Shared Hit Blocks":48,"Shared Read Blocks":0,"Shared Dirtied Blocks":0,"Shared Written Blocks":0,"Local Hit Blocks":0,"Local Read Blocks":0,"Local Dirtied Blocks":0,"Local Written Blocks":0,"Temp Read Blocks":0,"Temp Written Blocks":0,"Plans":[{"Node Type":"Sort","Parent Relationship":"Outer","Parallel Aware":false,"Async Capable":false,"Startup Cost":8.3,"Total Cost":8.3,"Plan Rows":1,"Plan Width":12,"Actual Startup Time":0.47,"Actual Total Time":0.471,"Actual Rows":5,"Actual Loops":1,"Sort Key":["\"createdAt\"","id"],"Sort Method":"top-N heapsort","Sort Space Used":25,"Sort Space Type":"Memory","Shared Hit Blocks":48,"Shared Read Blocks":0,"Shared Dirtied Blocks":0,"Shared Written Blocks":0,"Local Hit Blocks":0,"Local Read Blocks":0,"Local Dirtied Blocks":0,"Local Written Blocks":0,"Temp Read Blocks":0,"Temp Written Blocks":0,"Plans":[{"Node Type":"Index Scan","Parent Relationship":"Outer","Parallel Aware":false,"Async Capable":false,"Scan Direction":"Forward","Index Name":"actions_taken_assignedToId_status_idx","Relation Name":"actions_taken","Alias":"actions_taken","Startup Cost":0.27,"Total Cost":8.29,"Plan Rows":1,"Plan Width":12,"Actual Startup Time":0.012,"Actual Total Time":0.298,"Actual Rows":3001,"Actual Loops":1,"Index Cond":"((\"assignedToId\" = '12'::bigint) AND (status = 'PLANNED'::\"ActionStatus\"))","Rows Removed by Index Recheck":0,"Shared Hit Blocks":48,"Shared Read Blocks":0,"Shared Dirtied Blocks":0,"Shared Written Blocks":0,"Local Hit Blocks":0,"Local Read Blocks":0,"Local Dirtied Blocks":0,"Local Written Blocks":0,"Temp Read Blocks":0,"Temp Written Blocks":0}]}]},"Planning":{"Shared Hit Blocks":5,"Shared Read Blocks":0,"Shared Dirtied Blocks":0,"Shared Written Blocks":0,"Local Hit Blocks":0,"Local Read Blocks":0,"Local Dirtied Blocks":0,"Local Written Blocks":0,"Temp Read Blocks":0,"Temp Written Blocks":0},"Planning Time":0.026,"Triggers":[],"Execution Time":0.475}]}}
+
+ ✓ tests/lab-04/dashboard-performance.test.ts (1 test) 330ms
+   ✓ DASH-PERF-01 keeps query count and previews bounded as isolated operational data grows 306ms
+ ✓ tests/lab-02/ticket-detail.api.test.ts (3 tests) 824ms
+ ✓ tests/lab-04/http-harness.test.ts (5 tests) 49ms
+ ✓ tests/lab-03/seed-examples.test.ts (1 test) 692ms
+   ✓ seeds comment/note examples idempotently and preserves unrelated conversation records 655ms
+ ✓ tests/lab-03/migration.test.ts (3 tests) 52ms
+ ✓ tests/lab-03/test-database.unit.test.ts (7 tests) 30ms
+ ✓ tests/lab-04/ticket-transition.unit.test.ts (64 tests) 31ms
+ ✓ tests/lab-01/categories.test.ts (1 test) 56ms
+ ✓ tests/lab-01/health.test.ts (1 test) 43ms
+ ✓ tests/lab-02/ticket-number.unit.test.ts (1 test) 30ms
+
+ Test Files  33 passed (33)
+      Tests  662 passed (662)
+   Start at  19:37:32
+   Duration  54.44s (transform 199ms, setup 19.24s, collect 1.52s, tests 30.73s, environment 2ms, prepare 680ms)
+
+
+> toktickit-server@1.0.0 test:data
+> vitest run --config vitest.migrations.config.ts
+
+
+ RUN  v2.1.9 /Users/thuthuwai/Documents/toktickit/server
+
+ ✓ tests/lab-04/actions-data-integrity.test.ts (19 tests) 673ms
+ ✓ tests/lab-04/migration-regression.test.ts (3 tests) 4248ms
+   ✓ Actual SQL migration replay and preservation > reproduces Category drift, upgrades representative Lab 2/3 data, and preserves every earlier record 1603ms
+   ✓ Actual SQL migration replay and preservation > fresh replay matches Prisma and a disposable backup restores data, evidence and file bytes 2105ms
+   ✓ Actual SQL migration replay and preservation > refuses ambiguous Category/categories collisions without deleting either table 540ms
+ ✓ tests/lab-04/seed.test.ts (4 tests) 1989ms
+   ✓ Lab 4 preservation-oriented seed > adds required scenarios without backfilling Actions onto baseline Tickets 432ms
+   ✓ Lab 4 preservation-oriented seed > is byte/field-stable on repeated runs, including timestamps, revisions, hashes and evidence 392ms
+   ✓ Lab 4 preservation-oriented seed > serializes concurrent first-run seeds without duplicate fixtures or audit/retry evidence 608ms
+
+ Test Files  3 passed (3)
+      Tests  26 passed (26)
+   Start at  19:38:27
+   Duration  7.27s (transform 32ms, setup 0ms, collect 68ms, tests 6.91s, environment 0ms, prepare 65ms)

@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
 import app from "../../src/app.js";
@@ -34,7 +35,7 @@ describe("Lab 3 Staff Ticket Queue API Tests (STAFF-API-01, STAFF-API-07)", () =
     catId = category ? category.id : 1;
 
     // Login Staff (Alex Thompson)
-    staffAgent = request.agent(app);
+    staffAgent = request.agent(await startTestServer(app));
     await staffAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)
@@ -49,7 +50,7 @@ describe("Lab 3 Staff Ticket Queue API Tests (STAFF-API-01, STAFF-API-07)", () =
       });
 
     // Login Admin (admin@toktickit.local)
-    adminAgent = request.agent(app);
+    adminAgent = request.agent(await startTestServer(app));
     await adminAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)
@@ -64,7 +65,7 @@ describe("Lab 3 Staff Ticket Queue API Tests (STAFF-API-01, STAFF-API-07)", () =
       });
 
     // Login Requester (Jennifer Anderson)
-    requesterAgent = request.agent(app);
+    requesterAgent = request.agent(await startTestServer(app));
     await requesterAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)

@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import request from "supertest";
 import { app } from "../../src/app.js";
@@ -33,21 +34,21 @@ describe("Lab 3 Admin User Management API Tests (ADMIN-API-01..07, SEC-API-02)",
     });
 
     // Login Admin
-    adminAgent = request.agent(app);
+    adminAgent = request.agent(await startTestServer(app));
     await adminAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)
       .send({ email: "admin@toktickit.local", password: "Initial123!" });
 
     // Login Staff
-    staffAgent = request.agent(app);
+    staffAgent = request.agent(await startTestServer(app));
     await staffAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)
       .send({ email: "alex.t@toktickit.local", password: "Initial123!" });
 
     // Login Requester
-    requesterAgent = request.agent(app);
+    requesterAgent = request.agent(await startTestServer(app));
     await requesterAgent
       .post("/api/auth/login")
       .set(CSRF_HEADER)

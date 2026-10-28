@@ -1,0 +1,42 @@
+
+> toktickit-client@1.0.0 test
+> vitest run --reporter=dot
+
+
+ RUN  v2.1.9 /Users/thuthuwai/Documents/toktickit/client
+
+ ✓ tests/lab-02/AttachmentSection.test.tsx (6 tests) 341ms
+ ✓ tests/lab-02/CreateTicket.test.tsx (8 tests) 424ms
+ ✓ tests/lab-04/recoverable-failures.test.tsx (9 tests) 578ms
+ ✓ tests/lab-04/StaffDashboard.test.tsx (15 tests) 734ms
+ ✓ tests/lab-04/RequesterDashboard.test.tsx (18 tests) 798ms
+ ✓ tests/lab-04/ActionsTaken.test.tsx (32 tests) 890ms
+ ✓ tests/lab-03/UserManagement.test.tsx (5 tests) 375ms
+ ✓ tests/lab-03/CommentsAndNotes.test.tsx (3 tests) 254ms
+ ✓ tests/lab-04/ZenGreenStyle.test.tsx (6 tests) 345ms
+ ✓ tests/lab-03/StaffTicketQueue.test.tsx (4 tests) 336ms
+ ✓ tests/lab-02/RequesterTicketDetail.test.tsx (3 tests) 178ms
+ ✓ tests/lab-02/MyTickets.test.tsx (4 tests) 315ms
+ ✓ tests/lab-04/TicketWorkflow.test.tsx (37 tests) 2335ms
+ ✓ tests/lab-03/StaffTicketDetail.test.tsx (4 tests) 445ms
+ ✓ tests/lab-04/requester-dashboard-navigation.test.tsx (11 tests) 1081ms
+ ✓ tests/lab-04/ticket-creation-retry.test.tsx (3 tests) 398ms
+   ✓ Ticket create operation identity > reuses the key after an uncertain response, retains input, and rotates only for an intentional new submission 327ms
+ ✓ tests/lab-04/staff-queue-transport.test.tsx (2 tests) 316ms
+ ✓ tests/lab-04/actions-api.test.tsx (6 tests) 7ms
+ ✓ tests/lab-03/AppShell.test.tsx (4 tests) 264ms
+ ✓ tests/lab-04/api-error-safety.test.tsx (26 tests) 6ms
+ ✓ tests/lab-03/ChangePassword.test.tsx (4 tests) 217ms
+ ✓ tests/lab-04/requester-drilldown.test.tsx (5 tests) 163ms
+ ✓ tests/lab-03/Login.test.tsx (3 tests) 115ms
+ ✓ tests/lab-04/workflow-api.test.tsx (4 tests) 4ms
+ ✓ tests/lab-04/staff-drilldown.test.tsx (6 tests) 157ms
+ ✓ tests/lab-04/requester-dashboard-api.test.tsx (3 tests) 4ms
+ ✓ tests/lab-01/App.test.tsx (2 tests) 177ms
+ ✓ tests/lab-04/staff-dashboard-navigation.test.tsx (16 tests) 1796ms
+   ✓ applies 'View Unassigned Active Tickets (7)' to the real queue and normal navigation clears it 385ms
+
+ Test Files  28 passed (28)
+      Tests  249 passed (249)
+   Start at  03:31:23
+   Duration  4.87s (transform 930ms, setup 1.53s, collect 3.84s, tests 13.05s, environment 9.00s, prepare 1.30s)

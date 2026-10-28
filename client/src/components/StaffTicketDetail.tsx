@@ -1,4 +1,8 @@
-import React, { useEffect, useState, useCallback } from "react";
+import { useDialogAccessibility } from "../hooks/useDialogAccessibility";
+import { attachmentDownloadUrl } from "../apiOrigin";
+import { safeFailure } from "../utils/safeFailure";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { ActionsTaken } from "./ActionsTaken";
 import {
   fetchStaffTicketDetail,
   assignStaffTicket,
@@ -9,7 +13,7 @@ import {
   fetchInternalNotes,
   postInternalNote,
   fetchStaffUsers,
-  StaffUser,
+  ActionsResponse,
   Comment,
   InternalNote,
 } from "../api.js";
@@ -18,7 +22,9 @@ interface StaffTicketDetailProps {
   ticketId: number;
   currentUserRole?: "REQUESTER" | "IT_STAFF" | "ADMINISTRATOR";
   currentUserId?: number;
+  currentUserName?: string;
   onBack?: () => void;
+  focusActions?: boolean;
 }
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
@@ -34,14 +40,48 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
 
 export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   ticketId,
+  focusActions = false,
   currentUserRole,
   currentUserId,
+  currentUserName,
   onBack,
 }) => {
   const [ticket, setTicket] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successBanner, setSuccessBanner] = useState("");
+  const [workflowConflict, setWorkflowConflict] = useState<'refresh' | 'review' | null>(null);
+  const [workflowRefreshing, setWorkflowRefreshing] = useState(false);
+  const [resolutionBlockedByServer, setResolutionBlockedByServer] = useState(false);
+  const [actionsState, setActionsState] = useState<ActionsResponse | null>(null);
+  const [actionsRefreshKey, setActionsRefreshKey] = useState(0);
+  const workflowSaving = useRef(false);
+  const onWorkflowState = useCallback((state: ActionsResponse | null) => setActionsState(state), []);
+  const refreshTicket = useCallback(async () => {
+    const latest = await fetchStaffTicketDetail(ticketId);
+    setTicket(latest);
+    // Preserve all in-progress workflow/comment/note drafts.
+    return latest;
+  }, [ticketId]);
+  const workflowFailure = (err: any, fallback: string) => {
+    if (err.status === 409 || !err.status || err.status >= 500) {
+      setWorkflowConflict('refresh');
+      setResolutionBlockedByServer(err.code === 'RESOLUTION_BLOCKED');
+      setError(err.code === 'RESOLUTION_BLOCKED'
+        ? 'Review Actions Taken and finish outstanding work before resolving or closing this Ticket. Your draft is retained.'
+        : 'Ticket may have changed. Your draft is retained. Refresh and review before saving again.');
+    } else if (err.status === 401) setError('Your session has expired. Sign in again.');
+    else if (err.code === 'MUST_CHANGE_PASSWORD') setError('Change your password before continuing.');
+    else if (err.status === 403) setError('You do not have permission to change this Ticket.');
+    else if (err.status === 404) setError('This Ticket is unavailable.');
+    else setError(err.message || fallback);
+  };
+  const refreshWorkflow = async () => {
+    setWorkflowRefreshing(true);
+    try { await refreshTicket(); setActionsRefreshKey(key => key + 1); setWorkflowConflict('review'); setResolutionBlockedByServer(false); setError(''); }
+    catch (err: any) { setError(err.message || 'Unable to refresh. Retry when available.'); }
+    finally { setWorkflowRefreshing(false); }
+  };
 
   // Operational states
   const [assigning, setAssigning] = useState(false);
@@ -52,6 +92,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   const [selectedStatus, setSelectedStatus] = useState("");
   const [resolutionSummaryInput, setResolutionSummaryInput] = useState("");
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const confirmationDialog = useDialogAccessibility(showConfirmationModal, () => setShowConfirmationModal(false));
   const [pendingStatusChange, setPendingStatusChange] = useState("");
 
   // Tabs: "comments", "notes", "attachments"
@@ -63,6 +104,18 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const [noteSubmitting, setNoteSubmitting] = useState(false);
   const [tabError, setTabError] = useState("");
+  const [feedLoading, setFeedLoading] = useState({ comments: true, notes: true });
+  const [feedErrors, setFeedErrors] = useState({ comments: '', notes: '' });
+  const loadFeed = useCallback(async (feed: 'comments' | 'notes') => {
+    setFeedLoading(previous => ({ ...previous, [feed]: true }));
+    setFeedErrors(previous => ({ ...previous, [feed]: '' }));
+    try {
+      if (feed === 'comments') setComments(await fetchTicketComments(ticketId));
+      else setInternalNotes(await fetchInternalNotes(ticketId));
+    } catch {
+      setFeedErrors(previous => ({ ...previous, [feed]: feed === 'comments' ? 'Unable to load public comments.' : 'Unable to load internal notes.' }));
+    } finally { setFeedLoading(previous => ({ ...previous, [feed]: false })); }
+  }, [ticketId]);
 
   // Staff users for assignment dropdown
   const [staffUsers, setStaffUsers] = useState<any[]>([]);
@@ -78,26 +131,28 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
       setResolutionSummaryInput(data.resolutionSummary || "");
 
       // Load comments & notes
-      const [fetchedComments, fetchedNotes] = await Promise.all([
-        fetchTicketComments(ticketId).catch(() => []),
-        fetchInternalNotes(ticketId).catch(() => []),
-      ]);
-      setComments(fetchedComments);
-      setInternalNotes(fetchedNotes);
+      await Promise.all([loadFeed('comments'), loadFeed('notes')]);
     } catch (err: any) {
       if (err?.status === 403) {
-        setError("Access Denied: IT Staff authorization required.");
+        setError("Access Denied: IT Staff or Administrator authorization required.");
       } else {
         setError(err.message || "Failed to load ticket details.");
       }
     } finally {
       setLoading(false);
     }
-  }, [ticketId]);
+  }, [ticketId, loadFeed]);
 
   useEffect(() => {
     loadTicketData();
   }, [loadTicketData]);
+
+  useEffect(() => {
+    if (loading || !ticket || !focusActions) return;
+    const heading = document.getElementById(`actions-heading-${ticketId}`);
+    heading?.focus();
+    heading?.scrollIntoView?.({ block: 'start' });
+  }, [loading, ticket?.id, ticketId, focusActions]);
 
   // Load active staff users for assignment dropdown
   useEffect(() => {
@@ -106,51 +161,64 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
       .catch(() => setStaffUsers([]));
   }, []);
 
+  useEffect(() => {
+    if (!actionsState || !ticket || actionsState.workflowRevision === ticket.workflowRevision) return;
+    let active = true;
+    refreshTicket().catch(() => { if (active) { setWorkflowConflict('refresh'); setError('Unable to synchronize Ticket. Refresh and review before saving.'); } });
+    return () => { active = false; };
+  }, [actionsState, ticket?.workflowRevision, refreshTicket]);
+
   const handleClaimTicket = async () => {
     if (!currentUserId) return;
+    if (workflowSaving.current || workflowConflict || workflowRefreshing) return;
+    workflowSaving.current = true;
     setAssigning(true);
     setError("");
     setSuccessBanner("");
     try {
-      const updated = await assignStaffTicket(ticketId, currentUserId);
-      setTicket(updated);
+      const updated = await assignStaffTicket(ticketId, currentUserId, ticket.workflowRevision);
+      setTicket((previous: any) => ({ ...previous, ...updated }));
       setSuccessBanner("Ticket claimed successfully.");
     } catch (err: any) {
-      setError(err.message || "Failed to claim ticket.");
+      workflowFailure(err, "Failed to claim ticket.");
     } finally {
-      setAssigning(false);
+      workflowSaving.current = false; setAssigning(false);
     }
   };
 
   const handleAssignChange = async (targetIdStr: string) => {
+    if (workflowSaving.current || workflowConflict || workflowRefreshing) return;
+    workflowSaving.current = true;
     setAssigning(true);
     setError("");
     setSuccessBanner("");
     try {
       const targetId = targetIdStr === "unassigned" || targetIdStr === "" ? null : parseInt(targetIdStr, 10);
-      const updated = await assignStaffTicket(ticketId, targetId);
-      setTicket(updated);
+      const updated = await assignStaffTicket(ticketId, targetId, ticket.workflowRevision);
+      setTicket((previous: any) => ({ ...previous, ...updated }));
       setSuccessBanner("Ticket assignment updated successfully.");
     } catch (err: any) {
-      setError(err.message || "Failed to reassign ticket.");
+      workflowFailure(err, "Failed to reassign ticket.");
     } finally {
-      setAssigning(false);
+      workflowSaving.current = false; setAssigning(false);
     }
   };
 
   const handlePriorityChange = async (newPriority: string) => {
+    if (workflowSaving.current || workflowConflict || workflowRefreshing) return;
+    workflowSaving.current = true;
     setPriorityUpdating(true);
     setError("");
     setSuccessBanner("");
     try {
-      const updated = await updateStaffTicketPriority(ticketId, newPriority);
-      setTicket(updated);
+      const updated = await updateStaffTicketPriority(ticketId, newPriority, ticket.workflowRevision);
+      setTicket((previous: any) => ({ ...previous, ...updated }));
       setSelectedPriority(updated.itPriority);
       setSuccessBanner("IT Priority updated successfully.");
     } catch (err: any) {
-      setError(err.message || "Failed to update IT priority.");
+      workflowFailure(err, "Failed to update IT priority.");
     } finally {
-      setPriorityUpdating(false);
+      workflowSaving.current = false; setPriorityUpdating(false);
     }
   };
 
@@ -172,7 +240,8 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
   const handleStatusSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedStatus || selectedStatus === ticket.currentStatus) return;
+    if (!selectedStatus || !ALLOWED_TRANSITIONS[ticket.currentStatus]?.includes(selectedStatus) || workflowSaving.current || workflowConflict || workflowRefreshing || gateBlocked && ["RESOLVED", "CLOSED"].includes(selectedStatus)) return;
+    workflowSaving.current = true;
 
     setStatusUpdating(true);
     setError("");
@@ -181,15 +250,16 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
       const updated = await updateStaffTicketStatus(
         ticketId,
         selectedStatus,
-        selectedStatus === "RESOLVED" ? resolutionSummaryInput : undefined
+        selectedStatus === "RESOLVED" ? resolutionSummaryInput : undefined,
+        ticket.workflowRevision
       );
-      setTicket(updated);
+      setTicket((previous: any) => ({ ...previous, ...updated }));
       setSelectedStatus(updated.currentStatus);
       setSuccessBanner("Ticket status updated successfully.");
     } catch (err: any) {
-      setError(err.message || "Invalid status transition.");
+      workflowFailure(err, "Invalid status transition.");
     } finally {
-      setStatusUpdating(false);
+      workflowSaving.current = false; setStatusUpdating(false);
     }
   };
 
@@ -204,7 +274,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
       setComments((prev) => [...prev, newComment]);
       setNewCommentInput("");
     } catch (err: any) {
-      setTabError(err.message || "Failed to post public comment.");
+      setTabError(safeFailure(err, "Failed to post public comment. Please retry."));
     } finally {
       setCommentSubmitting(false);
     }
@@ -221,7 +291,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
       setInternalNotes((prev) => [...prev, newNote]);
       setNewNoteInput("");
     } catch (err: any) {
-      setTabError(err.message || "Failed to post internal note.");
+      setTabError(safeFailure(err, "Failed to post internal note. Please retry."));
     } finally {
       setNoteSubmitting(false);
     }
@@ -237,7 +307,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
     );
   }
 
-  if (error || !ticket) {
+  if (!ticket) {
     return (
       <div className="container py-4">
         <button type="button" className="btn btn-outline-secondary mb-3" onClick={onBack}>
@@ -250,7 +320,13 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
     );
   }
 
-  const isStaff = currentUserRole === "IT_STAFF";
+  const isStaff = currentUserRole === "IT_STAFF" || currentUserRole === "ADMINISTRATOR";
+  const workflowBusy = assigning || priorityUpdating || statusUpdating || workflowRefreshing || !!workflowConflict;
+  const planned = actionsState?.actions.filter(a => a.status === 'PLANNED').length ?? 0;
+  const followUp = actionsState?.actions.filter(a => a.status === 'COMPLETED' && a.followUpRequired).length ?? 0;
+  const actionsReady = !!actionsState && actionsState.workflowRevision === ticket.workflowRevision;
+  const gateBlocked = !actionsReady || planned > 0 || followUp > 0;
+  const showGateFeedback = isStaff && selectedStatus !== ticket.currentStatus && ['RESOLVED', 'CLOSED'].includes(selectedStatus) && (gateBlocked || resolutionBlockedByServer);
   const allowedNextStatuses = ALLOWED_TRANSITIONS[ticket.currentStatus] || [];
 
   return (
@@ -259,22 +335,33 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
         <button type="button" className="btn btn-outline-secondary btn-sm" onClick={onBack}>
           ← Back to Ticket Queue
         </button>
-        <span className="badge badge-secondary">ID: {ticket.id}</span>
       </div>
 
       {successBanner && (
         <div className="alert alert-success alert-dismissible fade show" role="alert">
           {successBanner}
-          <button type="button" className="btn-close" onClick={() => setSuccessBanner("")}></button>
+          <button type="button" className="btn-close" aria-label="Dismiss success message" onClick={() => setSuccessBanner("")}></button>
         </div>
       )}
 
       {error && (
         <div className="alert alert-danger alert-dismissible fade show" role="alert">
           {error}
-          <button type="button" className="btn-close" onClick={() => setError("")}></button>
+          <button type="button" className="btn-close" aria-label="Dismiss error message" onClick={() => setError("")}></button>
         </div>
       )}
+
+      {workflowConflict && <div role="status" className="alert alert-warning">
+        {workflowConflict === 'refresh' ? <button type="button" className="btn btn-outline-success" disabled={workflowRefreshing} onClick={() => void refreshWorkflow()}>Refresh and review Ticket</button>
+          : <><p>Latest Ticket and Actions loaded. Review the current status and your retained draft before saving. Nothing has been resubmitted.</p>
+            <button type="button" className="btn btn-outline-success" disabled={workflowRefreshing || !actionsState || actionsState.workflowRevision !== ticket.workflowRevision}
+              onClick={() => setWorkflowConflict(null)}>I have reviewed the latest Ticket</button></>}
+      </div>}
+      <h1 className="h3 mb-3" style={{ color: "#006B3C" }}>Ticket Detail</h1>
+      <ActionsTaken key={ticketId} ticketId={ticketId} ticketStatus={ticket.currentStatus}
+        viewer={{ role: currentUserRole || "REQUESTER", name: currentUserName || "Current signed-in user" }}
+        onRefreshTicket={async () => { await refreshTicket(); }} workflowRevision={ticket.workflowRevision}
+        refreshKey={actionsRefreshKey} onWorkflowState={onWorkflowState} />
 
       {/* Main 2-column Dashboard Grid (desktop ≥ 992px) */}
       <div className="row g-4">
@@ -282,7 +369,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
         <div className="col-12 col-lg-7">
           <div className="card p-4 surface-card mb-4" style={{ borderColor: "#E2E8F0" }}>
             <div className="d-flex justify-content-between align-items-start mb-2">
-              <h3 className="mb-0" style={{ color: "#006B3C" }}>{ticket.ticketNumber}</h3>
+              <h2 className="h3 mb-0" style={{ color: "#006B3C" }}>{ticket.ticketNumber}</h2>
               <span className="badge badge-pale">{ticket.currentStatus.replace(/_/g, " ")}</span>
             </div>
             <h5 className="mb-3 text-dark">{ticket.summary}</h5>
@@ -315,6 +402,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                   <button
                     type="button"
                     className={`nav-link px-3 py-2 border-0 ${activeTab === "comments" ? "active fw-bold text-success border-bottom border-success border-2" : "text-muted"}`}
+                    aria-pressed={activeTab === "comments"}
                     onClick={() => setActiveTab("comments")}
                   >
                     Public Comments <span className="badge bg-success ms-1">{comments.length}</span>
@@ -324,6 +412,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                   <button
                     type="button"
                     className={`nav-link px-3 py-2 border-0 ${activeTab === "notes" ? "active fw-bold text-warning border-bottom border-warning border-2" : "text-muted"}`}
+                    aria-pressed={activeTab === "notes"}
                     onClick={() => setActiveTab("notes")}
                   >
                     Internal Notes <span className="badge bg-warning text-dark ms-1">{internalNotes.length}</span>
@@ -333,6 +422,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                   <button
                     type="button"
                     className={`nav-link px-3 py-2 border-0 ${activeTab === "attachments" ? "active fw-bold text-primary border-bottom border-primary border-2" : "text-muted"}`}
+                    aria-pressed={activeTab === "attachments"}
                     onClick={() => setActiveTab("attachments")}
                   >
                     Attachments <span className="badge bg-secondary ms-1">{ticket.attachments?.length || 0}</span>
@@ -342,13 +432,14 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
             </div>
 
             <div className="card-body p-3">
-              {tabError && <div className="alert alert-danger p-2 small mb-3">{tabError}</div>}
+              {tabError && <div role="alert" className="alert alert-danger p-2 small mb-3">{tabError}</div>}
 
               {/* Public Comments Tab */}
               {activeTab === "comments" && (
                 <div>
                   <div className="comments-feed mb-3" style={{ maxHeight: "350px", overflowY: "auto" }}>
-                    {comments.length === 0 ? (
+                    {feedLoading.comments ? <p role="status">Loading public comments…</p> : feedErrors.comments ?
+                      <div role="alert">{feedErrors.comments} <button className="btn btn-outline-secondary" onClick={() => void loadFeed('comments')}>Retry public comments</button></div> : comments.length === 0 ? (
                       <p className="text-muted small italic mb-0">No public comments yet.</p>
                     ) : (
                       comments.map((c) => (
@@ -371,6 +462,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                       <input
                         type="text"
                         className="form-control form-control-sm"
+                        aria-label="Public comment"
                         placeholder="Write a public comment (3–1000 characters)..."
                         value={newCommentInput}
                         onChange={(e) => setNewCommentInput(e.target.value)}
@@ -391,8 +483,10 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
               {/* Internal Notes Tab (Amber Background Shading #FEF3C7 per BR-04, FR-16) */}
               {activeTab === "notes" && (
                 <div className="p-3 rounded" style={{ backgroundColor: "#FEF3C7" }}>
+                  <p className="small">Private — visible only to IT Staff and Administrators.</p>
                   <div className="notes-feed mb-3" style={{ maxHeight: "350px", overflowY: "auto" }}>
-                    {internalNotes.length === 0 ? (
+                    {feedLoading.notes ? <p role="status">Loading internal notes…</p> : feedErrors.notes ?
+                      <div role="alert">{feedErrors.notes} <button className="btn btn-outline-secondary" onClick={() => void loadFeed('notes')}>Retry internal notes</button></div> : internalNotes.length === 0 ? (
                       <p className="text-muted small italic mb-0">No private internal notes recorded yet.</p>
                     ) : (
                       internalNotes.map((n) => (
@@ -415,6 +509,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                       <input
                         type="text"
                         className="form-control form-control-sm"
+                        aria-label="Private Internal Note"
                         placeholder="Write private internal note (3–2000 characters)..."
                         value={newNoteInput}
                         onChange={(e) => setNewNoteInput(e.target.value)}
@@ -454,7 +549,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                           </div>
                           {!att.isRemoved ? (
                             <a
-                              href={`http://localhost:3000/api/attachments/${att.id}/download`}
+                              href={attachmentDownloadUrl(att.id)}
                               target="_blank"
                               rel="noreferrer"
                               className="btn btn-sm btn-outline-primary"
@@ -479,15 +574,9 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
           <div className="card p-4 surface-card sticky-lg-top" style={{ top: "1rem", borderColor: "#E2E8F0" }}>
             <h5 className="mb-3 text-dark border-bottom pb-2">Operational Controls</h5>
 
-            {!isStaff && (
-              <div className="alert alert-info small p-2 mb-3">
-                <strong>Read Oversight Mode:</strong> You are logged in as Administrator. IT Staff operational controls (Claim, Priority, Status) require IT Staff role per SEC-API-04.
-              </div>
-            )}
-
             {/* Ownership / Assignment Control */}
             <div className="mb-4">
-              <label className="form-label small fw-bold text-muted">Assigned Owner</label>
+              <label htmlFor="assigned-owner" className="form-label small fw-bold text-muted">Assigned Owner</label>
               <div className="d-flex align-items-center gap-2 mb-2">
                 <span className="fw-bold">
                   {ticket.assignedStaff ? ticket.assignedStaff.name : <span className="text-muted fst-italic">Unassigned</span>}
@@ -497,7 +586,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                     type="button"
                     className="btn btn-sm btn-zen-primary ms-auto"
                     onClick={handleClaimTicket}
-                    disabled={assigning}
+                    disabled={workflowBusy}
                   >
                     {assigning ? "Claiming..." : "Claim Ticket"}
                   </button>
@@ -506,11 +595,11 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
               {isStaff && (
                 <div className="input-group input-group-sm">
-                  <select
+                  <select id="assigned-owner"
                     className="form-select"
                     value={ticket.assignedStaffId || "unassigned"}
                     onChange={(e) => handleAssignChange(e.target.value)}
-                    disabled={assigning}
+                    disabled={workflowBusy}
                   >
                     <option value="unassigned">Unassigned</option>
                     {staffUsers.length > 0
@@ -527,8 +616,8 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
             {/* Requested Priority */}
             <div className="mb-3">
-              <label className="form-label small fw-bold text-muted">Requested Priority</label>
-              <input
+              <label htmlFor="requested-priority" className="form-label small fw-bold text-muted">Requested Priority</label>
+              <input id="requested-priority"
                 type="text"
                 className="form-control form-control-sm text-dark fw-bold"
                 value={ticket.requestedPriority}
@@ -546,7 +635,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                 className="form-select form-select-sm"
                 value={selectedPriority}
                 onChange={(e) => handlePriorityChange(e.target.value)}
-                disabled={!isStaff || priorityUpdating}
+                disabled={!isStaff || workflowBusy}
               >
                 <option value="LOW">Low</option>
                 <option value="MEDIUM">Medium</option>
@@ -557,6 +646,9 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
             {/* State-Machine Status Transition */}
             <div className="mb-3">
+              {selectedStatus !== ticket.currentStatus && !allowedNextStatuses.includes(selectedStatus) && <p role="status" className="small">
+                Your draft target {selectedStatus.replace(/_/g, ' ')} is no longer permitted from {ticket.currentStatus.replace(/_/g, ' ')}. Choose an allowed transition; your summary is retained.
+              </p>}
               <form onSubmit={handleStatusSubmit}>
                 <label htmlFor="update-status-select" className="form-label small fw-bold text-muted">Update Status</label>
                 {allowedNextStatuses.length === 0 ? (
@@ -570,22 +662,33 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                       className="form-select form-select-sm mb-2"
                       value={selectedStatus}
                       onChange={handleStatusSelectChange}
-                      disabled={!isStaff || statusUpdating}
+                      aria-describedby={showGateFeedback ? "status-gate-feedback" : undefined}
+                      disabled={!isStaff || workflowBusy}
                     >
                       <option value={ticket.currentStatus}>{ticket.currentStatus.replace(/_/g, " ")} (Current)</option>
                       {allowedNextStatuses.map((st) => (
-                        <option key={st} value={st}>
+                        <option key={st} value={st} disabled={!actionsReady && ["RESOLVED", "CLOSED"].includes(st)}>
                           {st.replace(/_/g, " ")}
                         </option>
                       ))}
                     </select>
 
+                    {showGateFeedback && <p id="status-gate-feedback" role="status" className="small mb-2">
+                      {!actionsReady
+                        ? 'Checking current Actions before updating the status.'
+                        : planned > 0 || resolutionBlockedByServer
+                          ? 'Complete or cancel planned Actions, then clear any required follow-up before resolving or closing this Ticket.'
+                          : 'Clear the required follow-up on completed Actions before resolving or closing this Ticket.'}
+                      {' '}<a href={`#actions-heading-${ticketId}`}>Review Actions Taken</a>
+                    </p>}
+
                     {selectedStatus === "RESOLVED" && (
                       <div className="mb-2">
-                        <label className="form-label extra-small text-muted fw-bold">Resolution Summary (Optional, up to 1000 chars)</label>
+                        <label htmlFor="resolution-summary" className="form-label extra-small text-muted fw-bold">Resolution Summary (Optional, up to 1000 chars)</label>
                         <textarea
                           className="form-control form-control-sm"
                           rows={3}
+                          id="resolution-summary"
                           placeholder="Describe resolution details..."
                           value={resolutionSummaryInput}
                           onChange={(e) => setResolutionSummaryInput(e.target.value)}
@@ -598,7 +701,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                       <button
                         type="submit"
                         className="btn btn-sm btn-zen-primary w-100 mt-2"
-                        disabled={statusUpdating}
+                        disabled={workflowBusy || !allowedNextStatuses.includes(selectedStatus) || gateBlocked && ["RESOLVED", "CLOSED"].includes(selectedStatus)}
                       >
                         {statusUpdating
                           ? "Updating Status..."
@@ -615,12 +718,12 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
 
       {/* Confirmation Modal for CANCELLED or REOPENED status transitions */}
       {showConfirmationModal && (
-        <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div ref={confirmationDialog} role="dialog" aria-modal="true" aria-labelledby="status-confirmation-title" className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Confirm Status Change</h5>
-                <button type="button" className="btn-close" onClick={() => setShowConfirmationModal(false)}></button>
+                <h2 id="status-confirmation-title" className="modal-title h5">Confirm Status Change</h2>
+                <button type="button" className="btn-close" aria-label="Close dialog" onClick={() => setShowConfirmationModal(false)}></button>
               </div>
               <div className="modal-body">
                 <p className="mb-0">
@@ -628,7 +731,7 @@ export const StaffTicketDetail: React.FC<StaffTicketDetailProps> = ({
                 </p>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowConfirmationModal(false)}>
+                <button type="button" className="btn btn-secondary btn-sm" data-dialog-initial onClick={() => setShowConfirmationModal(false)}>
                   Cancel
                 </button>
                 <button type="button" className="btn btn-zen-primary btn-sm" onClick={confirmStatusChange}>

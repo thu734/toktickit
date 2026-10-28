@@ -14,10 +14,12 @@ vi.mock("../../src/api", () => ({
   fetchInternalNotes: vi.fn(),
   postInternalNote: vi.fn(),
   fetchStaffUsers: vi.fn(),
+  fetchActions: vi.fn(),
 }));
 
 const mockTicket = {
   id: 1,
+  workflowRevision: 0,
   ticketNumber: "TKT-2026-000001",
   summary: "VPN Connection drops frequently",
   description: "Connecting to campus VPN fails every 10 minutes.",
@@ -43,6 +45,7 @@ const mockStaffUsers: api.StaffUser[] = [
 describe("UI-05: IT Staff Ticket Detail Component Tests (AC-12..15, BR-19)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(api.fetchActions).mockResolvedValue({ actions: [], workflowRevision: 0 });
     (api.fetchStaffTicketDetail as any).mockResolvedValue(mockTicket);
     (api.fetchStaffUsers as any).mockResolvedValue(mockStaffUsers);
     (api.fetchTicketComments as any).mockResolvedValue([]);
@@ -54,6 +57,7 @@ describe("UI-05: IT Staff Ticket Detail Component Tests (AC-12..15, BR-19)", () 
 
     await waitFor(() => {
       expect(screen.getByText("TKT-2026-000001")).toBeInTheDocument();
+      expect(screen.queryByText(/^ID:\s*1$/)).not.toBeInTheDocument();
       expect(screen.getByText("VPN Connection drops frequently")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /claim ticket/i })).toBeInTheDocument();
     });
@@ -75,7 +79,7 @@ describe("UI-05: IT Staff Ticket Detail Component Tests (AC-12..15, BR-19)", () 
     fireEvent.click(screen.getByRole("button", { name: /claim ticket/i }));
 
     await waitFor(() => {
-      expect(api.assignStaffTicket).toHaveBeenCalledWith(1, 2);
+      expect(api.assignStaffTicket).toHaveBeenCalledWith(1, 2, 0);
     });
   });
 
@@ -94,7 +98,7 @@ describe("UI-05: IT Staff Ticket Detail Component Tests (AC-12..15, BR-19)", () 
     fireEvent.change(screen.getByLabelText(/it priority/i), { target: { value: "URGENT" } });
 
     await waitFor(() => {
-      expect(api.updateStaffTicketPriority).toHaveBeenCalledWith(1, "URGENT");
+      expect(api.updateStaffTicketPriority).toHaveBeenCalledWith(1, "URGENT", 0);
     });
   });
 
@@ -116,7 +120,7 @@ describe("UI-05: IT Staff Ticket Detail Component Tests (AC-12..15, BR-19)", () 
     fireEvent.click(saveStatusBtn);
 
     await waitFor(() => {
-      expect(api.updateStaffTicketStatus).toHaveBeenCalledWith(1, "OPEN", undefined);
+      expect(api.updateStaffTicketStatus).toHaveBeenCalledWith(1, "OPEN", undefined, 0);
     });
   });
 });

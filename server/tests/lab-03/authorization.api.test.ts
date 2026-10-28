@@ -1,3 +1,4 @@
+import { startTestServer } from "../testHttpServer.js";
 import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import request from "supertest";
 import { app } from "../../src/app.js";
@@ -59,14 +60,14 @@ describe("Lab 3 Server Authorization Tests (SEC-API-01, SEC-API-02, SEC-API-04)"
   ])(
     "rejects legacy identity headers without authentication on $url", async ({ url, email }) => {
       const user = await getPrisma().user.findUniqueOrThrow({ where: { email } });
-      const res = await request(app).get(url).set("X-Development-Requester-Id", String(user.id));
+      const res = await request(await startTestServer(app)).get(url).set("X-Development-Requester-Id", String(user.id));
       expect(res.status).toBe(401);
       expect(res.body.code).toBe("UNAUTHENTICATED");
     }
   );
 
   it("ignores an identity header supplied alongside an authenticated session", async () => {
-    const agent = request.agent(app);
+    const agent = request.agent(await startTestServer(app));
     await agent.post("/api/auth/login").set(CSRF_HEADER)
       .send({ email: "jennifer.a@toktickit.local", password: "Initial123!" }).expect(200);
     const admin = await getPrisma().user.findUniqueOrThrow({ where: { email: "admin@toktickit.local" } });
@@ -80,8 +81,8 @@ describe("Lab 3 Server Authorization Tests (SEC-API-01, SEC-API-02, SEC-API-04)"
     { change: { role: "REQUESTER" as const }, expected: 403, name: "demotion" },
   ])("enforces current Staff account permissions after $name", async ({ change, expected }) => {
     const staff = await getPrisma().user.findUniqueOrThrow({ where: { email: "alex.t@toktickit.local" } });
-    const staffAgent = request.agent(app);
-    const adminAgent = request.agent(app);
+    const staffAgent = request.agent(await startTestServer(app));
+    const adminAgent = request.agent(await startTestServer(app));
     await staffAgent.post("/api/auth/login").set(CSRF_HEADER)
       .send({ email: staff.email, password: "Initial123!" }).expect(200);
     await adminAgent.post("/api/auth/login").set(CSRF_HEADER)
@@ -98,14 +99,14 @@ describe("Lab 3 Server Authorization Tests (SEC-API-01, SEC-API-02, SEC-API-04)"
   });
 
   it("SEC-API-04: Unauthenticated access returns HTTP 401 Unauthorized", async () => {
-    const res = await request(app).get("/api/tickets");
+    const res = await request(await startTestServer(app)).get("/api/tickets");
     expect(res.status).toBe(401);
     expect(res.body.code).toBe("UNAUTHENTICATED");
   });
 
 
   it("SEC-API-02: Role violation returns HTTP 403 Forbidden for non-Requester role", async () => {
-    const agent = request.agent(app);
+    const agent = request.agent(await startTestServer(app));
 
     // Login as IT Staff
     await agent
@@ -124,7 +125,7 @@ describe("Lab 3 Server Authorization Tests (SEC-API-01, SEC-API-02, SEC-API-04)"
   });
 
   it("SEC-API-01: Authenticated Requester can access Requester workspace", async () => {
-    const agent = request.agent(app);
+    const agent = request.agent(await startTestServer(app));
 
     // Login as Requester
     await agent
@@ -143,7 +144,7 @@ describe("Lab 3 Server Authorization Tests (SEC-API-01, SEC-API-02, SEC-API-04)"
   });
 
   it("SEC-API-04: Reference data endpoints permit all authenticated roles", async () => {
-    const agent = request.agent(app);
+    const agent = request.agent(await startTestServer(app));
 
     // Login as Admin
     await agent

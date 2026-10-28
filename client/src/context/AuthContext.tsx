@@ -53,11 +53,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = async (): Promise<void> => {
-    try {
-      await logoutApi();
-    } finally {
-      setUser(null);
-    }
+    await logoutApi();
+    setUser(null);
   };
 
   return (

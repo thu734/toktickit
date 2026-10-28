@@ -38,6 +38,21 @@ enum TicketStatus {
   CANCELLED
 }
 
+enum ActionStatus {
+  PLANNED
+  COMPLETED
+  CANCELLED
+}
+
+enum ActionEventType {
+  CREATED
+  UPDATED
+  ASSIGNED
+  COMPLETED
+  CANCELLED
+  CORRECTED
+}
+
 model User {
   id                 Int      @id @default(autoincrement())
   name               String
@@ -54,6 +69,9 @@ model User {
   comments           Comment[]
   internalNotes      InternalNote[]
   removedAttachments Attachment[]   @relation("RemovedByUser")
+  performedActions   ActionTaken[]  @relation("ActionPerformer")
+  assignedActions    ActionTaken[]  @relation("ActionAssignee")
+  actionEvents       ActionAuditEvent[]
 
   @@map("users")
 }
@@ -89,6 +107,9 @@ model Ticket {
   itPriority        ITPriority        @default(MEDIUM)
   currentStatus     TicketStatus      @default(NEW)
   resolutionSummary String?
+  creationRequestKey String?
+  creationPayloadHash String?
+  workflowRevision  Int               @default(0)
 
   requesterId     Int
   requester       User          @relation("TicketRequester", fields: [requesterId], references: [id])
@@ -108,7 +129,9 @@ model Ticket {
   attachments     Attachment[]
   comments        Comment[]
   internalNotes   InternalNote[]
+  actions         ActionTaken[]
 
+  @@unique([requesterId, creationRequestKey])
   @@index([requesterId])
   @@index([assignedStaffId])
   @@index([currentStatus])
@@ -167,4 +190,61 @@ model InternalNote {
 
   @@index([ticketId])
   @@map("internal_notes")
+}
+
+model ActionTaken {
+  id               Int          @id @default(autoincrement())
+  ticketId         Int
+  ticket           Ticket       @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  performedById    Int
+  performedBy      User         @relation("ActionPerformer", fields: [performedById], references: [id], onDelete: Restrict)
+  assignedToId     Int?
+  assignedTo       User?        @relation("ActionAssignee", fields: [assignedToId], references: [id], onDelete: Restrict)
+  status           ActionStatus @default(PLANNED)
+  description      String       @db.VarChar(2000)
+  result           String?      @db.VarChar(2000)
+  followUpRequired Boolean      @default(false)
+  followUpNote     String?      @db.VarChar(1000)
+  attachmentNotes  String?      @db.VarChar(1000)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  events           ActionAuditEvent[]
+  creationRequest  ActionCreationRequest?
+
+  // Also anchors the retry record to the same Ticket and authenticated creator.
+  @@unique([id, ticketId, performedById])
+  @@index([ticketId, createdAt, id])
+  @@index([assignedToId, status])
+  @@index([ticketId, status, followUpRequired])
+  @@map("actions_taken")
+}
+
+model ActionAuditEvent {
+  id            Int             @id @default(autoincrement())
+  actionId      Int
+  action        ActionTaken     @relation(fields: [actionId], references: [id], onDelete: Restrict)
+  actorId       Int
+  actor         User            @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  timestamp     DateTime        @default(now())
+  eventType     ActionEventType
+  changedFields Json
+
+  @@index([actionId, timestamp, id])
+  @@map("action_audit_events")
+}
+
+model ActionCreationRequest {
+  id             Int         @id @default(autoincrement())
+  actionId       Int         @unique
+  ticketId       Int
+  creatorId      Int
+  action         ActionTaken @relation(fields: [actionId, ticketId, creatorId], references: [id, ticketId, performedById], onDelete: Restrict, onUpdate: Restrict)
+  requestKey     String
+  requestHash    String
+  originalResult Json
+  createdAt      DateTime    @default(now())
+
+  @@unique([creatorId, ticketId, requestKey])
+  @@unique([actionId, ticketId, creatorId])
+  @@map("action_creation_requests")
 }

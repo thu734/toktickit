@@ -6,7 +6,11 @@
   "scripts": {
     "test:client": "npm test --prefix client",
     "test:server": "npm test --prefix server",
-    "test:e2e": "playwright test e2e/lab-02/"
+    "test:e2e": "playwright test e2e/lab-02/",
+    "test:a11y": "playwright test --config playwright.accessibility.config.ts",
+    "test:lab4:integrated": "node scripts/lab4-e2e.mjs",
+    "smoke:startup": "node --import ./server/node_modules/tsx/dist/loader.mjs scripts/startup-smoke.mjs",
+    "test:startup": "node --test scripts/startup-smoke.test.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   fetchCategories,
   fetchRelatedSystems,
@@ -36,10 +36,14 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
   const [uploadWarning, setUploadWarning] = useState<string>("");
 
   // Submission & Validation States
+  const creationKey = useRef<string | null>(null);
+  const inFlight = useRef(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState<string>("");
   const [createdTicket, setCreatedTicket] = useState<Ticket | null>(null);
+  const pageHeading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { pageHeading.current?.focus(); }, [createdTicket]);
 
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
   const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".pdf"];
@@ -136,7 +140,7 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (submitting) return; // BR-13 double submit lock
+    if (inFlight.current) return; // BR-13 double submit lock
 
     setApiError("");
     setFormErrors({});
@@ -147,10 +151,12 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
       return;
     }
 
+    inFlight.current = true;
     setSubmitting(true);
     setUploadWarning("");
 
     try {
+      creationKey.current ??= crypto.randomUUID();
       const ticket = await createTicket(
         {
           categoryId: Number(categoryId),
@@ -159,7 +165,8 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
           summary: summary.trim(),
           description: description.trim(),
         },
-        activeRequester.id
+        activeRequester.id,
+        creationKey.current
       );
 
       // BR-22: Sequential upload of initial attachments after ticket creation
@@ -188,11 +195,13 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
         setApiError(err.message || "An unexpected error occurred while submitting the ticket.");
       }
     } finally {
+      inFlight.current = false;
       setSubmitting(false);
     }
   };
 
   const resetForm = () => {
+    creationKey.current = null;
     setCreatedTicket(null);
     setSummary("");
     setDescription("");
@@ -213,9 +222,9 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
         >
           ✓
         </div>
-        <h2 className="h4 fw-bold mb-2" style={{ color: "#1E2923" }}>
+        <h1 ref={pageHeading} tabIndex={-1} className="h4 fw-bold mb-2" style={{ color: "#1E2923" }}>
           Ticket Created Successfully!
-        </h2>
+        </h1>
         <p className="text-muted small mb-3">
           Your IT service request has been logged and assigned an official Ticket Number.
         </p>
@@ -293,9 +302,9 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
 
   return (
     <div className="card border-0 shadow-sm p-4" style={{ borderRadius: 12, maxWidth: 800, margin: "0 auto" }}>
-      <h2 className="h4 fw-bold mb-1" style={{ color: "#1E2923" }}>
+      <h1 ref={pageHeading} tabIndex={-1} className="h4 fw-bold mb-1" style={{ color: "#1E2923" }}>
         Create IT Support Ticket
-      </h2>
+      </h1>
       <p className="text-muted small mb-4">
         Submit a new IT service request. All fields marked with <span style={{ color: "#D92D20" }}>*</span> are required.
       </p>
@@ -310,10 +319,11 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
         {/* Top Row: System Generated Read-Only Fields */}
         <div className="row g-3 mb-4 p-3 rounded" style={{ backgroundColor: "#F1F5F3" }}>
           <div className="col-md-6">
-            <label className="form-label small fw-semibold text-muted mb-1">
+            <label htmlFor="create-ticket-number" className="form-label small fw-semibold text-muted mb-1">
               Ticket Number <span className="fw-normal text-muted">(Auto-Generated)</span>
             </label>
             <input
+              id="create-ticket-number"
               type="text"
               className="form-control form-control-sm font-monospace text-muted"
               value="TKT-YYYY-XXXXXX"
@@ -323,10 +333,11 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
             />
           </div>
           <div className="col-md-6">
-            <label className="form-label small fw-semibold text-muted mb-1">
+            <label htmlFor="create-ticket-date" className="form-label small fw-semibold text-muted mb-1">
               Created Date
             </label>
             <input
+              id="create-ticket-date"
               type="text"
               className="form-control form-control-sm text-muted"
               value={currentDate}

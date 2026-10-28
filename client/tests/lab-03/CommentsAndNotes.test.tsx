@@ -14,6 +14,7 @@ vi.mock("../../src/api", () => ({
   fetchInternalNotes: vi.fn(),
   postInternalNote: vi.fn(),
   fetchStaffUsers: vi.fn(),
+  fetchActions: vi.fn(),
 }));
 
 const mockTicket = {
@@ -58,6 +59,7 @@ const mockInternalNotes: api.InternalNote[] = [
 describe("UI-06: Public Comments & Internal Notes UI Tests (AC-08, AC-17, BR-22)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(api.fetchActions).mockResolvedValue({ actions: [], workflowRevision: 0 });
     (api.fetchStaffTicketDetail as any).mockResolvedValue(mockTicket);
     (api.fetchStaffUsers as any).mockResolvedValue([]);
     (api.fetchTicketComments as any).mockResolvedValue(mockComments);
@@ -113,10 +115,10 @@ describe("UI-06: Public Comments & Internal Notes UI Tests (AC-08, AC-17, BR-22)
     render(<StaffTicketDetail ticketId={1} currentUserRole="IT_STAFF" currentUserId={2} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/internal notes/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /internal notes/i })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText(/internal notes/i));
+    fireEvent.click(screen.getByRole("button", { name: /internal notes/i }));
 
     await waitFor(() => {
       expect(screen.getByText("Checked Cisco AnyConnect logs; radius timeout issue.")).toBeInTheDocument();

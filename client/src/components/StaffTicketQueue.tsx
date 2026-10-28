@@ -3,14 +3,16 @@ import {
   fetchStaffTickets,
   fetchCategories,
   Category,
+  StaffQueueFilters,
   PaginatedTicketsResponse,
 } from "../api.js";
 
 interface StaffTicketQueueProps {
+  initialFilters?: StaffQueueFilters;
   onOpenTicket?: (ticketId: number) => void;
 }
 
-export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket }) => {
+export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket, initialFilters }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [ticketsData, setTicketsData] = useState<PaginatedTicketsResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -19,10 +21,10 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
   const [searchInput, setSearchInput] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [itPriority, setItPriority] = useState("ALL");
-  const [currentStatus, setCurrentStatus] = useState("ALL");
-  const [assignedStaffFilter, setAssignedStaffFilter] = useState("ALL");
-  const [sortBy, setSortBy] = useState("createdAt");
+  const [itPriority, setItPriority] = useState(initialFilters?.itPriority || "ALL");
+  const [currentStatus, setCurrentStatus] = useState(initialFilters?.statusGroup === "active" ? "ACTIVE" : initialFilters?.currentStatus || "ALL");
+  const [assignedStaffFilter, setAssignedStaffFilter] = useState(initialFilters?.assignedStaffId || "ALL");
+  const [sortBy, setSortBy] = useState(initialFilters ? "updatedAt" : "createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
 
@@ -40,7 +42,8 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
         search: appliedSearch || undefined,
         categoryId: categoryId !== "" ? categoryId : undefined,
         itPriority: itPriority !== "ALL" ? itPriority : undefined,
-        currentStatus: currentStatus !== "ALL" ? currentStatus : undefined,
+        currentStatus: currentStatus !== "ALL" && currentStatus !== "ACTIVE" ? currentStatus : undefined,
+        statusGroup: currentStatus === "ACTIVE" ? "active" : undefined,
         assignedStaffId: assignedStaffFilter !== "ALL" ? assignedStaffFilter : undefined,
         sortBy,
         sortOrder,
@@ -65,6 +68,10 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (appliedSearch === searchInput && page === 1) {
+      void loadQueue();
+      return;
+    }
     setAppliedSearch(searchInput);
     setPage(1);
   };
@@ -100,9 +107,9 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
       case "URGENT":
         return <span className="badge text-white" style={{ ...style, backgroundColor: "#7F1D1D" }}>URGENT</span>;
       case "HIGH":
-        return <span className="badge" style={{ ...style, backgroundColor: "#FEE2E2", color: "#DC2626", border: "1px solid #FCA5A5" }}>HIGH</span>;
+        return <span className="badge" style={{ ...style, backgroundColor: "#FEE2E2", color: "#B42318", border: "1px solid #FCA5A5" }}>HIGH</span>;
       case "MEDIUM":
-        return <span className="badge" style={{ ...style, backgroundColor: "#FEF3C7", color: "#D97706", border: "1px solid #FDE68A" }}>MEDIUM</span>;
+        return <span className="badge" style={{ ...style, backgroundColor: "#FEF3C7", color: "#92400E", border: "1px solid #FDE68A" }}>MEDIUM</span>;
       case "LOW":
         return <span className="badge" style={{ ...style, backgroundColor: "#EAF6EF", color: "#006B3C", border: "1px solid #C6E7D2" }}>LOW</span>;
       default:
@@ -126,14 +133,14 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
       case "IN_PROGRESS":
         return <span className="badge" style={{ ...style, backgroundColor: "#EAF6EF", color: "#006B3C", border: "1px solid #C6E7D2" }}>IN PROGRESS</span>;
       case "WAITING_FOR_REQUESTER":
-        return <span className="badge" style={{ ...style, backgroundColor: "#FEF3C7", color: "#D97706", border: "1px solid #FDE68A" }}>WAITING FOR REQUESTER</span>;
+        return <span className="badge" style={{ ...style, backgroundColor: "#FEF3C7", color: "#92400E", border: "1px solid #FDE68A" }}>WAITING FOR REQUESTER</span>;
       case "RESOLVED":
         return <span className="badge" style={{ ...style, backgroundColor: "#EAF6EF", color: "#006B3C", border: "1px solid #C6E7D2" }}>RESOLVED</span>;
       case "CANCELLED":
       case "CLOSED":
         return <span className="badge" style={{ ...style, backgroundColor: "#F1F5F9", color: "#475569", border: "1px solid #CBD5E1" }}>{status.replace(/_/g, " ")}</span>;
       case "REOPENED":
-        return <span className="badge" style={{ ...style, backgroundColor: "#FEE2E2", color: "#DC2626", border: "1px solid #FCA5A5" }}>REOPENED</span>;
+        return <span className="badge" style={{ ...style, backgroundColor: "#FEE2E2", color: "#B42318", border: "1px solid #FCA5A5" }}>REOPENED</span>;
       default:
         return <span className="badge" style={{ ...style, backgroundColor: "#F1F5F9", color: "#475569" }}>{status}</span>;
     }
@@ -143,7 +150,7 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
     <div className="container py-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
-          <h2 className="mb-1" style={{ color: "#006B3C" }}>IT Support Ticket Queue</h2>
+          <h1 className="h2 mb-1" style={{ color: "#006B3C" }}>IT Support Ticket Queue</h1>
           <p className="text-muted small mb-0">Shared operational queue for IT Staff & Administrators</p>
         </div>
       </div>
@@ -158,9 +165,9 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
       <div className="card p-3 mb-4 surface-card" style={{ borderColor: "#E2E8F0" }}>
         <form onSubmit={handleSearchSubmit} className="row g-2 align-items-end">
           <div className="col-12 col-md-4">
-            <label className="form-label small fw-bold text-muted">Search Queue</label>
+            <label htmlFor="queue-search" className="form-label small fw-bold text-muted">Search Queue</label>
             <div className="input-group">
-              <input
+              <input id="queue-search"
                 type="text"
                 className="form-control"
                 placeholder="Ticket #, summary, or description..."
@@ -174,8 +181,8 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
           </div>
 
           <div className="col-6 col-md-2">
-            <label className="form-label small fw-bold text-muted">Category</label>
-            <select
+            <label htmlFor="queue-category" className="form-label small fw-bold text-muted">Category</label>
+            <select id="queue-category"
               className="form-select"
               value={categoryId}
               onChange={(e) => {
@@ -193,8 +200,8 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
           </div>
 
           <div className="col-6 col-md-2">
-            <label className="form-label small fw-bold text-muted">IT Priority</label>
-            <select
+            <label htmlFor="queue-priority" className="form-label small fw-bold text-muted">IT Priority</label>
+            <select id="queue-priority"
               className="form-select"
               value={itPriority}
               onChange={(e) => {
@@ -211,9 +218,10 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
           </div>
 
           <div className="col-6 col-md-2">
-            <label className="form-label small fw-bold text-muted">Status</label>
+            <label htmlFor="staff-status-filter" className="form-label small fw-bold text-muted">Status</label>
             <select
               className="form-select"
+              id="staff-status-filter"
               value={currentStatus}
               onChange={(e) => {
                 setCurrentStatus(e.target.value);
@@ -221,6 +229,7 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
               }}
             >
               <option value="ALL">All Statuses</option>
+              <option value="ACTIVE">Active Tickets</option>
               <option value="NEW">New</option>
               <option value="OPEN">Open</option>
               <option value="IN_PROGRESS">In Progress</option>
@@ -233,9 +242,10 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
           </div>
 
           <div className="col-6 col-md-2">
-            <label className="form-label small fw-bold text-muted">Assignment</label>
+            <label htmlFor="staff-assignment-filter" className="form-label small fw-bold text-muted">Assignment</label>
             <select
               className="form-select"
+              id="staff-assignment-filter"
               value={assignedStaffFilter}
               onChange={(e) => {
                 setAssignedStaffFilter(e.target.value);
@@ -244,14 +254,15 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
             >
               <option value="ALL">All Tickets</option>
               <option value="unassigned">Unassigned Only</option>
+              <option value="me">My Tickets</option>
             </select>
           </div>
         </form>
 
         <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
           <div className="d-flex align-items-center gap-2">
-            <span className="small text-muted fw-bold">Sort by:</span>
-            <select
+            <label htmlFor="queue-sort" className="small text-muted fw-bold">Sort by:</label>
+            <select id="queue-sort"
               className="form-select form-select-sm"
               style={{ width: "auto" }}
               value={sortBy}
@@ -291,7 +302,7 @@ export const StaffTicketQueue: React.FC<StaffTicketQueueProps> = ({ onOpenTicket
             <span className="visually-hidden">Loading ticket queue...</span>
           </div>
         </div>
-      ) : !ticketsData || ticketsData.items.length === 0 ? (
+      ) : error ? null : !ticketsData || ticketsData.items.length === 0 ? (
         <div className="text-center py-5 card p-4 surface-card" style={{ borderColor: "#E2E8F0" }}>
           {isFilterActive ? (
             <>
